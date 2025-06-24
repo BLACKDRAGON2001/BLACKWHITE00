@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <title>BLACKWHITE</title>
+  <link rel="stylesheet" href="AudioPlayer.css">
+  <link rel="stylesheet" href="AudioLogin.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="Assets/css/all.css">
+  <link rel="apple-touch-icon" href="SystemImages/192px-Logo.png">
+</head>
+<body>
+
+  <div id="LoginPage" class="login-box">
+    <div class="login-header">
+        <header>SIGN-IN</header>
+    </div>
+    <div class="input-box">
+        <input id="username" type="text" class="input-field" placeholder="ENTER YOUR USERNAME" autocomplete="off">
+    </div>
+    <div class="input-box">
+        <input id="password" type="password" class="input-field" placeholder="ENTER YOUR PASSWORD" autocomplete="off">
+    </div>
+    <div class="login-message">
+        <p id="MessageBox"></p>
+    </div>
+    <div class="input-submit">
+        <button class="submit-btn" id="signinBtn">SIGN IN</button>
+    </div>
+  </div>
+
+  <!--
+
+  <div id="AccountsPage" style="display:none;">
+    <div class="accounts-header">
+      <header id="accounts-title">ACCOUNTS</header>
+    </div>
+    <div class="account-box">
+      <button class="accountBtn" data-account="account1">
+        <img class="accountImg" src="SystemImages/Lightbringer.jpg">
+      </button>
+      <div>
+        <h1 class="AccountName">LIGHTBRINGER</h1>
+        <p class="AccountHolder">SIGN-IN AS CASTOR</p>
+      </div>
+    </div>
+    <div class="account-box">
+      <button class="accountBtn" data-account="account2">
+        <img class="accountImg" src="SystemImages/Crimsonvampire.jpg">
+      </button>
+      <div>
+        <h1 class="AccountName">CRIMSON VAMPIRE</h1>
+        <p class="AccountHolder">SIGN-IN AS DRACULA</p>
+      </div>
+    </div>
+    <div class="account-box">
+      <button class="accountBtn" data-account="account3">
+        <img class="accountImg" src="SystemImages/Morningstar.jpg">
+      </button>
+      <div>
+        <h1 class="AccountName">MORNINGSTAR</h1>
+        <p class="AccountHolder">SIGN-IN AS SPARTACUS</p>
+      </div>
+    </div>
+    <div class="account-box">
+      <button class="accountBtn" data-account="account4">
+        <img class="accountImg" src="SystemImages/Valentinean.jpg">
+      </button>
+      <div>
+        <h1 class="AccountName">VALENTINEAN</h1>
+        <p class="AccountHolder">SIGN-IN AS ALYSSA</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="AccountLoginPage" class="login-box white-bg" style="display: none; background: white;">
+    <div class="login-header">
+        <header id="accountsLogin-title">SIGN-IN</header>
+    </div>
+    <div class="input-box">
+        <input id="accountUsername" type="text" class="input-field" placeholder="ENTER ACCOUNT USERNAME" autocomplete="off">
+    </div>
+    <div class="input-box">
+        <input id="accountPassword" type="password" class="input-field" placeholder="ENTER ACCOUNT PASSWORD" autocomplete="off">
+    </div>
+    <div class="login-message">
+        <p id="MessageBox2"></p>
+    </div>
+    <div class="input-submit">
+        <button class="submit-btn" id="accountSigninBtn">SIGN IN</button>
+    </div>
+  </div>
+-->
+
+
+  <div id="HomePage" class="home-box" style="display: none;">
+    <div class="wrapper" id="wrapper">
+      <div class="top-bar">
+        <button id="modeToggle" class="DarkMode">
+          <i id="fontawesome-icons" class="fa-solid fa-moon fa-3x"></i>
+        </button>
+        <span id="title" class="title">BLACKWHITE</span>
+        <i id="muteButton" class="material-icons">star</i>
+      </div>
+      <div class="Major-Container">
+        <div class="img-area" id="media-container">
+          <!-- This area will dynamically include either an img or video elements -->
+        </div>
+        <video id="video" class="overlay-video" src="" autoplay playsinline muted loop></video>
+      </div>
+      <div class="song-details">
+        <p class="name"></p>
+        <p class="artist"></p>
+      </div>
+      <div class="control-box">
+        <div class="progress-area">
+          <div class="progress-bar">
+            <audio id="main-audio" src=""></audio>
+          </div>
+          <div class="song-timer">
+            <span class="current-time">0:00</span>
+            <span class="max-duration">0:00</span>
+          </div>
+        </div>
+        <div class="controls">
+          <i id="repeat-plist" class="material-icons" title="Playlist looped">repeat</i>
+          <i id="prev" class="material-icons">skip_previous</i>
+          <div class="play-pause">
+            <i class="material-icons play">play_arrow</i>
+          </div>
+          <i id="next" class="material-icons">skip_next</i>
+          <i id="more-music" class="material-icons">queue_music</i>
+        </div>
+      </div>
+      <div class="music-list">
+        <div class="header">
+          <div class="row">
+            <i class="list material-icons">queue_music</i>
+            <span>Music list</span>
+          </div>
+          <i id="close" class="material-icons">close</i>
+        </div>
+        <ul>
+          <!-- here li list are coming from js -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="DisguisePage" class="home-box" style="display: none;">
+    <div class="wrapper" id="wrapper2">
+      <div class="top-bar">
+        <button id="modeToggle2" class="DarkMode">
+          <i id="fontawesome-icons2" class=""></i>
+        </button>
+        <span id="title2" class="title">BLACKWHITE</span>
+        <i id="muteButton2" class="material-icons"></i>
+      </div>
+      <div class="Major-Container">
+        <div class="img-area" id="media-container2">
+          <!-- This area will dynamically include either an img or video elements -->
+        </div>
+        <video id="video2" class="overlay-video" style="border: none; display: none;" src="" autoplay playsinline muted loop></video>
+      </div>
+      <div class="song-details">
+        <p class="name" style="color: black;"></p>
+        <p class="artist" style="color: black;"></p>
+      </div>
+      <div class="control-box">
+        <div class="progress-area">
+          <div class="progress-bar">
+            <audio id="main-audio2" src=""></audio>
+          </div>
+          <div class="song-timer">
+            <span class="current-time">0:00</span>
+            <span class="max-duration">0:00</span>
+          </div>
+        </div>
+        <div class="controls">
+          <i id="repeat-plist2" class="material-icons" title="Playlist looped">repeat</i>
+          <i id="prev2" class="material-icons">skip_previous</i>
+          <div class="play-pause">
+            <i class="material-icons play">play_arrow</i>
+          </div>
+          <i id="next2" class="material-icons">skip_next</i>
+          <i id="more-music2" class="material-icons">queue_music</i>
+        </div>
+      </div>
+      <div class="music-list">
+        <div class="header">
+          <div class="row">
+            <i class="list material-icons">queue_music</i>
+            <span>Music list</span>
+          </div>
+          <i id="close2" class="material-icons" style="color: black;">close</i>
+        </div>
+        <ul>
+          <!-- here li list are coming from js -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="AudioList.js"></script>
+  <script src="AudioPlayer.js"></script>
+  <script src="AudioLogin.js"></script>
+  <script src="ServiceWorker.js"></script>
+  <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
+</body>
+</html>

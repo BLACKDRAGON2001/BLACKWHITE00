@@ -1,0 +1,367 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial";
+  user-select: none;
+}
+*::before, *::after{
+  padding: 0;
+  margin: 0;
+  user-select: none;
+}
+
+html, body{
+  touch-action: manipulation;
+}
+
+body{
+  display: flex;
+
+  justify-content: center;
+  min-height: 100vh;
+  background-color: black;
+  user-select: none;
+  color: white;
+  user-select: none;
+}
+
+.wrapper{
+  margin-top: 10px;
+  height: 100%;
+  min-height: 932px;
+  width: 430px;
+  padding: 25px 30px;
+  overflow: hidden;
+  flex-direction: column;
+  position: relative;
+  background: black;
+  box-shadow: 0px 0px 0px black;
+}
+.title {
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+.wrapper i{
+  cursor: pointer;
+}
+.top-bar, .progress-area .song-timer, 
+.controls, .music-list .header, .music-list ul li{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.top-bar i{
+  font-size: 30px;
+}
+.top-bar i:first-child{
+  margin-left: -7px;
+}
+.top-bar span{
+  font-size: 18px;
+  margin-left: -3px;
+}
+.img-area{
+  width: 100%;
+  height: 370px;
+  overflow: hidden;
+  margin-top: 30px;
+  border-radius: 15px;
+  border-width: 10px;
+  border-color: black;
+}
+
+video {
+  width: 370px;
+}
+
+.img-area img{
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  display: block;
+}
+.song-details{
+  text-align: center;
+  margin: 30px 0;
+}
+
+.song-details-dark{
+  color: white;
+  text-align: center;
+  margin: 30px 0;
+}
+
+.song-details p{
+  font-family: Arial, Helvetica, sans-serif;
+}
+.song-details .name{
+  font-size: 21px;
+  font-weight: bold;
+}
+.song-details .artist{
+  font-size: 18px;
+  opacity: 0.9;
+  font-weight: bold;
+  line-height: 35px;
+}
+.progress-area{
+  height: 6px;
+  width: 100%;
+  border-radius: 100px;
+  background: black;
+  cursor: pointer;
+}
+.progress-area .progress-bar{
+  height: inherit;
+  width: 0%;
+  position: relative;
+  border-radius: inherit;
+  background: linear-gradient(90deg, black 0%, black 100%);
+}
+.progress-bar::before{
+  content: "";
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  top: 50%;
+  right: -5px;
+  z-index: 2;
+  pointer-events: none;
+  transform: translateY(-50%);
+  background: inherit;
+  transition: opacity 0.2s ease;
+  margin-right: -7px;
+}
+.progress-area:hover .progress-bar::before{
+  opacity: 1;
+  pointer-events: auto;
+}
+.progress-area .song-timer{
+  margin-top: 7px;
+}
+.song-timer span{
+  font-size: 13px;
+  font-weight: bold;
+  color: black;
+}
+.controls{
+  margin: 20px 0 5px 0;
+}
+.controls i{
+  font-size: 28px;
+  user-select: none;
+  background: linear-gradient(black 0%, black 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.controls i:nth-child(2),
+.controls i:nth-child(4){
+  font-size: 43px;
+}
+.controls #prev{
+  margin-right: -13px;
+}
+.controls #next{
+  margin-left: -13px;
+}
+.controls .play-pause{
+  height: 53px;
+  width: 53px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(white 0%, white 100%);
+
+}
+.play-pause::before{
+  position: absolute;
+  content: "";
+  height: 53px;
+  width: 53px;
+  border-radius: inherit;
+  background: linear-gradient(black 0%, black 100%);
+}
+.play-pause i{
+  height: 53px;
+  width: 53px;
+  line-height: 53px;
+  text-align: center;
+  background: inherit;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: absolute;
+}
+
+.music-list{
+  position: absolute;
+  background: white;
+  width: 100%;
+  height: 45%;
+  left: 0;
+  bottom: -55%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  padding: 15px 30px;
+  box-shadow: black;
+  transition: all 0.15s ease-out;
+}
+.music-list.show{
+  bottom: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+.header .row{
+  display: flex;
+  align-items: center;
+  font-size: 19px;
+  color: black;
+}
+.header .row i{
+  cursor: default;
+}
+.header .row span{
+  margin-left: 5px;
+}
+.header #close{
+  font-size: 22px;
+  color: black;
+}
+.music-list ul{
+  margin: 10px 0;
+  max-height: 330px;
+  overflow: auto;
+}
+.music-list ul::-webkit-scrollbar{
+  width: 0px;
+}
+.music-list ul li{
+  list-style: none;
+  display: flex;
+  cursor: pointer;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+  color: black;
+  border-bottom: 3px solid black;
+}
+.music-list ul li:last-child{
+  border-bottom: 0px;
+}
+.music-list ul li .row span{
+  font-size: 17px;
+}
+.music-list ul li .row p{
+  opacity: 0.9;
+}
+ul li .audio-duration{
+  font-size: 16px;
+}
+ul li.playing{
+  pointer-events: none;
+  color: black;
+}
+
+.light-mode {
+    background-color: black;
+    color: black;
+}
+
+.dark-mode{
+    background: white;
+    color: black;
+    border-color: black;
+}
+
+.control-box {
+    border-color: white;
+    border-width: 8px;
+    border-style: solid;
+    padding: 11px;
+    padding-top: 15px;
+    border-radius: 7px;
+    color: white;
+    background-color: white;
+}
+
+.DarkMode {
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+.fontawesome-icon{
+  background: transparent;
+  color: white;
+  font-size: 10px;
+}
+
+.Dark {
+  color: black;
+}
+
+.Major-Container {
+  position: relative;
+}
+
+.bigger-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 370px;
+  display: none; /* Hidden by default */
+  transform: translate(0%, 0%);
+  border-radius: 15px;
+  box-sizing: border-box;
+}
+
+.overlay-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 280px;
+  display: none; /* Hidden by default */
+  transform: translate(16%, 16%);
+  border: 8px solid black;
+  box-sizing: border-box;
+}
+
+/* Add these styles to your CSS file */
+.muted {
+  background-image: url('path/to/muted-icon.png'); /* Path to your mute icon */
+  /* You can add more styles as needed */
+}
+
+.unmuted {
+  background-image: url('path/to/unmuted-icon.png'); /* Path to your unmute icon */
+  /* You can add more styles as needed */
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  src: url('./Assets/fonts/MaterialIcons-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px; /* Default size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,20 @@
+{
+    "name": "BLACKWHITE",
+    "short_name": "BLACKWHITE",
+    "start_url": "AudioPlayer.html",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "SystemImages/192px-Logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "SystemImages/512px-Logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
