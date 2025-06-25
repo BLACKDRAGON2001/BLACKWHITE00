@@ -272,7 +272,6 @@ class MusicPlayer {
         this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
         this.musicIndex = 1;
         this.loadMusic(this.musicIndex);
-        this.populateMusicList(this.shuffledOrder);
         this.playMusic();
         break;
       case "shuffle":
@@ -281,11 +280,10 @@ class MusicPlayer {
         this.isShuffleMode = false;
         this.musicIndex = 1;
         this.loadMusic(this.musicIndex);
-        this.populateMusicList(this.originalOrder);
         this.playMusic();
         break;
     }
-  }
+  }  
 
   handleSongEnd() {
     const mode = this.repeatBtn.textContent;
@@ -306,7 +304,6 @@ class MusicPlayer {
       this.playMusic();
     }
   }
-  
 
   toggleMusicList() {
     this.musicList.classList.toggle("show");
@@ -351,19 +348,27 @@ class MusicPlayer {
 
   updatePlayingSong() {
     const allLiTags = this.ulTag.querySelectorAll("li");
+  
+    const currentMusic = this.isShuffleMode
+      ? this.shuffledOrder[this.musicIndex - 1]
+      : this.originalOrder[this.musicIndex - 1];
+  
     allLiTags.forEach(liTag => {
       const audioTag = liTag.querySelector(".audio-duration");
-      const isPlaying = liTag.getAttribute("li-index") == this.musicIndex;
+      const id = audioTag.id; // id was set to music.src
+  
+      const isPlaying = id === currentMusic.src;
   
       if (!audioTag.hasAttribute("t-duration")) {
         audioTag.setAttribute("t-duration", audioTag.textContent);
       }
   
       liTag.classList.toggle("playing", isPlaying);
-      audioTag.textContent = isPlaying ? "Playing" : audioTag.getAttribute("t-duration");
+      audioTag.textContent = isPlaying
+        ? "Playing"
+        : audioTag.getAttribute("t-duration");
     });
-  }
-  
+  }  
 
   toggleDarkMode() {
     const isDarkMode = this.wrapper.classList.toggle("dark-mode");
