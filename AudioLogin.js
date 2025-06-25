@@ -102,7 +102,7 @@ document.getElementById("title").addEventListener("click", function() {
     localStorage.removeItem("HomeLoginTime");
     document.body.style.backgroundColor = "white";
     clearInputFields();
-    refreshPage();
+    //refreshPage();
 });
 
 document.getElementById("title2").addEventListener("click", function() {
@@ -111,5 +111,5 @@ document.getElementById("title2").addEventListener("click", function() {
     localStorage.removeItem("DisguiseLoginTime");
     document.body.style.backgroundColor = "white";
     clearInputFields();
-    refreshPage();
+    //refreshPage();
 });

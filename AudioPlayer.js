@@ -1,5 +1,6 @@
 // Add this to your existing test.js file
 document.getElementById("title").addEventListener("click", function() {
+  pauseAudio();
   // Clear HomePage player state
   localStorage.removeItem("musicIndex");
   localStorage.removeItem("isMusicPaused");
@@ -9,10 +10,11 @@ document.getElementById("title").addEventListener("click", function() {
   localStorage.removeItem("LoginTime");
   document.body.style.backgroundColor = "white";
   clearInputFields();
-  refreshPage();
+  //refreshPage();
 });
 
 document.getElementById("title2").addEventListener("click", function() {
+  pauseAudio2();
   // Clear DisguisePage player state
   localStorage.removeItem("musicIndex2");
   localStorage.removeItem("isMusicPaused2");
@@ -22,8 +24,18 @@ document.getElementById("title2").addEventListener("click", function() {
   localStorage.removeItem("LoginTime");
   document.body.style.backgroundColor = "white";
   clearInputFields();
-  refreshPage();
+  //refreshPage();
 });
+
+function pauseAudio() {
+  const audio = document.getElementById('main-audio');
+  audio.pause();
+};
+
+function pauseAudio2() {
+  const audio = document.getElementById('main-audio2');
+  audio.pause();
+};
 
 class MusicPlayer {
   constructor(suffix = '') {
