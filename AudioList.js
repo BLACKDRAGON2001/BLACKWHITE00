@@ -252,6 +252,13 @@ let allMusic = [
     },
 
     {
+        name: "Faster N Harder",
+        artist: "Asteria And 6arelyhuman",
+        src: "FasterNHarder",
+        coverType: "Images"
+    },
+
+    {
         name: "Bruxo Psycho",
         artist: "LVGHTER",
         src: "BruxoPsycho",
@@ -423,6 +430,13 @@ let allMusic = [
         name: "FEIN",
         artist: "Travis Scott",
         src: "Fein",
+        coverType: "Images"
+    },
+
+    {
+        name: "StaySchemin",
+        artist: "Drake And French Montana",
+        src: "StaySchemin",
         coverType: "Images"
     },
 
@@ -1254,7 +1268,7 @@ let allMusic = [
 
     {
         name: "Like Jennie",
-        artist: "Jennie",
+        artist: "JENNIE",
         src: "LikeJennie",
         coverType: "Images"
     },
@@ -1302,16 +1316,16 @@ let allMusic = [
     },
 
     {
-        name: "Hall Of Fame Nightcore Version",
-        artist: "Nightcore",
-        src: "HallOfFame",
+        name: "Dynamite",
+        artist: "BTS",
+        src: "BtsDynamite",
         coverType: "Images"
     },
 
     {
-        name: "Dynamite",
-        artist: "BTS",
-        src: "BtsDynamite",
+        name: "Hall Of Fame Nightcore Version",
+        artist: "Nightcore",
+        src: "HallOfFame",
         coverType: "Images"
     },
 
@@ -1358,6 +1372,13 @@ let allMusic = [
     },
 
     {
+        name: "Seoul City",
+        artist: "JENNIE",
+        src: "SeoulCity",
+        coverType: "Images"
+    },
+
+    {
         name: "After Dark x Sweater Weather",
         artist: "Mr. Kitty And The Neighbourhood",
         src: "AfterDarkXSweaterWeather",
@@ -1385,4 +1406,3 @@ let allMusic = [
         coverType: "Images"
     },
   ];
-  
