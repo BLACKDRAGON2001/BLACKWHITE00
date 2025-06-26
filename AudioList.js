@@ -224,6 +224,13 @@ let allMusic = [
     },
 
     {
+        name: "Heavy Love",
+        artist: "Odetari",
+        src: "HeavyLove",
+        coverType: "Images"
+    },
+
+    {
         name: "Ecstasy",
         artist: "Suicidal-Idol",
         src: "Ecstasy",
@@ -437,6 +444,13 @@ let allMusic = [
         name: "StaySchemin",
         artist: "Drake And French Montana",
         src: "StaySchemin",
+        coverType: "Images"
+    },
+
+    {
+        name: "Overseas",
+        artist: "D-Block Europe And Central Cee",
+        src: "Overseas",
         coverType: "Images"
     },
 
