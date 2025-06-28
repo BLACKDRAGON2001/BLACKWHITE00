@@ -441,6 +441,13 @@ let allMusic = [
     },
 
     {
+        name: "Yeah",
+        artist: "Usher",
+        src: "Yeah",
+        coverType: "Images"
+    },
+
+    {
         name: "StaySchemin",
         artist: "Drake And French Montana",
         src: "StaySchemin",
@@ -472,6 +479,34 @@ let allMusic = [
         name: "In Ha Mood",
         artist: "Ice Spice",
         src: "InHaMood",
+        coverType: "Images"
+    },
+
+    {
+        name: "Come Get Her",
+        artist: "Rae Sremmurd",
+        src: "ComeGetHer",
+        coverType: "Images"
+    },
+
+    {
+        name: "LushLife",
+        artist: "Zara Larsson",
+        src: "LushLife",
+        coverType: "Images"
+    },
+
+    {
+        name: "Turn Me On",
+        artist: "Kevin Lyttle",
+        src: "TurnMeOn",
+        coverType: "Images"
+    },
+
+    {
+        name: "Get Lucky",
+        artist: "Pharell Williams",
+        src: "GetLucky",
         coverType: "Images"
     },
 

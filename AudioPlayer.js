@@ -146,34 +146,69 @@ class MusicPlayer {
     const { coverType = 'Images', src, type = 'jpg' } = music;
     this.coverArea.innerHTML = '';
   
-    // If suffix is '2' (disguise player), always show image
-    const mediaElement = (this.suffix === '2' || coverType !== 'video') ?
-      this.createImageElement(src, type) :
-      this.createVideoElement(src, type);
+    // Choose image or video element
+    const mediaElement = (this.suffix === '2' || coverType !== 'video')
+      ? this.createImageElement(src, type)
+      : this.createVideoElementWithFallback(src, type);
   
     this.coverArea.appendChild(mediaElement);
+  
     this.mainAudio.src = `https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/${src}.mp3`;
   
     // Only set video src if not disguise player
     if (this.suffix !== '2') {
-      this.videoAd.src = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.mp4`;
+      this.setVideoSourceWithFallback(src);
     } else {
-      this.videoAd.src = ""; // Disable video
+      this.videoAd.src = "";
       this.videoAd.style.display = "none";
     }
   
     localStorage.setItem(`musicIndex${this.suffix}`, index);
     this.updatePlayingSong();
-  }  
-
-  createVideoElement(src, type) {
+  }
+  
+  createVideoElementWithFallback(src, type) {
     const video = document.createElement('video');
-    video.src = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
     video.controls = true;
     video.autoplay = true;
     video.loop = true;
+  
+    const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
+    const fallbackSrc = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.${type}`; // Replace with your 2nd bucket URL
+  
+    video.src = primarySrc;
+  
+    // On error, try fallback
+    video.onerror = function() {
+      console.warn(`Primary video not found, switching to fallback: ${fallbackSrc}`);
+      video.onerror = null; // prevent infinite loop
+      video.src = fallbackSrc;
+    };
+  
     return video;
   }
+  
+  setVideoSourceWithFallback(src) {
+    const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.mp4`;
+    const fallbackSrc = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.mp4`; // Replace with your 2nd bucket URL
+  
+    this.videoAd.onerror = () => {
+      console.warn(`Primary videoAd source failed. Falling back to: ${fallbackSrc}`);
+      this.videoAd.onerror = null;
+      this.videoAd.src = fallbackSrc;
+    };
+  
+    this.videoAd.src = primarySrc;
+  }  
+
+  //createVideoElement(src, type) {
+    //const video = document.createElement('video');
+    //video.src = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
+   // video.controls = true;
+   // video.autoplay = true;
+    //video.loop = true;
+    //return video;
+  //}
 
   createImageElement(src, type) {
     const img = document.createElement('img');
