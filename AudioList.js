@@ -273,6 +273,13 @@ let allMusic = [
     },
 
     {
+        name: "Slay",
+        artist: "Eternxlkz",
+        src: "Slay",
+        coverType: "Images"
+    },
+
+    {
         name: "Empire",
         artist: "Ogryzek",
         src: "Empire",
@@ -458,6 +465,13 @@ let allMusic = [
         name: "Overseas",
         artist: "D-Block Europe And Central Cee",
         src: "Overseas",
+        coverType: "Images"
+    },
+
+    {
+        name: "Loose",
+        artist: "S1mba And KSI",
+        src: "Loose",
         coverType: "Images"
     },
 
@@ -1284,6 +1298,13 @@ let allMusic = [
         name: "Unforgiven",
         artist: "LE SSERAFIM",
         src: "Unforgiven",
+        coverType: "Images"
+    },
+
+    {
+        name: "Ash",
+        artist: "LE SSERAFIM",
+        src: "Ash",
         coverType: "Images"
     },
 
