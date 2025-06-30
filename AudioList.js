@@ -476,6 +476,13 @@ let allMusic = [
     },
 
     {
+        name: "Loading",
+        artist: "Central Cee",
+        src: "Loading",
+        coverType: "Images"
+    },
+
+    {
         name: "Did It First",
         artist: "Central Cee",
         src: "DidItFirst",
@@ -504,9 +511,16 @@ let allMusic = [
     },
 
     {
-        name: "LushLife",
+        name: "Lush Life",
         artist: "Zara Larsson",
         src: "LushLife",
+        coverType: "Images"
+    },
+
+    {
+        name: "On The Floor",
+        artist: "Jennifer Lopez",
+        src: "OnTheFloor",
         coverType: "Images"
     },
 
@@ -987,6 +1001,13 @@ let allMusic = [
     },
 
     {
+        name: "Fantasy",
+        artist: "Brazzi",
+        src: "Fantasy",
+        coverType: "Images"
+    },
+
+    {
         name: "My Name",
         artist: "Reed Wonder",
         src: "MyName",
@@ -1001,16 +1022,16 @@ let allMusic = [
     },
 
     {
-        name: "Royalty X Shameless",
-        artist: "HVNTR",
-        src: "RoyaltyXShameless",
+        name: "Shameless",
+        artist: "Camilla Cabello",
+        src: "Shameless",
         coverType: "Images"
     },
 
     {
-        name: "Shameless",
-        artist: "Camilla Cabello",
-        src: "Shameless",
+        name: "Royalty X Shameless",
+        artist: "HVNTR",
+        src: "RoyaltyXShameless",
         coverType: "Images"
     },
 
