@@ -1015,6 +1015,13 @@ let allMusic = [
     },
 
     {
+        name: "Pornstar",
+        artist: "Nessa Barrett",
+        src: "Pornstar",
+        coverType: "Images"
+    },
+
+    {
         name: "Mathematical Disrespect",
         artist: "Lil Mabu",
         src: "MathematicalDisrespect",
