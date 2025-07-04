@@ -294,6 +294,27 @@ let allMusic = [
     },
 
     {
+        name: "Aura",
+        artist: "Ogryzek",
+        src: "Aura",
+        coverType: "Images"
+    },
+
+    {
+        name: "Mercy",
+        artist: "Ogryzek",
+        src: "Mercy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Vibe",
+        artist: "Ogryzek",
+        src: "Vibe",
+        coverType: "Images"
+    },
+
+    {
         name: "Lost Astronaut",
         artist: "Pinky Smash",
         src: "LostAstronaut",
@@ -1214,6 +1235,13 @@ let allMusic = [
         name: "Ninao",
         artist: "GIMS",
         src: "Ninao",
+        coverType: "Images"
+    },
+
+    {
+        name: "Air Force Blanche",
+        artist: "GIMS And Jul",
+        src: "AirForceBlanche",
         coverType: "Images"
     },
 
