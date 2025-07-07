@@ -490,6 +490,13 @@ let allMusic = [
     },
 
     {
+        name: "Oliver Twist",
+        artist: "Arrdee",
+        src: "OliverTwist",
+        coverType: "Images"
+    },
+
+    {
         name: "Loose",
         artist: "S1mba And KSI",
         src: "Loose",
@@ -1242,6 +1249,20 @@ let allMusic = [
         name: "Air Force Blanche",
         artist: "GIMS And Jul",
         src: "AirForceBlanche",
+        coverType: "Images"
+    },
+
+    {
+        name: "Spider",
+        artist: "GIMS And DYSTINCT",
+        src: "Spider",
+        coverType: "Images"
+    },
+
+    {
+        name: "Touche",
+        artist: "GIMS And KEBLACK",
+        src: "Touche",
         coverType: "Images"
     },
 
