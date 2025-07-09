@@ -483,9 +483,30 @@ let allMusic = [
     },
 
     {
+        name: "Keisha And Becky",
+        artist: "Russ Millions X Tion Wayne",
+        src: "KeishaAndBecky",
+        coverType: "Images"
+    },
+
+    {
+        name: "Je M'Appelle",
+        artist: "Benzz",
+        src: "JeMAppelle",
+        coverType: "Images"
+    },
+
+    {
         name: "Overseas",
         artist: "D-Block Europe And Central Cee",
         src: "Overseas",
+        coverType: "Images"
+    },
+
+    {
+        name: "Indulge",
+        artist: "M Huncho And D-Block Europe",
+        src: "Indulge",
         coverType: "Images"
     },
 
@@ -504,9 +525,23 @@ let allMusic = [
     },
 
     {
+        name: "Take Me Back To London",
+        artist: "Stormzy And Ed Sheeran",
+        src: "TakeMeBackToLondon",
+        coverType: "Images"
+    },
+
+    {
         name: "Loading",
         artist: "Central Cee",
         src: "Loading",
+        coverType: "Images"
+    },
+
+    {
+        name: "Band 4 Band",
+        artist: "Central Cee And Lil Baby",
+        src: "Band4Band",
         coverType: "Images"
     },
 
@@ -1120,6 +1155,13 @@ let allMusic = [
     },
 
     {
+        name: "Tourner Dans Le Vide",
+        artist: "Indila",
+        src: "TournerDansLeVide",
+        coverType: "Images"
+    },
+
+    {
         name: "Ara",
         artist: "Zeynep Bastik",
         src: "Ara",
@@ -1361,6 +1403,20 @@ let allMusic = [
         name: "Dust Til Dawn",
         artist: "Sia and Zayn",
         src: "DuskTilDawn",
+        coverType: "Images"
+    },
+
+    {
+        name: "Skyfall",
+        artist: "Adele",
+        src: "Skyfall",
+        coverType: "Images"
+    },
+
+    {
+        name: "Set Fire To The Rain",
+        artist: "Adele",
+        src: "SetFireToTheRain",
         coverType: "Images"
     },
 
