@@ -314,8 +314,6 @@ document.getElementById("title").addEventListener("click", function() {
           this.repeatBtn.title = "Playback shuffled";
           this.isShuffleMode = true;
           this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
-          this.currentMusicArray = this.shuffledOrder;
-          this.resetPagination();
           this.musicIndex = 1;
           this.loadMusic(this.musicIndex);
           this.playMusic();
@@ -324,8 +322,6 @@ document.getElementById("title").addEventListener("click", function() {
           this.repeatBtn.textContent = "repeat";
           this.repeatBtn.title = "Playlist looped";
           this.isShuffleMode = false;
-          this.currentMusicArray = this.originalOrder;
-          this.resetPagination();
           this.musicIndex = 1;
           this.loadMusic(this.musicIndex);
           this.playMusic();
@@ -380,14 +376,14 @@ document.getElementById("title").addEventListener("click", function() {
       const startIndex = (this.currentPage + 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
       
-      // Check if there are more items to load
-      if (startIndex >= this.currentMusicArray.length) return;
+      // Check if there are more items to load from original order
+      if (startIndex >= this.originalOrder.length) return;
       
       this.isLoading = true;
       this.currentPage++;
       
-      // Get the next batch of items
-      const nextItems = this.currentMusicArray.slice(startIndex, endIndex);
+      // Get the next batch of items from original order
+      const nextItems = this.originalOrder.slice(startIndex, endIndex);
       
       // Add the new items to the existing list
       this.appendMusicItems(nextItems, startIndex);
@@ -398,16 +394,16 @@ document.getElementById("title").addEventListener("click", function() {
     resetPagination() {
       this.currentPage = 0;
       this.ulTag.innerHTML = "";
-      this.populateMusicList(this.currentMusicArray);
+      this.populateMusicList(this.originalOrder); // Always populate with original order
     }
   
     populateMusicList(musicArray) {
-      this.currentMusicArray = musicArray;
+      this.currentMusicArray = this.originalOrder; // Always use original order for DOM list
       this.currentPage = 0;
       this.ulTag.innerHTML = "";
       
-      // Load initial batch
-      const initialItems = musicArray.slice(0, this.itemsPerPage);
+      // Load initial batch from original order
+      const initialItems = this.originalOrder.slice(0, this.itemsPerPage);
       this.appendMusicItems(initialItems, 0);
     }
   
@@ -437,7 +433,15 @@ document.getElementById("title").addEventListener("click", function() {
         });
   
         liTag.addEventListener("click", () => {
-          this.musicIndex = actualIndex + 1;
+          // When clicking on a list item, find the corresponding index in the current playback order
+          if (this.isShuffleMode) {
+            // Find the index of this song in the shuffled order
+            const clickedMusic = this.originalOrder[actualIndex];
+            const shuffledIndex = this.shuffledOrder.findIndex(music => music.src === clickedMusic.src);
+            this.musicIndex = shuffledIndex + 1;
+          } else {
+            this.musicIndex = actualIndex + 1;
+          }
           this.loadMusic(this.musicIndex);
           this.playMusic();
         });
