@@ -1078,9 +1078,79 @@ let allMusic = [
     },
 
     {
-        name: "Pornstar",
+        name: "AFTERCARE",
+        artist: "Nessa Barrett",
+        src: "Aftercare",
+        coverType: "Images"
+    },
+
+    {
+        name: "PORNSTAR",
         artist: "Nessa Barrett",
         src: "Pornstar",
+        coverType: "Images"
+    },
+
+    {
+        name: "HEARTBEAT",
+        artist: "Nessa Barrett",
+        src: "Heartbeat",
+        coverType: "Images"
+    },
+
+    {
+        name: "RUSSIAN ROULETTE",
+        artist: "Nessa Barrett",
+        src: "RussianRoulette",
+        coverType: "Images"
+    },
+
+    {
+        name: "SLUT",
+        artist: "Nessa Barrett",
+        src: "Slut",
+        coverType: "Images"
+    },
+
+    {
+        name: "BABYDOLL",
+        artist: "Nessa Barrett",
+        src: "Babydoll",
+        coverType: "Images"
+    },
+
+    {
+        name: "GIVEN ENOUGH",
+        artist: "Nessa Barrett",
+        src: "GivenEnough",
+        coverType: "Images"
+    },
+
+    {
+        name: "EDWARD SCISSORHANDS",
+        artist: "Nessa Barrett",
+        src: "EdwardScissorHands",
+        coverType: "Images"
+    },
+
+    {
+        name: "GLITTER AND VIOLENCE",
+        artist: "Nessa Barrett",
+        src: "GlitterAndViolence",
+        coverType: "Images"
+    },
+
+    {
+        name: "PINS AND NEEDLES",
+        artist: "Nessa Barrett",
+        src: "PinsAndNeedles",
+        coverType: "Images"
+    },
+
+    {
+        name: "STAY ALIVE",
+        artist: "Nessa Barrett",
+        src: "StayAlive",
         coverType: "Images"
     },
 
