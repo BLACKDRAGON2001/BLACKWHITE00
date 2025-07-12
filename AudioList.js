@@ -231,6 +231,20 @@ let allMusic = [
     },
 
     {
+        name: "Keep Up",
+        artist: "Odetari",
+        src: "KeepUp",
+        coverType: "Images"
+    },
+
+    {
+        name: "Wet Dreams",
+        artist: "Odetari",
+        src: "WetDreams",
+        coverType: "Images"
+    },
+
+    {
         name: "Ecstasy",
         artist: "Suicidal-Idol",
         src: "Ecstasy",
@@ -1088,6 +1102,13 @@ let allMusic = [
         name: "PORNSTAR",
         artist: "Nessa Barrett",
         src: "Pornstar",
+        coverType: "Images"
+    },
+
+    {
+        name: "DIRTY LITTLE SECRET",
+        artist: "Nessa Barrett",
+        src: "DirtyLittleSecret",
         coverType: "Images"
     },
 
