@@ -91,6 +91,27 @@ let allMusic = [
     },
 
     {
+        name: "Gnarly",
+        artist: "Katseye",
+        src: "Gnarly",
+        coverType: "Images"
+    },
+
+    {
+        name: "Gabriela",
+        artist: "Katseye",
+        src: "Gabriela",
+        coverType: "Images"
+    },
+
+    {
+        name: "Gameboy",
+        artist: "Katseye",
+        src: "Gameboy",
+        coverType: "Images"
+    },
+
+    {
         name: "Swim",
         artist: "Chase Atlantic",
         src: "Swim",
@@ -239,8 +260,29 @@ let allMusic = [
 
     {
         name: "Wet Dreams",
-        artist: "Odetari",
+        artist: "Odetari And Nimstarr",
         src: "WetDreams",
+        coverType: "Images"
+    },
+
+    {
+        name: "SMB",
+        artist: "Odetari And Hongjoong Of ATEEZ",
+        src: "Smb",
+        coverType: "Images"
+    },
+
+    {
+        name: "Good Loyal Thots",
+        artist: "Odetari",
+        src: "GoodLoyalThots",
+        coverType: "Images"
+    },
+
+    {
+        name: "Coldest Winter",
+        artist: "Odetari",
+        src: "ColdestWinter",
         coverType: "Images"
     },
 
@@ -717,13 +759,6 @@ let allMusic = [
         name: "Plevne",
         artist: "CVRTOON",
         src: "Plevne",
-        coverType: "Images"
-    },
-
-    {
-        name: "Gnarly",
-        artist: "Katseye",
-        src: "Gnarly",
         coverType: "Images"
     },
 
