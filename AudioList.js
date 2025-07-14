@@ -483,6 +483,13 @@ let allMusic = [
     },
 
     {
+        name: "Down Like That",
+        artist: "KSI S-X Lil Baby And Rick Ross",
+        src: "DownLikeThat",
+        coverType: "Images"
+    },
+
+    {
         name: "Dirty",
         artist: "KSI and Billie Eilish",
         src: "Dirtyy",
@@ -1144,6 +1151,13 @@ let allMusic = [
         name: "DIRTY LITTLE SECRET",
         artist: "Nessa Barrett",
         src: "DirtyLittleSecret",
+        coverType: "Images"
+    },
+
+    {
+        name: "DISCO",
+        artist: "Nessa Barrett And Tommy Genesis",
+        src: "Disco",
         coverType: "Images"
     },
 
