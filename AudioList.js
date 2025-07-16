@@ -280,6 +280,13 @@ let allMusic = [
     },
 
     {
+        name: "Your're Too Slow",
+        artist: "Odetari",
+        src: "YourAreTooSlow",
+        coverType: "Images"
+    },
+
+    {
         name: "Coldest Winter",
         artist: "Odetari",
         src: "ColdestWinter",
@@ -472,6 +479,48 @@ let allMusic = [
         name: "Let Me Love You",
         artist: "Justin Beiber and DJ Snake",
         src: "LetMeLoveYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "Story Of My Life",
+        artist: "One Direction",
+        src: "StoryOfMyLife",
+        coverType: "Images"
+    },
+
+    {
+        name: "Steal My Girl",
+        artist: "One Direction",
+        src: "StealMyGirl",
+        coverType: "Images"
+    },
+
+    {
+        name: "Best Song Ever",
+        artist: "One Direction",
+        src: "BestSongEver",
+        coverType: "Images"
+    },
+
+    {
+        name: "Animals",
+        artist: "Maroon 5",
+        src: "Animals",
+        coverType: "Images"
+    },
+
+    {
+        name: "Moves Like Jagger",
+        artist: "Maroon 5 And Christina Aguilera",
+        src: "MovesLikeJagger",
+        coverType: "Images"
+    },
+
+    {
+        name: "Centuries",
+        artist: "Fall Out Boy",
+        src: "Centuries",
         coverType: "Images"
     },
 
@@ -756,6 +805,13 @@ let allMusic = [
     },
 
     {
+        name: "Wahran",
+        artist: "Randall",
+        src: "Wahran2",
+        coverType: "Images"
+    },
+
+    {
         name: "Choix De Vie",
         artist: "Anas x Randall",
         src: "ChoixDeVie",
@@ -885,6 +941,13 @@ let allMusic = [
         name: "Haunted",
         artist: "Chris Grey",
         src: "Haunted",
+        coverType: "Images"
+    },
+
+    {
+        name: "Give Me Your Love",
+        artist: "Chris Grey",
+        src: "GiveMeYourLove",
         coverType: "Images"
     },
 
