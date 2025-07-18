@@ -119,6 +119,13 @@ let allMusic = [
     },
 
     {
+        name: "Waka Waka",
+        artist: "Shakira",
+        src: "WakaWaka",
+        coverType: "Images"
+    },
+
+    {
         name: "Blackout",
         artist: "Emilia",
         src: "Blackout",
