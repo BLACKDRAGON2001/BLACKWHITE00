@@ -287,6 +287,20 @@ let allMusic = [
     },
 
     {
+        name: "Hypnotic Data",
+        artist: "Odetari",
+        src: "HypnoticData",
+        coverType: "Images"
+    },
+
+    {
+        name: "Don't Touch It",
+        artist: "Odetari",
+        src: "DontTouchIt",
+        coverType: "Images"
+    },
+
+    {
         name: "Coldest Winter",
         artist: "Odetari",
         src: "ColdestWinter",
@@ -500,6 +514,13 @@ let allMusic = [
         name: "Best Song Ever",
         artist: "One Direction",
         src: "BestSongEver",
+        coverType: "Images"
+    },
+
+    {
+        name: "Night Changes",
+        artist: "One Direction",
+        src: "NightChanges",
         coverType: "Images"
     },
 
