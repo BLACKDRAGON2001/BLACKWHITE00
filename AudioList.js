@@ -434,6 +434,13 @@ let allMusic = [
     },
 
     {
+        name: "New Rules",
+        artist: "Dua Lipa",
+        src: "NewRules",
+        coverType: "Images"
+    },
+
+    {
         name: "Where We Started",
         artist: "NCS",
         src: "WhereWeStarted",
@@ -528,6 +535,13 @@ let allMusic = [
         name: "Night Changes",
         artist: "One Direction",
         src: "NightChanges",
+        coverType: "Images"
+    },
+
+    {
+        name: "Watermelon Sugar",
+        artist: "Harry Styles",
+        src: "WatermelonSugar",
         coverType: "Images"
     },
 
@@ -864,6 +878,13 @@ let allMusic = [
         name: "Collide Sped Up Version",
         artist: "Justine Skye and Tyga",
         src: "Collide2",
+        coverType: "Images"
+    },
+
+    {
+        name: "Wannabe",
+        artist: "Why Mona",
+        src: "Wannabe",
         coverType: "Images"
     },
 
@@ -1788,6 +1809,13 @@ let allMusic = [
         name: "Under The Influence X Streets",
         artist: "Chris Brown x Weeknd",
         src: "UnderTheInfluenceXStreets",
+        coverType: "Images"
+    },
+
+    {
+        name: "Chubina",
+        artist: "East Duo",
+        src: "Chubina",
         coverType: "Images"
     },
 
