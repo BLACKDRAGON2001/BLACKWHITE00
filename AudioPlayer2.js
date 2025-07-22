@@ -176,7 +176,7 @@ document.getElementById("title").addEventListener("click", function() {
       this.updatePlayingSong();
     }
     
-    createVideoElementWithFallback(src, type) {
+    /*createVideoElementWithFallback(src, type) {
       const video = document.createElement('video');
       video.controls = true;
       video.autoplay = true;
@@ -208,7 +208,67 @@ document.getElementById("title").addEventListener("click", function() {
       };
     
       this.videoAd.src = primarySrc;
-    }  
+    }*/
+
+    createVideoElementWithFallback(src, type) {
+      const video = document.createElement('video');
+      video.controls = true;
+      video.autoplay = true;
+      video.loop = true;
+    
+      const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
+      const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.${type}`;
+      const fallbackSrc2 = `https://f005.backblazeb2.com/file/assets4/${src}.${type}`; // Replace with your 3rd bucket URL
+    
+      // Track fallback attempts
+      let attempt = 0;
+      const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
+    
+      const tryNextSource = () => {
+        if (attempt >= sources.length) {
+          console.error("All video sources failed to load.");
+          return;
+        }
+        video.src = sources[attempt];
+        attempt++;
+      };
+    
+      // On error, try next fallback source
+      video.onerror = () => {
+        console.warn(`Video source failed, switching to fallback #${attempt}: ${sources[attempt]}`);
+        tryNextSource();
+      };
+    
+      // Start with primary source
+      tryNextSource();
+    
+      return video;
+    }
+
+    setVideoSourceWithFallback(src) {
+      const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.mp4`;
+      const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.mp4`;
+      const fallbackSrc2 = `https://f005.backblazeb2.com/file/assets4/${src}.mp4`; // Replace with your 3rd bucket URL
+    
+      const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
+      let attempt = 0;
+    
+      const tryNextSource = () => {
+        if (attempt >= sources.length) {
+          console.error("All videoAd sources failed to load.");
+          return;
+        }
+        this.videoAd.src = sources[attempt];
+        attempt++;
+      };
+    
+      this.videoAd.onerror = () => {
+        console.warn(`videoAd source failed, switching to fallback #${attempt}: ${sources[attempt]}`);
+        tryNextSource();
+      };
+    
+      tryNextSource();
+    }    
   
     //createVideoElement(src, type) {
       //const video = document.createElement('video');

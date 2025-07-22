@@ -63,6 +63,13 @@ let allMusic = [
     },
 
     {
+        name: "See You Again",
+        artist: "Wiz Khalifa And Charlie Puth",
+        src: "SeeYouAgain",
+        coverType: "Images"
+    },
+
+    {
         name: "We Own It",
         artist: "Wiz Khalifa and Two Chainz",
         src: "WeOwnIt",
@@ -567,6 +574,41 @@ let allMusic = [
     },
 
     {
+        name: "Blank Space",
+        artist: "Taylor Swift",
+        src: "BlankSpace",
+        coverType: "Images"
+    },
+
+    {
+        name: "California Gurls",
+        artist: "Katy Perry",
+        src: "CaliforniaGurls",
+        coverType: "Images"
+    },
+
+    {
+        name: "Firework",
+        artist: "Katy Perry",
+        src: "Firework",
+        coverType: "Images"
+    },
+
+    {
+        name: "Call Me Maybe",
+        artist: "Carly Rae Jepsen",
+        src: "CallMeMaybe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Starboy",
+        artist: "The Weeknd",
+        src: "Starboy",
+        coverType: "Images"
+    },
+
+    {
         name: "Lean On",
         artist: "Major Lazer and DJ Snake",
         src: "LeanOn",
@@ -717,6 +759,13 @@ let allMusic = [
         name: "In Ha Mood",
         artist: "Ice Spice",
         src: "InHaMood",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lovin On Me",
+        artist: "Jack Harlow",
+        src: "LovinOnMe",
         coverType: "Images"
     },
 
@@ -1589,6 +1638,13 @@ let allMusic = [
     },
 
     {
+        name: "Locked Out Of Heaven",
+        artist: "Bruno Mars",
+        src: "LockedOutOfHeaven",
+        coverType: "Images"
+    },
+
+    {
         name: "Die With A Smile",
         artist: "Bruno Mars and Lady Gaga",
         src: "DieWithASmile",
@@ -1624,6 +1680,13 @@ let allMusic = [
     },
 
     {
+        name: "Give Me Everything",
+        artist: "Pitbull Ne-Yo And Afrojack",
+        src: "GiveMeEverything",
+        coverType: "Images"
+    },
+
+    {
         name: "Feel This Moment",
         artist: "Pitbull and Christina Aguilera",
         src: "FeelThisMoment",
@@ -1655,6 +1718,13 @@ let allMusic = [
         name: "Dust Til Dawn",
         artist: "Sia and Zayn",
         src: "DuskTilDawn",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pillowtalk",
+        artist: "Zayn",
+        src: "Pillowtalk",
         coverType: "Images"
     },
 
@@ -1792,6 +1862,13 @@ let allMusic = [
     },
 
     {
+        name: "Dance Monkey",
+        artist: "Tones And I",
+        src: "DanceMonkey",
+        coverType: "Images"
+    },
+
+    {
         name: "Dancin",
         artist: "KRONO",
         src: "Dancin",
@@ -1830,6 +1907,13 @@ let allMusic = [
         name: "Someone You Loved",
         artist: "Louis Capaldi",
         src: "SomeoneYouLoved",
+        coverType: "Images"
+    },
+
+    {
+        name: "All Of Me",
+        artist: "John Legend",
+        src: "AllOfMe",
         coverType: "Images"
     },
 
