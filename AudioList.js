@@ -574,6 +574,13 @@ let allMusic = [
     },
 
     {
+        name: "Closer",
+        artist: "Chainsmokers And Halsey",
+        src: "Closer",
+        coverType: "Images"
+    },
+
+    {
         name: "Blank Space",
         artist: "Taylor Swift",
         src: "BlankSpace",
@@ -980,9 +987,37 @@ let allMusic = [
     },
 
     {
+        name: "Bye Bye Bye",
+        artist: "NSYNC",
+        src: "ByeByeBye",
+        coverType: "Images"
+    },
+
+    {
+        name: "Its My Life",
+        artist: "Bon Jovi",
+        src: "ItsMyLife",
+        coverType: "Images"
+    },
+
+    {
+        name: "Livin On A Prayer",
+        artist: "Bon Jovi",
+        src: "LivinOnAPrayer",
+        coverType: "Images"
+    },
+
+    {
         name: "Rewrite The Stars",
         artist: "Zac Efron and Zendaya",
         src: "RewriteTheStars",
+        coverType: "Images"
+    },
+
+    {
+        name: "Middle Of The Night",
+        artist: "Elley Duhe",
+        src: "MiddleOfTheNight",
         coverType: "Images"
     },
 
@@ -1610,6 +1645,13 @@ let allMusic = [
     },
 
     {
+        name: "Hola Senorita",
+        artist: "Maluma Ana GIMS",
+        src: "HolaSenorita",
+        coverType: "Images"
+    },
+
+    {
         name: "Da Da Da",
         artist: "Tanir and Tyomcha Jarico Remix",
         src: "DaDaDa",
@@ -1893,6 +1935,13 @@ let allMusic = [
         name: "Chubina",
         artist: "East Duo",
         src: "Chubina",
+        coverType: "Images"
+    },
+
+    {
+        name: "Beautiful Things",
+        artist: "Benson Boone",
+        src: "BeautifulThings",
         coverType: "Images"
     },
 
