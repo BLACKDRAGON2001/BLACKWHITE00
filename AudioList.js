@@ -553,6 +553,20 @@ let allMusic = [
     },
 
     {
+        name: "Girls Like You",
+        artist: "Maroon 5 And Rihanna",
+        src: "GirlsLikeYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cold",
+        artist: "Maroon 5",
+        src: "Cold",
+        coverType: "Images"
+    },
+
+    {
         name: "Animals",
         artist: "Maroon 5",
         src: "Animals",
