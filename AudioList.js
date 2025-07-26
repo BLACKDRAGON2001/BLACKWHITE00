@@ -84,6 +84,13 @@ let allMusic = [
     },
 
     {
+        name: "Good Life",
+        artist: "Kehlani And G-Eazy",
+        src: "GoodLife",
+        coverType: "Images"
+    },
+
+    {
         name: "In2",
         artist: "WSTRN",
         src: "In2",
@@ -588,6 +595,20 @@ let allMusic = [
     },
 
     {
+        name: "Counting Stars",
+        artist: "OneRepublic",
+        src: "CountingStars",
+        coverType: "Images"
+    },
+
+    {
+        name: "Demons",
+        artist: "Imagine Dragons",
+        src: "Demons",
+        coverType: "Images"
+    },
+
+    {
         name: "Closer",
         artist: "Chainsmokers And Halsey",
         src: "Closer",
@@ -633,6 +654,41 @@ let allMusic = [
         name: "Lean On",
         artist: "Major Lazer and DJ Snake",
         src: "LeanOn",
+        coverType: "Images"
+    },
+
+    {
+        name: "Stay",
+        artist: "The Kid LAROI And Justin Bieber",
+        src: "Stay",
+        coverType: "Images"
+    },
+
+    {
+        name: "Feel Invincible",
+        artist: "Skillet",
+        src: "FeelInvincible",
+        coverType: "Images"
+    },
+
+    {
+        name: "Resistance",
+        artist: "Skillet",
+        src: "Resistance",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hero",
+        artist: "Skillet",
+        src: "Hero",
+        coverType: "Images"
+    },
+
+    {
+        name: "Rise",
+        artist: "Skillet",
+        src: "Rise",
         coverType: "Images"
     },
 
@@ -689,6 +745,13 @@ let allMusic = [
         name: "Yeah",
         artist: "Usher",
         src: "Yeah",
+        coverType: "Images"
+    },
+
+    {
+        name: "A Cold Sunday",
+        artist: "Lil Yachty",
+        src: "AColdSunday",
         coverType: "Images"
     },
 
@@ -1106,6 +1169,20 @@ let allMusic = [
     },
 
     {
+        name: "Wrong",
+        artist: "Chris Grey",
+        src: "Wrong",
+        coverType: "Images"
+    },
+
+    {
+        name: "Funhouse",
+        artist: "Chris Grey",
+        src: "Funhouse",
+        coverType: "Images"
+    },
+
+    {
         name: "Mine",
         artist: "Allegra Jordyn",
         src: "Mine",
@@ -1435,6 +1512,34 @@ let allMusic = [
     },
 
     {
+        name: "Dont Speak",
+        artist: "No Doubt",
+        src: "DontSpeak",
+        coverType: "Images"
+    },
+
+    {
+        name: "Life For Rent",
+        artist: "Dido",
+        src: "LifeForRent",
+        coverType: "Images"
+    },
+
+    {
+        name: "Thank You",
+        artist: "Dido",
+        src: "ThankYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "White Flag",
+        artist: "Dido",
+        src: "WhiteFlag",
+        coverType: "Images"
+    },
+
+    {
         name: "Mathematical Disrespect",
         artist: "Lil Mabu",
         src: "MathematicalDisrespect",
@@ -1725,6 +1830,13 @@ let allMusic = [
         name: "Cheap Thrills",
         artist: "SIA",
         src: "CheapThrills",
+        coverType: "Images"
+    },
+
+    {
+        name: "Am I Wrong",
+        artist: "Nico And Vinz",
+        src: "AmIWrong",
         coverType: "Images"
     },
 
