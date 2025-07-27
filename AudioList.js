@@ -574,6 +574,13 @@ let allMusic = [
     },
 
     {
+        name: "Locked Away",
+        artist: "R. City And Adam Levine",
+        src: "LockedAway",
+        coverType: "Images"
+    },
+
+    {
         name: "Animals",
         artist: "Maroon 5",
         src: "Animals",
@@ -584,6 +591,13 @@ let allMusic = [
         name: "Moves Like Jagger",
         artist: "Maroon 5 And Christina Aguilera",
         src: "MovesLikeJagger",
+        coverType: "Images"
+    },
+
+    {
+        name: "One Last Time",
+        artist: "Ariana Grande",
+        src: "OneLastTime",
         coverType: "Images"
     },
 
@@ -605,6 +619,13 @@ let allMusic = [
         name: "Demons",
         artist: "Imagine Dragons",
         src: "Demons",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hymm For The Weekend",
+        artist: "Coldplay",
+        src: "HymmForTheWeekend",
         coverType: "Images"
     },
 
@@ -1883,6 +1904,13 @@ let allMusic = [
     },
 
     {
+        name: "Never Give Up",
+        artist: "Sia",
+        src: "NeverGiveUp",
+        coverType: "Images"
+    },
+
+    {
         name: "Dust Til Dawn",
         artist: "Sia and Zayn",
         src: "DuskTilDawn",
@@ -1893,6 +1921,20 @@ let allMusic = [
         name: "Pillowtalk",
         artist: "Zayn",
         src: "Pillowtalk",
+        coverType: "Images"
+    },
+
+    {
+        name: "Stitches",
+        artist: "Zayn",
+        src: "Stitches",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hello",
+        artist: "Adele",
+        src: "Hello",
         coverType: "Images"
     },
 
