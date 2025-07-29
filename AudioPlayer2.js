@@ -164,10 +164,12 @@ document.getElementById("title").addEventListener("click", function() {
     
       this.mainAudio.src = `https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/${src}.mp3`;
     
-      // Only set video src if not disguise player
+      // Only set video source for player 1, but keep video element for player 2 (for border positioning)
       if (this.suffix !== '2') {
+        // Original player - full video functionality
         this.setVideoSourceWithFallback(src);
       } else {
+        // Player 2 - NO VIDEO, but keep element for border reference
         this.videoAd.src = "";
         this.videoAd.style.display = "none";
       }
@@ -320,8 +322,70 @@ document.getElementById("title").addEventListener("click", function() {
     }  
   
     toggleVideoDisplay(show) {
-      this.videoAd.style.display = show ? "block" : "none";
-      show ? this.videoAd.play() : this.videoAd.pause();
+      const borderBox = document.getElementById(`video-border-box${this.suffix}`);
+      
+      if (show) {
+        if (this.suffix === '2') {
+          // Player 2: Show ONLY the border box, no video
+          this.videoAd.style.display = "none"; // Keep video hidden
+          borderBox.style.display = "block";
+          
+          // Center the border box in the image area (296px border for 280px "video")
+          const borderSize = 296;
+          const containerSize = 370; // img-area size
+          const centerOffset = (containerSize - borderSize) / 2;
+          
+          borderBox.style.top = `${centerOffset}px`;
+          borderBox.style.left = `${centerOffset}px`;
+          borderBox.style.width = `${borderSize}px`;
+          borderBox.style.height = `${borderSize}px`;
+          borderBox.style.transform = 'translate(0, 0)';
+          
+          // Don't play video for player 2
+        } else {
+          // Player 1: Show both video and border, centered
+          this.videoAd.style.display = "block";
+          borderBox.style.display = "block";
+          
+          // Style border based on video size - CENTER EVERYTHING
+          if (this.videoAd.classList.contains('bigger-video')) {
+            // Full size video (370px) - border matches exactly
+            borderBox.style.top = '0px';
+            borderBox.style.left = '0px';
+            borderBox.style.width = '370px';
+            borderBox.style.height = '370px';
+            borderBox.style.transform = 'translate(0, 0)';
+          } else {
+            // Overlay video (280px) - center border (296px) and video within it
+            const borderSize = 296;
+            const containerSize = 370; // img-area size
+            const borderOffset = (containerSize - borderSize) / 2; // 37px from edges
+            
+            // Position border box centered in container
+            borderBox.style.top = `${borderOffset}px`;
+            borderBox.style.left = `${borderOffset}px`;
+            borderBox.style.width = `${borderSize}px`;
+            borderBox.style.height = `${borderSize}px`;
+            borderBox.style.transform = 'translate(0, 0)';
+            
+            // Center video within the border box
+            const videoSize = 280;
+            const videoBorderPadding = (borderSize - videoSize) / 2; // 8px padding
+            const videoOffset = borderOffset + videoBorderPadding; // 37px + 8px = 45px from container edge
+            
+            this.videoAd.style.top = `${videoOffset}px`;
+            this.videoAd.style.left = `${videoOffset}px`;
+            this.videoAd.style.transform = 'translate(0, 0)';
+          }
+          
+          this.videoAd.play();
+        }
+      } else {
+        // Hide both video and border for both players
+        this.videoAd.style.display = "none";
+        borderBox.style.display = "none";
+        this.videoAd.pause();
+      }
     }
   
     muteVideo() {
@@ -534,7 +598,7 @@ document.getElementById("title").addEventListener("click", function() {
       });
     }  
   
-    toggleDarkMode() {
+    /*toggleDarkMode() {
       const isDarkMode = this.wrapper.classList.toggle("dark-mode");
       document.getElementById(`fontawesome-icons${this.suffix}`).classList.toggle("Dark");
   
@@ -545,7 +609,146 @@ document.getElementById("title").addEventListener("click", function() {
         document.body.style.backgroundColor = "black";
         this.listcolourwhite();
       }
+    }*/
+
+    // Updated toggleDarkMode method in MusicPlayer class
+    // Updated toggleDarkMode method - blue controls box, red content inside
+    // Updated toggleDarkMode method - blue controls box, red content, but play icon stays black
+    // Updated toggleDarkMode method in MusicPlayer class
+toggleDarkMode() {
+  const isDarkMode = this.wrapper.classList.toggle("dark-mode");
+  document.getElementById(`fontawesome-icons${this.suffix}`).classList.toggle("Dark");
+
+  // Get the controls box, progress area, and progress bar
+  const controlsBox = this.wrapper.querySelector('.control-box');
+  const progressArea = this.wrapper.querySelector('.progress-area');
+  const progressBar = this.wrapper.querySelector('.progress-bar');
+
+  if (isDarkMode) {
+    document.body.style.backgroundColor = "white";
+    this.listcolourblack();
+    
+    // Make controls box blue
+    if (controlsBox) {
+      controlsBox.style.setProperty('background-color', 'black', 'important');
+      controlsBox.style.setProperty('border-color', 'black', 'important');
     }
+    
+    // Make progress area background red (the track)
+    if (progressArea) {
+      progressArea.style.setProperty('background', 'white', 'important');
+    }
+    
+    // Make progress bar red (the filled portion)
+    if (progressBar) {
+      progressBar.style.setProperty('background', 'linear-gradient(90deg, white 0%, white 100%)', 'important');
+    }
+    
+    // Make ALL content inside controls box red (except play-pause icon)
+    const controlsContent = this.wrapper.querySelectorAll('.control-box *');
+    controlsContent.forEach(element => {
+      // Skip the play-pause icon itself
+      if (element.closest('.play-pause') && element.tagName === 'I') {
+        return; // Keep play/pause icon black
+      }
+      
+      // Skip the progress bar since we handle it separately
+      if (element.classList.contains('progress-bar')) {
+        return;
+      }
+      
+      // For regular elements
+      element.style.setProperty('color', 'white', 'important');
+      
+      // For elements with gradients (like the other control icons)
+      if (element.tagName === 'I' && element.classList.contains('material-icons')) {
+        element.style.setProperty('background', 'linear-gradient(white 0%, white 100%)', 'important');
+        element.style.setProperty('background-clip', 'text', 'important');
+        element.style.setProperty('-webkit-background-clip', 'text', 'important');
+        element.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+      }
+    });
+    
+    // Make the play-pause button circle red, but keep icon black
+    const playPauseBtn = this.wrapper.querySelector('.play-pause');
+    if (playPauseBtn) {
+      playPauseBtn.style.setProperty('background', 'linear-gradient(red 0%, red 100%)', 'important');
+    }
+    
+    // Make the play-pause button's ::before pseudo-element red
+    const playPauseBefore = this.wrapper.querySelector('.play-pause');
+    if (playPauseBefore) {
+      // Create a style element to target the ::before pseudo-element
+      const styleElement = document.createElement('style');
+      styleElement.id = `dark-mode-style${this.suffix}`;
+      styleElement.textContent = `
+        #wrapper${this.suffix}.dark-mode .play-pause::before {
+          background: linear-gradient(white 0%, white 100%) !important;
+        }
+      `;
+      document.head.appendChild(styleElement);
+    }
+    
+    // Ensure the play-pause icon stays black
+    const playPauseIcon = this.wrapper.querySelector('.play-pause i');
+    if (playPauseIcon) {
+      playPauseIcon.style.setProperty('background', 'linear-gradient(black 0%, black 100%)', 'important');
+      playPauseIcon.style.setProperty('background-clip', 'text', 'important');
+      playPauseIcon.style.setProperty('-webkit-background-clip', 'text', 'important');
+      playPauseIcon.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+    }
+    
+  } else {
+    document.body.style.backgroundColor = "black";
+    this.listcolourwhite();
+    
+    // Reset controls box to original color
+    if (controlsBox) {
+      controlsBox.style.removeProperty('background-color');
+      controlsBox.style.removeProperty('border-color');
+    }
+    
+    // Reset progress area to original color
+    if (progressArea) {
+      progressArea.style.removeProperty('background');
+    }
+    
+    // Reset progress bar to original color
+    if (progressBar) {
+      progressBar.style.removeProperty('background');
+    }
+    
+    // Reset all content inside controls box
+    const controlsContent = this.wrapper.querySelectorAll('.control-box *');
+    controlsContent.forEach(element => {
+      element.style.removeProperty('color');
+      element.style.removeProperty('background');
+      element.style.removeProperty('background-clip');
+      element.style.removeProperty('-webkit-background-clip');
+      element.style.removeProperty('-webkit-text-fill-color');
+    });
+    
+    // Reset play-pause button and icon
+    const playPauseBtn = this.wrapper.querySelector('.play-pause');
+    if (playPauseBtn) {
+      playPauseBtn.style.removeProperty('background');
+    }
+    
+    // Remove the dark mode style element
+    const styleElement = document.getElementById(`dark-mode-style${this.suffix}`);
+    if (styleElement) {
+      styleElement.remove();
+    }
+    
+    const playPauseIcon = this.wrapper.querySelector('.play-pause i');
+    if (playPauseIcon) {
+      playPauseIcon.style.removeProperty('background');
+      playPauseIcon.style.removeProperty('background-clip');
+      playPauseIcon.style.removeProperty('-webkit-background-clip');
+      playPauseIcon.style.removeProperty('-webkit-text-fill-color');
+    }
+  }
+}
   
     handleMute() {
       const isAudioPlaying = !this.isMusicPaused;
@@ -598,32 +801,64 @@ document.getElementById("title").addEventListener("click", function() {
   }
   
   function handleSize() {
+    // Only handle video element for player 1 (no video interaction for player 2)
     const sizer = document.getElementById("video");
-  
-    sizer.addEventListener("click", () => {
-        if (sizer.classList.contains("overlay-video")) {
-        sizer.classList.replace("overlay-video", "bigger-video");
-        } else {
-        sizer.classList.replace("bigger-video", "overlay-video");
-        }
-    });
-  }
-  
-  function handleSize() {
-    const sizer = document.getElementById("video");
-  
+    
+    if (!sizer) return;
+    
+    const borderBox = document.getElementById("video-border-box");
+    
     if (!sizer.classList.contains("overlay-video") && !sizer.classList.contains("bigger-video")) {
       sizer.classList.add("overlay-video");
     }
   
     sizer.addEventListener("click", () => {
-      const player = window.homePlayer || window.disguisePlayer;
+      const player = window.homePlayer;
       
       // Prevent size toggle if controls are shown by user
-      if (sizer.classList.contains("bigger-video") && player.controlsToggledManually) return;
+      if (sizer.classList.contains("bigger-video") && player && player.controlsToggledManually) return;
   
       sizer.classList.toggle("overlay-video");
       sizer.classList.toggle("bigger-video");
+      
+      // Update border box and video positioning when size changes
+      if (sizer.style.display !== "none" && borderBox && borderBox.style.display !== "none") {
+        if (sizer.classList.contains('bigger-video')) {
+          // Full size - border and video fill container
+          borderBox.style.backgroundColor = 'transparent';
+          borderBox.style.top = '0px';
+          borderBox.style.left = '0px';
+          borderBox.style.width = '370px';
+          borderBox.style.height = '370px';
+          borderBox.style.transform = 'translate(0, 0)';
+          
+          sizer.style.top = '0px';
+          sizer.style.left = '0px';
+          sizer.style.transform = 'translate(0, 0)';
+        } else {
+          // Overlay size - center border and video
+          borderBox.style.backgroundColor = 'black';
+          const borderSize = 296;
+          const containerSize = 370;
+          const borderOffset = (containerSize - borderSize) / 2; // 37px
+          
+          // Center border box
+          borderBox.style.top = `${borderOffset}px`;
+          borderBox.style.left = `${borderOffset}px`;
+          borderBox.style.width = `${borderSize}px`;
+          borderBox.style.height = `${borderSize}px`;
+          borderBox.style.transform = 'translate(0, 0)';
+          
+          // Center video within border (280px video with 8px padding on each side)
+          const videoSize = 280;
+          const videoBorderPadding = (borderSize - videoSize) / 2; // 8px
+          const videoOffset = borderOffset + videoBorderPadding; // 45px from container edge
+          
+          sizer.style.top = `${videoOffset}px`;
+          sizer.style.left = `${videoOffset}px`;
+          sizer.style.transform = 'translate(0, 0)';
+        }
+      }
     });
   }
   

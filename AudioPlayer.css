@@ -310,26 +310,72 @@ ul li.playing{
   position: relative;
 }
 
-.bigger-video {
+/* Black box border - hidden by default */
+.video-border-box {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 370px;
+  background-color: black;
   display: none; /* Hidden by default */
-  transform: translate(0%, 0%);
-  border-radius: 15px;
-  box-sizing: border-box;
+  z-index: 1;
 }
 
 .overlay-video {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 280px;
-  display: none; /* Hidden by default */
-  transform: translate(16%, 16%);
-  border: 8px solid black;
+  display: none;
+  /* Remove: transform: translate(16%, 16%); */
   box-sizing: border-box;
+  z-index: 2;
+}
+
+.bigger-video {
+  position: absolute;
+  width: 370px;
+  display: none;
+  /* Remove: transform: translate(0%, 0%); */
+  border-radius: 15px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+/* Dark mode: Blue controls box */
+.dark-mode .control-box {
+  background-color: black !important;
+}
+
+/* Dark mode: Red content inside controls box */
+.dark-mode .control-box * {
+  color: white !important;
+}
+
+/* Dark mode: Red gradient for control icons (except play-pause) */
+.dark-mode .control-box .controls i.material-icons:not(.play-pause i) {
+  background: linear-gradient(white 0%, white 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Dark mode: Red circle background for play-pause button */
+.dark-mode .control-box .play-pause {
+  background: linear-gradient(white 0%, white 100%) !important;
+}
+
+/* Dark mode: Keep play-pause ICON black */
+.dark-mode .control-box .play-pause i {
+  background: linear-gradient(black 0%, black 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: black !important;
+}
+
+/* Dark mode: Red progress bar */
+.dark-mode .control-box .progress-bar {
+  background: linear-gradient(90deg, white 0%, white 100%) !important;
+}
+
+.dark-mode .play-pause::before {
+  background: linear-gradient(white 0%, white 100%) !important;
 }
 
 /* Add these styles to your CSS file */

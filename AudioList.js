@@ -966,6 +966,27 @@ let allMusic = [
     },
 
     {
+        name: "Stereo Love",
+        artist: "Edward Maya And Vika Jigulina",
+        src: "StereoLove",
+        coverType: "Images"
+    },
+
+    {
+        name: "Desert Rain",
+        artist: "Edward Maya And Vika Jigulina",
+        src: "DesertRain",
+        coverType: "Images"
+    },
+
+    {
+        name: "This Is My Life",
+        artist: "Edward Maya And Vika Jigulina",
+        src: "ThisIsMyLife",
+        coverType: "Images"
+    },
+
+    {
         name: "Starboy Slowed",
         artist: "Weeknd",
         src: "StarboySlowed",
@@ -1557,6 +1578,13 @@ let allMusic = [
         name: "White Flag",
         artist: "Dido",
         src: "WhiteFlag",
+        coverType: "Images"
+    },
+
+    {
+        name: "Somewhere Only We Know",
+        artist: "Keane",
+        src: "SomewhereOnlyWeKnow",
         coverType: "Images"
     },
 
