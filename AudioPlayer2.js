@@ -323,25 +323,13 @@ document.getElementById("title").addEventListener("click", function() {
   
     toggleVideoDisplay(show) {
       const borderBox = document.getElementById(`video-border-box${this.suffix}`);
+      const isDarkMode = this.wrapper.classList.contains("dark-mode");
       
       if (show) {
         if (this.suffix === '2') {
           // Player 2: Show ONLY the border box, no video
           this.videoAd.style.display = "none"; // Keep video hidden
-          borderBox.style.display = "block";
-          
-          // Center the border box in the image area (296px border for 280px "video")
-          const borderSize = 296;
-          const containerSize = 370; // img-area size
-          const centerOffset = (containerSize - borderSize) / 2;
-          
-          borderBox.style.top = `${centerOffset}px`;
-          borderBox.style.left = `${centerOffset}px`;
-          borderBox.style.width = `${borderSize}px`;
-          borderBox.style.height = `${borderSize}px`;
-          borderBox.style.transform = 'translate(0, 0)';
-          
-          // Don't play video for player 2
+         // borderBox.style.display = "none";
         } else {
           // Player 1: Show both video and border, centered
           this.videoAd.style.display = "block";
@@ -381,10 +369,21 @@ document.getElementById("title").addEventListener("click", function() {
           this.videoAd.play();
         }
       } else {
-        // Hide both video and border for both players
-        this.videoAd.style.display = "none";
-        borderBox.style.display = "none";
-        this.videoAd.pause();
+        if (this.suffix === '2') {
+          if (isDarkMode) {
+            this.videoAd.style.display = "none";
+            borderBox.style.display = "block";
+            this.videoAd.pause();
+          } else {
+            this.videoAd.style.display = "none";
+            borderBox.style.display = "none";
+            this.videoAd.pause();
+          }
+        } else {
+          this.videoAd.style.display = "none";
+          borderBox.style.display = "none";
+          this.videoAd.pause();
+        }
       }
     }
   
@@ -625,6 +624,15 @@ toggleDarkMode() {
   const progressBar = this.wrapper.querySelector('.progress-bar');
 
   if (isDarkMode) {
+    const borderBox2 = document.getElementById("video-border-box2");
+    borderBox2.style.display = "block";
+    borderBox2.style.top = '0px';
+    borderBox2.style.left = '0px';
+    borderBox2.style.width = '370px';
+    borderBox2.style.height = '370px';
+    borderBox2.style.transform = 'translate(0, 0)';
+    borderBox2.style.borderRadius = "15px";
+
     document.body.style.backgroundColor = "white";
     this.listcolourblack();
     
@@ -701,6 +709,9 @@ toggleDarkMode() {
   } else {
     document.body.style.backgroundColor = "black";
     this.listcolourwhite();
+    const borderBox2 = document.getElementById("video-border-box2");
+
+    borderBox2.style.display = "none";
     
     // Reset controls box to original color
     if (controlsBox) {
