@@ -481,6 +481,7 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     handleScroll() {
+      const isDarkMode = this.wrapper.classList.contains("dark-mode");
       if (this.isLoading) return;
       
       const scrollTop = this.ulTag.scrollTop;
@@ -489,7 +490,12 @@ document.getElementById("title").addEventListener("click", function() {
       
       // Check if user scrolled to bottom (with small threshold)
       if (scrollTop + clientHeight >= scrollHeight - 10) {
-        this.loadMoreItems();
+        if (isDarkMode) {
+          this.loadMoreItems();
+          this.listcolourblack();
+        } else {
+          this.loadMoreItems();
+        }
       }
     }
   
