@@ -79,6 +79,7 @@ class MusicPlayer {
     this.originalOrder = [...allMusic];
     this.shuffledOrder = [];
     this.isMuted = false;
+    this.isInitializing = true;
 
     // Pagination state
     this.currentPage = 0;
@@ -95,30 +96,92 @@ class MusicPlayer {
         left: '0px',
         width: '370px',
         height: '370px',
-        transform: 'translate(0, 0)'
+        transform: 'translate(0, 0)',
+        borderRadius: '50px'
       },
       overlaySize: {
         top: '37px',
         left: '37px',
         width: '296px',
         height: '296px',
-        transform: 'translate(0, 0)'
+        transform: 'translate(0, 0)',
+        borderRadius: '0px'
+      },
+      player2DarkMode: {
+        top: '0px',
+        left: '0px',
+        width: '370px',
+        height: '370px',
+        transform: 'translate(0, 0)',
+        borderRadius: '15px'
       }
     };
+
+     this.borderBoxState = {
+      isVisible: false,
+      currentStyle: null,
+      lastUpdate: 0
+    };
+
+    this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 16);
     
     this.initialize();
   }
 
+  // CHANGED - now calls the new initializeBorderBox method
   initialize() {
     this.setupEventListeners();
     this.loadPersistedState();
     this.populateMusicList(this.originalOrder);
     this.updatePlayingSong();
     
-    // Initially hide border box when player starts
-    if (this.borderBox) {
-      this.borderBox.style.display = "none";
-    }
+    // Ensure border box is completely hidden on initial load
+    this.initializeBorderBox(); // <-- NEW LINE
+
+    setTimeout(() => {
+      this.isInitializing = false;
+    }, 100)
+  }
+
+    // NEW METHOD - called during player startup
+  initializeBorderBox() {
+    if (!this.borderBox) return;
+    
+    // Force hide border box with multiple methods to ensure it's gone
+    this.borderBox.style.display = "none";
+    this.borderBox.style.visibility = "hidden";
+    this.borderBox.style.opacity = "0";
+    this.borderBox.classList.remove('full-size', 'overlay-size', 'player2-dark');
+    
+    // Reset border box state
+    this.borderBoxState = {
+      isVisible: false,
+      currentStyle: null,
+      lastUpdate: 0
+    };
+    
+    // For extra safety, use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      if (this.borderBox) {
+        this.borderBox.style.display = "none";
+      }
+    });
+  }
+
+   debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  updateBorderBoxDisplay() {
+    this.updateBorderBoxDebounced();
   }
 
   setupEventListeners() {
@@ -205,7 +268,9 @@ class MusicPlayer {
     this.updatePlayingSong();
     
     // Ensure border box is properly displayed when song changes
-    this.updateBorderBoxDisplay();
+    if (!this.isInitializing) {
+      this.updateBorderBoxDisplay();
+    }
   }
 
   createVideoElementWithFallback(src, type) {
@@ -286,7 +351,10 @@ class MusicPlayer {
     this.isMusicPaused = false;
     localStorage.setItem(`isMusicPaused${this.suffix}`, false);
     this.toggleVideoDisplay(false);
-    this.resetVideoSize(); // Reset size and controls
+    this.resetVideoSize();
+    
+    // Single border box update at the end
+    this.updateBorderBoxDisplay();
   }
 
   pauseMusic() {
@@ -297,7 +365,10 @@ class MusicPlayer {
     localStorage.setItem(`isMusicPaused${this.suffix}`, true);
     this.toggleVideoDisplay(true);
     this.muteVideo();
-    this.resetVideoSize(); // Reset size and controls
+    this.resetVideoSize();
+    
+    // Single border box update at the end
+    this.updateBorderBoxDisplay();
   }
 
   resetVideoSize() {
@@ -307,76 +378,34 @@ class MusicPlayer {
     this.controlsToggledManually = false;
     this.videoAd.loop = true;
     
-    // Update border box when video size resets
-    this.updateBorderBoxDisplay();
+    // Border box update will be called by parent method
   }
   
   // Optimized method to update border box display and positioning
-  updateBorderBoxDisplay() {
-    if (!this.borderBox) return;
-    
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    const isVideoPaused = this.isMusicPaused;
-    const isPlayer2 = this.suffix === '2';
-    const isBiggerVideo = this.videoAd.classList.contains("bigger-video");
-    const isVideoVisible = this.videoAd.style.display !== "none";
-    
-    // Determine if border should be shown
-    let shouldShowBorder = false;
-    
-    if (isPlayer2) {
-      // Player 2: Show border only in dark mode (no video, but border for reference)
-      shouldShowBorder = isDarkMode;
-    } else {
-      // Player 1: Show border only when video is visible and paused
-      shouldShowBorder = isVideoPaused && isVideoVisible;
-    }
-    
-    // Apply display state
-    this.borderBox.style.display = shouldShowBorder ? "block" : "none";
-    
-    if (shouldShowBorder) {
-      // Apply appropriate positioning based on video size
-      const styles = isBiggerVideo ? this.borderBoxStyles.fullSize : this.borderBoxStyles.overlaySize;
-      
-      // Apply styles in one batch to avoid multiple reflows
-      Object.assign(this.borderBox.style, styles);
-      
-      // Set border radius based on video size
-      this.borderBox.style.borderRadius = isBiggerVideo ? "50px" : "0px";
-      
-      // For player 2 in dark mode, always use full size with 15px border radius
-      if (isPlayer2 && isDarkMode) {
-        Object.assign(this.borderBox.style, this.borderBoxStyles.fullSize);
-        this.borderBox.style.borderRadius = "15px";
-      }
-    }
-  }
 
   toggleVideoDisplay(show) {
     const isDarkMode = this.wrapper.classList.contains("dark-mode");
     
     if (show) {
       if (this.suffix === '2') {
-        // Player 2: Show ONLY the border box, no video
-        this.videoAd.style.display = "none"; // Keep video hidden
+        this.videoAd.style.display = "none";
       } else {
-        // Player 1: Show both video and border when paused
         this.videoAd.style.display = "block";
         
-        // Position video for overlay size (starting size)
         const videoSize = 280;
         const containerSize = 370;
-        const videoOffset = (containerSize - videoSize) / 2; // 45px from container edge
+        const videoOffset = (containerSize - videoSize) / 2;
         
-        this.videoAd.style.top = `${videoOffset}px`;
-        this.videoAd.style.left = `${videoOffset}px`;
-        this.videoAd.style.transform = 'translate(0, 0)';
+        // Batch video positioning updates
+        Object.assign(this.videoAd.style, {
+          top: `${videoOffset}px`,
+          left: `${videoOffset}px`,
+          transform: 'translate(0, 0)'
+        });
         
         this.videoAd.play();
       }
     } else {
-      // Hide video and border when playing (except player 2 in dark mode)
       if (this.suffix === '2') {
         this.videoAd.style.display = "none";
         this.videoAd.pause();
@@ -386,8 +415,7 @@ class MusicPlayer {
       }
     }
     
-    // Update border box display
-    this.updateBorderBoxDisplay();
+    // Border box update will be called by parent method
   }
 
   muteVideo() {
@@ -792,6 +820,125 @@ class MusicPlayer {
     this.musicList.style.backgroundColor = "white";
     this.closeMoreMusicBtn.style.color = "black";
     this.header.style.color = "black";
+  }
+
+  updateBorderBoxImmediate() {
+    if (this.isInitializing) {
+      if (this.borderBox) {
+        this.borderBox.style.display = "none";
+      }
+      return;
+    }
+
+    if (!this.borderBox) return;
+    
+    const now = performance.now();
+    
+    // Throttle updates to avoid excessive DOM manipulation
+    if (now - this.borderBoxState.lastUpdate < 16) return; // ~60fps limit
+    
+    const isDarkMode = this.wrapper.classList.contains("dark-mode");
+    const isVideoPaused = this.isMusicPaused;
+    const isPlayer2 = this.suffix === '2';
+    const isBiggerVideo = this.videoAd.classList.contains("bigger-video");
+    const isVideoVisible = this.videoAd.style.display !== "none";
+    
+    // Determine visibility and style in one pass
+    let shouldShowBorder = false;
+    let targetStyle = null;
+    
+    if (isPlayer2) {
+      if (isDarkMode) {
+        shouldShowBorder = true;
+        targetStyle = 'player2DarkMode';
+      }
+    } else {
+      if (isVideoPaused && isVideoVisible) {
+        shouldShowBorder = true;
+        targetStyle = isBiggerVideo ? 'fullSize' : 'overlaySize';
+      }
+    }
+    
+    // Only update if state actually changed
+    if (this.borderBoxState.isVisible !== shouldShowBorder || 
+        this.borderBoxState.currentStyle !== targetStyle) {
+      
+      // Batch all DOM operations together
+      this.applyBorderBoxChanges(shouldShowBorder, targetStyle);
+      
+      // Update cached state
+      this.borderBoxState.isVisible = shouldShowBorder;
+      this.borderBoxState.currentStyle = targetStyle;
+      this.borderBoxState.lastUpdate = now;
+    }
+  }
+
+  applyBorderBoxChanges(shouldShow, styleKey) {
+    if (shouldShow && styleKey) {
+      const styles = this.borderBoxStyles[styleKey];
+      
+      // Use CSS transform for better performance
+      const cssText = `
+        display: block;
+        top: ${styles.top};
+        left: ${styles.left};
+        width: ${styles.width};
+        height: ${styles.height};
+        transform: ${styles.transform};
+        border-radius: ${styles.borderRadius};
+      `;
+      
+      // Apply all styles at once using cssText (single reflow)
+      this.borderBox.style.cssText = cssText;
+    } else {
+    // Hide with minimal DOM impact - use multiple methods for complete hiding
+    this.borderBox.style.cssText = 'display: none; visibility: hidden; opacity: 0;';
+  }
+  }
+
+  applyBorderBoxChangesWithClasses(shouldShow, styleKey) {
+    // Remove all style classes
+    this.borderBox.classList.remove('full-size', 'overlay-size', 'player2-dark');
+    
+    if (shouldShow && styleKey) {
+      this.borderBox.style.display = 'block';
+      
+      // Add appropriate class (requires CSS to be defined)
+      switch(styleKey) {
+        case 'fullSize':
+          this.borderBox.classList.add('full-size');
+          break;
+        case 'overlaySize':
+          this.borderBox.classList.add('overlay-size');
+          break;
+        case 'player2DarkMode':
+          this.borderBox.classList.add('player2-dark');
+          break;
+      }
+    } else {
+      // Remove all style classes
+      this.borderBox.classList.remove('full-size', 'overlay-size', 'player2-dark');
+      
+      // Completely hide the border box
+      this.borderBox.style.display = 'none';
+      this.borderBox.style.visibility = 'hidden';
+      this.borderBox.style.opacity = '0';
+    }
+  }
+
+   setupPerformanceMonitoring() {
+    if (this.borderBox && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) {
+            // Border box is not visible, can skip some updates
+            this.borderBoxState.isVisible = false;
+          }
+        });
+      });
+      
+      observer.observe(this.borderBox);
+    }
   }
 }
 
