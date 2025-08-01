@@ -318,23 +318,26 @@ ul li.playing{
   z-index: 1;
 }
 
-.overlay-video {
-  position: absolute;
-  width: 280px;
-  display: none;
-  /* Remove: transform: translate(16%, 16%); */
-  box-sizing: border-box;
-  z-index: 2;
-}
-
 .bigger-video {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 370px;
-  display: none;
-  /* Remove: transform: translate(0%, 0%); */
+  display: none; /* Hidden by default */
+  transform: translate(0%, 0%);
   border-radius: 15px;
   box-sizing: border-box;
-  z-index: 2;
+}
+
+.overlay-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 280px;
+  display: none; /* Hidden by default */
+  transform: translate(16%, 16%);
+  border: 8px solid black;
+  box-sizing: border-box;
 }
 
 /* Dark mode: Blue controls box */
