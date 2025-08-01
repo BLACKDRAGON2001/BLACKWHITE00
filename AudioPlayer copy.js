@@ -21,7 +21,7 @@ document.getElementById("title2").addEventListener("click", function() {
   // Existing logout logic
   document.getElementById("DisguisePage").style.display = "none";
   document.getElementById("LoginPage").style.display = "block";
-  localStorage.removeTime("LoginTime");
+  localStorage.removeItem("LoginTime");
   document.body.style.backgroundColor = "white";
   clearInputFields();
   //refreshPage();
@@ -68,9 +68,6 @@ class MusicPlayer {
     this.header = this.wrapper.querySelector(".row");
     this.ulTag = this.wrapper.querySelector("ul");
     this.repeatBtn = this.wrapper.querySelector(`#repeat-plist${suffix}`);
-    
-    // Cache border box element for performance
-    this.borderBox = document.getElementById(`video-border-box${suffix}`);
 
     // Player state
     this.musicIndex = 1;
@@ -80,32 +77,7 @@ class MusicPlayer {
     this.shuffledOrder = [];
     this.isMuted = false;
 
-    // Pagination state
-    this.currentPage = 0;
-    this.itemsPerPage = 25;
-    this.isLoading = false;
-    this.currentMusicArray = this.originalOrder;
-
     this.controlsToggledManually = false;
-    
-    // Performance optimization: cache border box styles
-    this.borderBoxStyles = {
-      fullSize: {
-        top: '0px',
-        left: '0px',
-        width: '370px',
-        height: '370px',
-        transform: 'translate(0, 0)'
-      },
-      overlaySize: {
-        top: '37px',
-        left: '37px',
-        width: '296px',
-        height: '296px',
-        transform: 'translate(0, 0)'
-      }
-    };
-    
     this.initialize();
   }
 
@@ -114,11 +86,6 @@ class MusicPlayer {
     this.loadPersistedState();
     this.populateMusicList(this.originalOrder);
     this.updatePlayingSong();
-    
-    // Initially hide border box when player starts
-    if (this.borderBox) {
-      this.borderBox.style.display = "none";
-    }
   }
 
   setupEventListeners() {
@@ -141,9 +108,6 @@ class MusicPlayer {
     this.videoAd.addEventListener("ended", () => this.handleVideoEnd());
 
     this.musicName.addEventListener("click", () => this.toggleVideoControls());
-
-    // Scroll event for pagination
-    this.ulTag.addEventListener("scroll", () => this.handleScroll());
   }
 
   loadPersistedState() {
@@ -191,23 +155,18 @@ class MusicPlayer {
   
     this.mainAudio.src = `https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/${src}.mp3`;
   
-    // Only set video source for player 1, but keep video element for player 2 (for border positioning)
+    // Only set video src if not disguise player
     if (this.suffix !== '2') {
-      // Original player - full video functionality
       this.setVideoSourceWithFallback(src);
     } else {
-      // Player 2 - NO VIDEO, but keep element for border reference
       this.videoAd.src = "";
       this.videoAd.style.display = "none";
     }
   
     localStorage.setItem(`musicIndex${this.suffix}`, index);
     this.updatePlayingSong();
-    
-    // Ensure border box is properly displayed when song changes
-    this.updateBorderBoxDisplay();
   }
-
+  
   createVideoElementWithFallback(src, type) {
     const video = document.createElement('video');
     video.controls = true;
@@ -215,58 +174,41 @@ class MusicPlayer {
     video.loop = true;
   
     const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
-    const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.${type}`;
-    const fallbackSrc2 = `https://f005.backblazeb2.com/file/assets4/${src}.${type}`; // Replace with your 3rd bucket URL
+    const fallbackSrc = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.${type}`; // Replace with your 2nd bucket URL
   
-    // Track fallback attempts
-    let attempt = 0;
-    const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
+    video.src = primarySrc;
   
-    const tryNextSource = () => {
-      if (attempt >= sources.length) {
-        console.error("All video sources failed to load.");
-        return;
-      }
-      video.src = sources[attempt];
-      attempt++;
+    // On error, try fallback
+    video.onerror = function() {
+      console.warn(`Primary video not found, switching to fallback: ${fallbackSrc}`);
+      video.onerror = null; // prevent infinite loop
+      video.src = fallbackSrc;
     };
-  
-    // On error, try next fallback source
-    video.onerror = () => {
-      console.warn(`Video source failed, switching to fallback #${attempt}: ${sources[attempt]}`);
-      tryNextSource();
-    };
-  
-    // Start with primary source
-    tryNextSource();
   
     return video;
   }
-
+  
   setVideoSourceWithFallback(src) {
     const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.mp4`;
-    const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.mp4`;
-    const fallbackSrc2 = `https://f005.backblazeb2.com/file/assets4/${src}.mp4`; // Replace with your 3rd bucket URL
-  
-    const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
-    let attempt = 0;
-  
-    const tryNextSource = () => {
-      if (attempt >= sources.length) {
-        console.error("All videoAd sources failed to load.");
-        return;
-      }
-      this.videoAd.src = sources[attempt];
-      attempt++;
-    };
+    const fallbackSrc = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.mp4`; // Replace with your 2nd bucket URL
   
     this.videoAd.onerror = () => {
-      console.warn(`videoAd source failed, switching to fallback #${attempt}: ${sources[attempt]}`);
-      tryNextSource();
+      console.warn(`Primary videoAd source failed. Falling back to: ${fallbackSrc}`);
+      this.videoAd.onerror = null;
+      this.videoAd.src = fallbackSrc;
     };
   
-    tryNextSource();
-  }    
+    this.videoAd.src = primarySrc;
+  }  
+
+  //createVideoElement(src, type) {
+    //const video = document.createElement('video');
+    //video.src = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
+   // video.controls = true;
+   // video.autoplay = true;
+    //video.loop = true;
+    //return video;
+  //}
 
   createImageElement(src, type) {
     const img = document.createElement('img');
@@ -306,88 +248,11 @@ class MusicPlayer {
     this.videoAd.controls = false;
     this.controlsToggledManually = false;
     this.videoAd.loop = true;
-    
-    // Update border box when video size resets
-    this.updateBorderBoxDisplay();
-  }
-  
-  // Optimized method to update border box display and positioning
-  updateBorderBoxDisplay() {
-    if (!this.borderBox) return;
-    
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    const isVideoPaused = this.isMusicPaused;
-    const isPlayer2 = this.suffix === '2';
-    const isBiggerVideo = this.videoAd.classList.contains("bigger-video");
-    const isVideoVisible = this.videoAd.style.display !== "none";
-    
-    // Determine if border should be shown
-    let shouldShowBorder = false;
-    
-    if (isPlayer2) {
-      // Player 2: Show border only in dark mode (no video, but border for reference)
-      shouldShowBorder = isDarkMode;
-    } else {
-      // Player 1: Show border only when video is visible and paused
-      shouldShowBorder = isVideoPaused && isVideoVisible;
-    }
-    
-    // Apply display state
-    this.borderBox.style.display = shouldShowBorder ? "block" : "none";
-    
-    if (shouldShowBorder) {
-      // Apply appropriate positioning based on video size
-      const styles = isBiggerVideo ? this.borderBoxStyles.fullSize : this.borderBoxStyles.overlaySize;
-      
-      // Apply styles in one batch to avoid multiple reflows
-      Object.assign(this.borderBox.style, styles);
-      
-      // Set border radius based on video size
-      this.borderBox.style.borderRadius = isBiggerVideo ? "50px" : "0px";
-      
-      // For player 2 in dark mode, always use full size with 15px border radius
-      if (isPlayer2 && isDarkMode) {
-        Object.assign(this.borderBox.style, this.borderBoxStyles.fullSize);
-        this.borderBox.style.borderRadius = "15px";
-      }
-    }
-  }
+  }  
 
   toggleVideoDisplay(show) {
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    
-    if (show) {
-      if (this.suffix === '2') {
-        // Player 2: Show ONLY the border box, no video
-        this.videoAd.style.display = "none"; // Keep video hidden
-      } else {
-        // Player 1: Show both video and border when paused
-        this.videoAd.style.display = "block";
-        
-        // Position video for overlay size (starting size)
-        const videoSize = 280;
-        const containerSize = 370;
-        const videoOffset = (containerSize - videoSize) / 2; // 45px from container edge
-        
-        this.videoAd.style.top = `${videoOffset}px`;
-        this.videoAd.style.left = `${videoOffset}px`;
-        this.videoAd.style.transform = 'translate(0, 0)';
-        
-        this.videoAd.play();
-      }
-    } else {
-      // Hide video and border when playing (except player 2 in dark mode)
-      if (this.suffix === '2') {
-        this.videoAd.style.display = "none";
-        this.videoAd.pause();
-      } else {
-        this.videoAd.style.display = "none";
-        this.videoAd.pause();
-      }
-    }
-    
-    // Update border box display
-    this.updateBorderBoxDisplay();
+    this.videoAd.style.display = show ? "block" : "none";
+    show ? this.videoAd.play() : this.videoAd.pause();
   }
 
   muteVideo() {
@@ -483,67 +348,11 @@ class MusicPlayer {
     this.musicList.classList.remove("show");
   }
 
-  handleScroll() {
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    if (this.isLoading) return;
-    
-    const scrollTop = this.ulTag.scrollTop;
-    const scrollHeight = this.ulTag.scrollHeight;
-    const clientHeight = this.ulTag.clientHeight;
-    
-    // Check if user scrolled to bottom (with small threshold)
-    if (scrollTop + clientHeight >= scrollHeight - 10) {
-      if (isDarkMode) {
-        this.loadMoreItems();
-        this.listcolourblack();
-      } else {
-        this.loadMoreItems();
-      }
-    }
-  }
-
-  loadMoreItems() {
-    if (this.isLoading) return;
-    
-    const startIndex = (this.currentPage + 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    
-    // Check if there are more items to load from original order
-    if (startIndex >= this.originalOrder.length) return;
-    
-    this.isLoading = true;
-    this.currentPage++;
-    
-    // Get the next batch of items from original order
-    const nextItems = this.originalOrder.slice(startIndex, endIndex);
-    
-    // Add the new items to the existing list
-    this.appendMusicItems(nextItems, startIndex);
-    
-    this.isLoading = false;
-  }
-
-  resetPagination() {
-    this.currentPage = 0;
-    this.ulTag.innerHTML = "";
-    this.populateMusicList(this.originalOrder); // Always populate with original order
-  }
-
   populateMusicList(musicArray) {
-    this.currentMusicArray = this.originalOrder; // Always use original order for DOM list
-    this.currentPage = 0;
     this.ulTag.innerHTML = "";
-    
-    // Load initial batch from original order
-    const initialItems = this.originalOrder.slice(0, this.itemsPerPage);
-    this.appendMusicItems(initialItems, 0);
-  }
-
-  appendMusicItems(musicItems, startIndex) {
-    musicItems.forEach((music, i) => {
-      const actualIndex = startIndex + i;
+    musicArray.forEach((music, i) => {
       const liTag = document.createElement("li");
-      liTag.setAttribute("li-index", actualIndex + 1);
+      liTag.setAttribute("li-index", i + 1);
 
       liTag.innerHTML = `
         <div class="row">
@@ -565,21 +374,11 @@ class MusicPlayer {
       });
 
       liTag.addEventListener("click", () => {
-        // When clicking on a list item, find the corresponding index in the current playback order
-        if (this.isShuffleMode) {
-          // Find the index of this song in the shuffled order
-          const clickedMusic = this.originalOrder[actualIndex];
-          const shuffledIndex = this.shuffledOrder.findIndex(music => music.src === clickedMusic.src);
-          this.musicIndex = shuffledIndex + 1;
-        } else {
-          this.musicIndex = actualIndex + 1;
-        }
+        this.musicIndex = i + 1;
         this.loadMusic(this.musicIndex);
         this.playMusic();
       });
     });
-    
-    this.updatePlayingSong();
   }
 
   updatePlayingSong() {
@@ -606,143 +405,17 @@ class MusicPlayer {
     });
   }  
 
-  // Optimized toggleDarkMode method
   toggleDarkMode() {
     const isDarkMode = this.wrapper.classList.toggle("dark-mode");
     document.getElementById(`fontawesome-icons${this.suffix}`).classList.toggle("Dark");
 
-    // Get the controls box, progress area, and progress bar
-    const controlsBox = this.wrapper.querySelector('.control-box');
-    const progressArea = this.wrapper.querySelector('.progress-area');
-    const progressBar = this.wrapper.querySelector('.progress-bar');
-
     if (isDarkMode) {
       document.body.style.backgroundColor = "white";
       this.listcolourblack();
-      
-      // Make controls box blue
-      if (controlsBox) {
-        controlsBox.style.setProperty('background-color', 'black', 'important');
-        controlsBox.style.setProperty('border-color', 'black', 'important');
-      }
-      
-      // Make progress area background red (the track)
-      if (progressArea) {
-        progressArea.style.setProperty('background', 'white', 'important');
-      }
-      
-      // Make progress bar red (the filled portion)
-      if (progressBar) {
-        progressBar.style.setProperty('background', 'linear-gradient(90deg, white 0%, white 100%)', 'important');
-      }
-      
-      // Make ALL content inside controls box red (except play-pause icon)
-      const controlsContent = this.wrapper.querySelectorAll('.control-box *');
-      controlsContent.forEach(element => {
-        // Skip the play-pause icon itself
-        if (element.closest('.play-pause') && element.tagName === 'I') {
-          return; // Keep play/pause icon black
-        }
-        
-        // Skip the progress bar since we handle it separately
-        if (element.classList.contains('progress-bar')) {
-          return;
-        }
-        
-        // For regular elements
-        element.style.setProperty('color', 'white', 'important');
-        
-        // For elements with gradients (like the other control icons)
-        if (element.tagName === 'I' && element.classList.contains('material-icons')) {
-          element.style.setProperty('background', 'linear-gradient(white 0%, white 100%)', 'important');
-          element.style.setProperty('background-clip', 'text', 'important');
-          element.style.setProperty('-webkit-background-clip', 'text', 'important');
-          element.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
-        }
-      });
-      
-      // Make the play-pause button circle red, but keep icon black
-      const playPauseBtn = this.wrapper.querySelector('.play-pause');
-      if (playPauseBtn) {
-        playPauseBtn.style.setProperty('background', 'linear-gradient(red 0%, red 100%)', 'important');
-      }
-      
-      // Make the play-pause button's ::before pseudo-element red
-      const playPauseBefore = this.wrapper.querySelector('.play-pause');
-      if (playPauseBefore) {
-        // Create a style element to target the ::before pseudo-element
-        const styleElement = document.createElement('style');
-        styleElement.id = `dark-mode-style${this.suffix}`;
-        styleElement.textContent = `
-          #wrapper${this.suffix}.dark-mode .play-pause::before {
-            background: linear-gradient(white 0%, white 100%) !important;
-          }
-        `;
-        document.head.appendChild(styleElement);
-      }
-      
-      // Ensure the play-pause icon stays black
-      const playPauseIcon = this.wrapper.querySelector('.play-pause i');
-      if (playPauseIcon) {
-        playPauseIcon.style.setProperty('background', 'linear-gradient(black 0%, black 100%)', 'important');
-        playPauseIcon.style.setProperty('background-clip', 'text', 'important');
-        playPauseIcon.style.setProperty('-webkit-background-clip', 'text', 'important');
-        playPauseIcon.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
-      }
-      
     } else {
       document.body.style.backgroundColor = "black";
       this.listcolourwhite();
-      
-      // Reset controls box to original color
-      if (controlsBox) {
-        controlsBox.style.removeProperty('background-color');
-        controlsBox.style.removeProperty('border-color');
-      }
-      
-      // Reset progress area to original color
-      if (progressArea) {
-        progressArea.style.removeProperty('background');
-      }
-      
-      // Reset progress bar to original color
-      if (progressBar) {
-        progressBar.style.removeProperty('background');
-      }
-      
-      // Reset all content inside controls box
-      const controlsContent = this.wrapper.querySelectorAll('.control-box *');
-      controlsContent.forEach(element => {
-        element.style.removeProperty('color');
-        element.style.removeProperty('background');
-        element.style.removeProperty('background-clip');
-        element.style.removeProperty('-webkit-background-clip');
-        element.style.removeProperty('-webkit-text-fill-color');
-      });
-      
-      // Reset play-pause button and icon
-      const playPauseBtn = this.wrapper.querySelector('.play-pause');
-      if (playPauseBtn) {
-        playPauseBtn.style.removeProperty('background');
-      }
-      
-      // Remove the dark mode style element
-      const styleElement = document.getElementById(`dark-mode-style${this.suffix}`);
-      if (styleElement) {
-        styleElement.remove();
-      }
-      
-      const playPauseIcon = this.wrapper.querySelector('.play-pause i');
-      if (playPauseIcon) {
-        playPauseIcon.style.removeProperty('background');
-        playPauseIcon.style.removeProperty('background-clip');
-        playPauseIcon.style.removeProperty('-webkit-background-clip');
-        playPauseIcon.style.removeProperty('-webkit-text-fill-color');
-      }
     }
-    
-    // Update border box after dark mode toggle
-    this.updateBorderBoxDisplay();
   }
 
   handleMute() {
@@ -796,47 +469,32 @@ class MusicPlayer {
 }
 
 function handleSize() {
-  // Only handle video element for player 1 (no video interaction for player 2)
   const sizer = document.getElementById("video");
-  
-  if (!sizer) return;
-  
+
+  sizer.addEventListener("click", () => {
+      if (sizer.classList.contains("overlay-video")) {
+      sizer.classList.replace("overlay-video", "bigger-video");
+      } else {
+      sizer.classList.replace("bigger-video", "overlay-video");
+      }
+  });
+}
+
+function handleSize() {
+  const sizer = document.getElementById("video");
+
   if (!sizer.classList.contains("overlay-video") && !sizer.classList.contains("bigger-video")) {
     sizer.classList.add("overlay-video");
   }
 
   sizer.addEventListener("click", () => {
-    const player = window.homePlayer;
+    const player = window.homePlayer || window.disguisePlayer;
     
     // Prevent size toggle if controls are shown by user
-    if (sizer.classList.contains("bigger-video") && player && player.controlsToggledManually) return;
+    if (sizer.classList.contains("bigger-video") && player.controlsToggledManually) return;
 
     sizer.classList.toggle("overlay-video");
     sizer.classList.toggle("bigger-video");
-    
-    // Update border box positioning when video size changes
-    if (player) {
-      player.updateBorderBoxDisplay();
-      
-      // Update video positioning based on new size
-      if (sizer.style.display !== "none") {
-        if (sizer.classList.contains('bigger-video')) {
-          // Full size video positioning
-          sizer.style.top = '0px';
-          sizer.style.left = '0px';
-          sizer.style.transform = 'translate(0, 0)';
-        } else {
-          // Overlay size video positioning (centered)
-          const videoSize = 280;
-          const containerSize = 370;
-          const videoOffset = (containerSize - videoSize) / 2; // 45px from container edge
-          
-          sizer.style.top = `${videoOffset}px`;
-          sizer.style.left = `${videoOffset}px`;
-          sizer.style.transform = 'translate(0, 0)';
-        }
-      }
-    }
   });
 }
 
