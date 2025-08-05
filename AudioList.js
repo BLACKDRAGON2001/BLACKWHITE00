@@ -945,6 +945,13 @@ let allMusic = [
     },
 
     {
+        name: "Calm Down",
+        artist: "Selena Gomez And Rema",
+        src: "CalmDown",
+        coverType: "Images"
+    },
+
+    {
         name: "Take Me Back To London",
         artist: "Stormzy And Ed Sheeran",
         src: "TakeMeBackToLondon",
