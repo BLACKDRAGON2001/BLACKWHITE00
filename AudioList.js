@@ -189,6 +189,20 @@ let allMusic = [
     },
 
     {
+        name: "Montagem Xonada",
+        artist: "MXZI",
+        src: "MontagemXonada",
+        coverType: "Images"
+    },
+
+    {
+        name: "Nada Nada",
+        artist: "Jmilton",
+        src: "NadaNada",
+        coverType: "Images"
+    },
+
+    {
         name: "No Fear",
         artist: "Andromeda",
         src: "NoFear",
@@ -266,6 +280,13 @@ let allMusic = [
     },
 
     {
+        name: "Nakama",
+        artist: "Zedd And AI",
+        src: "Nakama",
+        coverType: "Images"
+    },
+
+    {
         name: "Heavy Love",
         artist: "Odetari",
         src: "HeavyLove",
@@ -329,6 +350,27 @@ let allMusic = [
     },
 
     {
+        name: "Avangard",
+        artist: "Lonown",
+        src: "Avangard",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Lost Soul Down X Lost Soul",
+        artist: "NBSPLV",
+        src: "TheLostSoulDownXLostSoul",
+        coverType: "Images"
+    },
+
+    {
+        name: "Love On Me X Prince Of Egypt",
+        artist: "Rex",
+        src: "LoveOnMeXPrinceOfEgypt",
+        coverType: "Images"
+    },
+
+    {
         name: "Ecstasy",
         artist: "Suicidal-Idol",
         src: "Ecstasy",
@@ -343,6 +385,13 @@ let allMusic = [
     },
 
     {
+        name: "New Jeans Jersey Remix",
+        artist: "Jiandro And Dxrkaii",
+        src: "NewJeansJerseyRemix",
+        coverType: "Images"
+    },
+
+    {
         name: "Never See",
         artist: "SPYRAL",
         src: "NeverSee",
@@ -353,6 +402,20 @@ let allMusic = [
         name: "Sleepwalker X Icewhore",
         artist: "Nxxkz",
         src: "SleepwalkerXIcewhore",
+        coverType: "Images"
+    },
+
+    {
+        name: "Islands",
+        artist: "Opoem And Tomo",
+        src: "Islands",
+        coverType: "Images"
+    },
+
+    {
+        name: "Love Me Back",
+        artist: "Trinidad Cardona",
+        src: "LoveMeBack",
         coverType: "Images"
     },
 
@@ -574,9 +637,37 @@ let allMusic = [
     },
 
     {
+        name: "Swalla",
+        artist: "Jason Derulo Niki Minaj And Ty Dolla Sign",
+        src: "Swalla",
+        coverType: "Images"
+    },
+
+    {
         name: "Locked Away",
         artist: "R. City And Adam Levine",
         src: "LockedAway",
+        coverType: "Images"
+    },
+
+    {
+        name: "Beautiful Mistakes",
+        artist: "Maroon 5 And Megan Thee Stallion",
+        src: "BeautifulMistakes",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Color Violet",
+        artist: "Tory Lanez",
+        src: "TheColorViolet",
+        coverType: "Images"
+    },
+
+    {
+        name: "Love Nwantiti",
+        artist: "CKay",
+        src: "LoveNwantiti",
         coverType: "Images"
     },
 
@@ -658,9 +749,23 @@ let allMusic = [
     },
 
     {
+        name: "Girl On Fire",
+        artist: "Katy Perry",
+        src: "GirlOnFire",
+        coverType: "Images"
+    },
+
+    {
         name: "Call Me Maybe",
         artist: "Carly Rae Jepsen",
         src: "CallMeMaybe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Power",
+        artist: "Little Mix And Stormzy",
+        src: "Power",
         coverType: "Images"
     },
 
@@ -728,6 +833,13 @@ let allMusic = [
     },
 
     {
+        name: "Gangsta",
+        artist: "Kehlani",
+        src: "Gangsta",
+        coverType: "Images"
+    },
+
+    {
         name: "If We Being Real",
         artist: "Yeat Music",
         src: "IfWeBeingReal",
@@ -759,6 +871,13 @@ let allMusic = [
         name: "FEIN",
         artist: "Travis Scott",
         src: "Fein",
+        coverType: "Images"
+    },
+
+    {
+        name: "Panini",
+        artist: "Lil Nas X",
+        src: "Panini",
         coverType: "Images"
     },
 
@@ -829,6 +948,13 @@ let allMusic = [
         name: "Take Me Back To London",
         artist: "Stormzy And Ed Sheeran",
         src: "TakeMeBackToLondon",
+        coverType: "Images"
+    },
+
+    {
+        name: "Clean Up",
+        artist: "Chunkz",
+        src: "CleanUp",
         coverType: "Images"
     },
 
@@ -1123,6 +1249,13 @@ let allMusic = [
         name: "Livin On A Prayer",
         artist: "Bon Jovi",
         src: "LivinOnAPrayer",
+        coverType: "Images"
+    },
+
+    {
+        name: "Written In The Stars",
+        artist: "Tinie Tempah And Eric Turner",
+        src: "WrittenInTheStars",
         coverType: "Images"
     },
 
@@ -1463,6 +1596,13 @@ let allMusic = [
     },
 
     {
+        name: "Home",
+        artist: "Yu And Damona",
+        src: "Home",
+        coverType: "Images"
+    },
+
+    {
         name: "AFTERCARE",
         artist: "Nessa Barrett",
         src: "Aftercare",
@@ -1582,6 +1722,34 @@ let allMusic = [
     },
 
     {
+        name: "Here With Me",
+        artist: "Dido",
+        src: "HereWithMe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Beat It",
+        artist: "MJ",
+        src: "BeatIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Smooth Criminal",
+        artist: "MJ",
+        src: "SmoothCriminal",
+        coverType: "Images"
+    },
+
+    {
+        name: "Thriller",
+        artist: "MJ",
+        src: "Thriller",
+        coverType: "Images"
+    },
+
+    {
         name: "Somewhere Only We Know",
         artist: "Keane",
         src: "SomewhereOnlyWeKnow",
@@ -1592,6 +1760,13 @@ let allMusic = [
         name: "Mathematical Disrespect",
         artist: "Lil Mabu",
         src: "MathematicalDisrespect",
+        coverType: "Images"
+    },
+
+    {
+        name: "Havana",
+        artist: "Camilla Cabello And Young Thung",
+        src: "Havana",
         coverType: "Images"
     },
 
@@ -1760,6 +1935,13 @@ let allMusic = [
         name: "Gasoline Slowed",
         artist: "Halsey",
         src: "GasolineSlowed",
+        coverType: "Images"
+    },
+
+    {
+        name: "Ignite",
+        artist: "Alan Walker And K-391",
+        src: "Ignite",
         coverType: "Images"
     },
 
@@ -1954,7 +2136,7 @@ let allMusic = [
 
     {
         name: "Stitches",
-        artist: "Zayn",
+        artist: "Shawn Mendes",
         src: "Stitches",
         coverType: "Images"
     },
@@ -2023,9 +2205,23 @@ let allMusic = [
     },
 
     {
+        name: "Better Things",
+        artist: "Aespa",
+        src: "BetterThings",
+        coverType: "Images"
+    },
+
+    {
         name: "Up Karina Solo",
         artist: "Aespa",
         src: "Up",
+        coverType: "Images"
+    },
+
+    {
+        name: "Girls",
+        artist: "Aespa",
+        src: "Girls",
         coverType: "Images"
     },
 
@@ -2082,6 +2278,13 @@ let allMusic = [
         name: "Dynamite",
         artist: "BTS",
         src: "BtsDynamite",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cupid",
+        artist: "FIFTY FIFTY",
+        src: "Cupid",
         coverType: "Images"
     },
 
@@ -2152,6 +2355,13 @@ let allMusic = [
         name: "Someone You Loved",
         artist: "Louis Capaldi",
         src: "SomeoneYouLoved",
+        coverType: "Images"
+    },
+
+    {
+        name: "Seven Years",
+        artist: "Lucas Graham",
+        src: "SevenYears",
         coverType: "Images"
     },
 
