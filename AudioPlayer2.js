@@ -220,7 +220,7 @@ document.getElementById("title").addEventListener("click", function() {
     
       const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
       const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.${type}`;
-      const fallbackSrc2 = `https://f005.backblazeb2.com/file/assets4/${src}.${type}`; // Replace with your 3rd bucket URL
+      const fallbackSrc2 = `https://pub-15e524466e7449c997fe1434a0717e91.r2.dev/${src}.${type}`; // Replace with your 3rd bucket URL
     
       // Track fallback attempts
       let attempt = 0;
@@ -250,7 +250,7 @@ document.getElementById("title").addEventListener("click", function() {
     setVideoSourceWithFallback(src) {
       const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.mp4`;
       const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.mp4`;
-      const fallbackSrc2 = `https://f005.backblazeb2.com/file/assets4/${src}.mp4`; // Replace with your 3rd bucket URL
+      const fallbackSrc2 = `https://pub-15e524466e7449c997fe1434a0717e91.r2.dev/${src}.mp4`; // Replace with your 3rd bucket URL
     
       const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
       let attempt = 0;
