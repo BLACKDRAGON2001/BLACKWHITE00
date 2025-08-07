@@ -48,6 +48,11 @@ class MusicPlayer {
     this.imageFolder = suffix === '2' ? 'ImagesDisguise/' : 'Images/';
     this.videoFolder = suffix === '2' ? 'VideosDisguise/' : 'Videos/';
 
+    // Configure R2 bucket URLs for images
+    this.imageBucketUrl = suffix === '2' 
+    ? 'https://pub-35bf609bb46e4f27a992efb322030db4.r2.dev/' // Replace with your disguise images bucket URL
+    : 'https://pub-99d8e809a4554c358c8d5e75932939cd.r2.dev/';    // Replace with your main images bucket URL
+
     // Element selectors
     this.wrapper = document.querySelector(`#wrapper${suffix}`);
     this.coverArea = this.wrapper.querySelector(".img-area");
@@ -326,8 +331,17 @@ class MusicPlayer {
 
   createImageElement(src, type) {
     const img = document.createElement('img');
-    img.src = `${this.imageFolder}${src}.${type}`;
+    // Use R2 bucket URL instead of local folder
+    img.src = `${this.imageBucketUrl}${src}.${type}`;
     img.alt = this.musicName.textContent;
+    
+    // Add error handling for image loading
+    img.onerror = () => {
+      console.warn(`Failed to load image from R2 bucket: ${img.src}`);
+      // Fallback to local folder if R2 fails
+      img.src = `${this.imageFolder}${src}.${type}`;
+    };
+    
     return img;
   }
 
