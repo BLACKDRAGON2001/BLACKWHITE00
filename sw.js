@@ -1,4 +1,4 @@
-const CACHE_VERSION = "__BUILD_VERSION__97"; // Replace during deploy (e.g. with timestamp or git hash)
+const CACHE_VERSION = "__BUILD_VERSION__98"; // Replace during deploy (e.g. with timestamp or git hash)
 const CACHE_NAME = `static-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
