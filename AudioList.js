@@ -511,6 +511,13 @@ let allMusic = [
     },
 
     {
+        name: "Feather",
+        artist: "Sabrina Carpenter",
+        src: "Feather",
+        coverType: "Images"
+    },
+
+    {
         name: "New Rules",
         artist: "Dua Lipa",
         src: "NewRules",
@@ -605,6 +612,13 @@ let allMusic = [
         name: "Best Song Ever",
         artist: "One Direction",
         src: "BestSongEver",
+        coverType: "Images"
+    },
+
+    {
+        name: "Drag Me Down",
+        artist: "One Direction",
+        src: "DragMeDown",
         coverType: "Images"
     },
 
@@ -1081,6 +1095,20 @@ let allMusic = [
         name: "Dum De Dum",
         artist: "Zack Knight And Jasmin Walia",
         src: "DumDeDum",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bewafa",
+        artist: "Imran Khan",
+        src: "Bewafa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Satisfya",
+        artist: "Imran Khan",
+        src: "Satisfya",
         coverType: "Images"
     },
 
@@ -1610,6 +1638,27 @@ let allMusic = [
     },
 
     {
+        name: "One Of The Girls",
+        artist: "The Weeknd JENNIE And Lily Depp Rose",
+        src: "OneOfTheGirls",
+        coverType: "Images"
+    },
+
+    {
+        name: "Close To You",
+        artist: "Gracie Abrams",
+        src: "CloseToYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "Thats So True",
+        artist: "Gracie Abrams",
+        src: "ThatsSoTrue",
+        coverType: "Images"
+    },
+
+    {
         name: "AFTERCARE",
         artist: "Nessa Barrett",
         src: "Aftercare",
@@ -1753,6 +1802,209 @@ let allMusic = [
         name: "Thriller",
         artist: "MJ",
         src: "Thriller",
+        coverType: "Images"
+    },
+
+    {
+        name: "All-American Bitch",
+        artist: "Olivia Rodrigo",
+        src: "AllAmericanBitch",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bad Idea Right",
+        artist: "Olivia Rodrigo",
+        src: "BadIdeaRight",
+        coverType: "Images"
+    },
+
+    {
+        name: "Brutal",
+        artist: "Olivia Rodrigo",
+        src: "Brutal",
+        coverType: "Images"
+    },
+
+    {
+        name: "Traitor",
+        artist: "Olivia Rodrigo",
+        src: "Traitor",
+        coverType: "Images"
+    },
+
+    {
+        name: "Vampire",
+        artist: "Olivia Rodrigo",
+        src: "Vampire",
+        coverType: "Images"
+    },
+
+    {
+        name: "Drivers License",
+        artist: "Olivia Rodrigo",
+        src: "DriversLicense",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lacy",
+        artist: "Olivia Rodrigo",
+        src: "Lacy",
+        coverType: "Images"
+    },
+
+    {
+        name: "One Step Forward Three Steps Back",
+        artist: "Olivia Rodrigo",
+        src: "OneStepForwardThreeStepsBack",
+        coverType: "Images"
+    },
+
+    {
+        name: "Ballad Of A Homeschooled Girl",
+        artist: "Olivia Rodrigo",
+        src: "BalladOfAHomeschooledGirl",
+        coverType: "Images"
+    },
+
+    {
+        name: "Deja Vu",
+        artist: "Olivia Rodrigo",
+        src: "DejaVu",
+        coverType: "Images"
+    },
+
+    {
+        name: "Making The Bed",
+        artist: "Olivia Rodrigo",
+        src: "MakingTheBed",
+        coverType: "Images"
+    },
+
+    {
+        name: "Good Four U",
+        artist: "Olivia Rodrigo",
+        src: "Good4U",
+        coverType: "Images"
+    },
+
+    {
+        name: "Logical",
+        artist: "Olivia Rodrigo",
+        src: "Logical",
+        coverType: "Images"
+    },
+
+    {
+        name: "Enough For You",
+        artist: "Olivia Rodrigo",
+        src: "EnoughForYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "Get Him Back!",
+        artist: "Olivia Rodrigo",
+        src: "GetHimBack",
+        coverType: "Images"
+    },
+
+    {
+        name: "Happier",
+        artist: "Olivia Rodrigo",
+        src: "Happier",
+        coverType: "Images"
+    },
+
+    {
+        name: "Love Is Embarrassing",
+        artist: "Olivia Rodrigo",
+        src: "LoveIsEmbarassing",
+        coverType: "Images"
+    },
+
+    {
+        name: "Jealousy Jealousy",
+        artist: "Olivia Rodrigo",
+        src: "JealousyJealousy",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Grudge",
+        artist: "Olivia Rodrigo",
+        src: "TheGrudge",
+        coverType: "Images"
+    },
+
+    {
+        name: "Favourite Crime",
+        artist: "Olivia Rodrigo",
+        src: "FavouriteCrime",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pretty Isn't Pretty",
+        artist: "Olivia Rodrigo",
+        src: "PrettyIsNotPretty",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hope Ur Ok",
+        artist: "Olivia Rodrigo",
+        src: "HopeUrOk",
+        coverType: "Images"
+    },
+
+    {
+        name: "Teenage Dream",
+        artist: "Olivia Rodrigo",
+        src: "TeenageDream",
+        coverType: "Images"
+    },
+
+    {
+        name: "Obsessed",
+        artist: "Olivia Rodrigo",
+        src: "Obsessed2",
+        coverType: "Images"
+    },
+
+    {
+        name: "So American",
+        artist: "Olivia Rodrigo",
+        src: "SoAmerican",
+        coverType: "Images"
+    },
+
+    {
+        name: "Stranger",
+        artist: "Olivia Rodrigo",
+        src: "Stranger",
+        coverType: "Images"
+    },
+
+    {
+        name: "Girl I've Always Been",
+        artist: "Olivia Rodrigo",
+        src: "GirlIHaveAlwaysBeen",
+        coverType: "Images"
+    },
+
+    {
+        name: "Scared Of Me Guitar",
+        artist: "Olivia Rodrigo",
+        src: "ScaredOfMyGuitar",
+        coverType: "Images"
+    },
+
+    {
+        name: "Art Deco",
+        artist: "Lana Del Rey",
+        src: "ArtDeco",
         coverType: "Images"
     },
 
