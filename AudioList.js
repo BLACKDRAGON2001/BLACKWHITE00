@@ -707,6 +707,20 @@ let allMusic = [
     },
 
     {
+        name: "Attention",
+        artist: "Charlie Puth",
+        src: "Attention",
+        coverType: "Images"
+    },
+
+    {
+        name: "We Don't Talk Anymore",
+        artist: "Charlie Puth And Selena Gomez",
+        src: "WeDontTalkAnymore",
+        coverType: "Images"
+    },
+
+    {
         name: "Centuries",
         artist: "Fall Out Boy",
         src: "Centuries",
@@ -2418,6 +2432,13 @@ let allMusic = [
         name: "Set Fire To The Rain",
         artist: "Adele",
         src: "SetFireToTheRain",
+        coverType: "Images"
+    },
+
+    {
+        name: "Shoong",
+        artist: "TAEYANG And Lisa",
+        src: "Shoong",
         coverType: "Images"
     },
 
