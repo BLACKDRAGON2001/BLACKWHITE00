@@ -444,3 +444,19 @@ ul li.playing{
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/Roboto/Roboto-Regular.woff2') format('woff2'),
+       url('fonts/Roboto/Roboto-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: url('fonts/Roboto/Roboto-Bold.woff2') format('woff2'),
+       url('fonts/Roboto/Roboto-Bold.ttf') format('truetype');
+}

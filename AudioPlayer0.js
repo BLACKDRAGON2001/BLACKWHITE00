@@ -10,7 +10,7 @@ document.getElementById("title").addEventListener("click", function() {
     localStorage.removeItem("LoginTime");
     document.body.style.backgroundColor = "white";
     clearInputFields();
-    //refreshPage();
+    refreshPage();
   });
   
   document.getElementById("title2").addEventListener("click", function() {
@@ -24,7 +24,7 @@ document.getElementById("title").addEventListener("click", function() {
     localStorage.removeTime("LoginTime");
     document.body.style.backgroundColor = "white";
     clearInputFields();
-    //refreshPage();
+    refreshPage();
   });
   
   function pauseAudio() {
@@ -45,8 +45,15 @@ document.getElementById("title").addEventListener("click", function() {
       }
       // Configure media folders based on page
       this.suffix = suffix;
-      this.imageFolder = suffix === '2' ? 'ImagesDisguise/' : 'Images/';
-      this.videoFolder = suffix === '2' ? 'VideosDisguise/' : 'Videos/';
+      this.imageFolder = suffix === '2' ? 'MainAssets/ImagesDisguise/' : 'MainAssets/Images/';
+      this.videoFolder = suffix === '2' ? 'VideosDisguise/' : 'MainAssets/Videos/';
+      this.audioFolder = 'MainAssets/Audios/';
+      this.audioBucketUrl = 'https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/';
+      this.videoBucketUrls = [
+        'https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/',
+        'https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/',
+        'https://pub-15e524466e7449c997fe1434a0717e91.r2.dev/'
+      ];
   
       // Configure R2 bucket URLs for images
       this.imageBucketUrl = suffix === '2' 
@@ -87,6 +94,10 @@ document.getElementById("title").addEventListener("click", function() {
       this.shuffledOrder = [];
       this.isMuted = false;
       this.isInitializing = true;
+
+      this.r2Available = true;
+
+      this.preShuffleIndex = 1;
   
       // Pagination state
       this.currentPage = 0;
@@ -209,12 +220,21 @@ document.getElementById("title").addEventListener("click", function() {
     loadPersistedState() {
       const storedMusicIndex = localStorage.getItem(`musicIndex${this.suffix}`);
       if (storedMusicIndex) {
-        this.musicIndex = parseInt(storedMusicIndex, 10);
+        const parsedIndex = parseInt(storedMusicIndex, 10);
+        // Ensure the index is valid
+        if (parsedIndex >= 1 && parsedIndex <= this.originalOrder.length) {
+          this.musicIndex = parsedIndex;
+        } else {
+          this.musicIndex = 1; // Reset to first song if invalid
+          localStorage.setItem(`musicIndex${this.suffix}`, 1);
+        }
+        
         this.loadMusic(this.musicIndex);
         if (localStorage.getItem(`isMusicPaused${this.suffix}`) === "false") {
           this.playMusic();
         }
       } else {
+        this.musicIndex = 1;
         this.loadMusic(this.musicIndex);
       }
     }
@@ -248,7 +268,8 @@ document.getElementById("title").addEventListener("click", function() {
     
       this.coverArea.appendChild(mediaElement);
     
-      this.mainAudio.src = `https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/${src}.mp3`;
+      // Set audio source with R2 fallback to local
+      this.setAudioSourceWithFallback(src);
     
       // Only set video source for player 1, but keep video element for player 2 (for border positioning)
       if (this.suffix !== '2') {
@@ -268,6 +289,23 @@ document.getElementById("title").addEventListener("click", function() {
         this.updateBorderBoxDisplay();
       }
     }
+
+    setAudioSourceWithFallback(src) {
+      const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
+      const localAudioSrc = `${this.audioFolder}${src}.mp3`;
+      
+      // Try R2 first
+      this.mainAudio.src = r2AudioSrc;
+      
+      // Set up error handling for audio
+      const handleAudioError = () => {
+        console.warn(`Audio failed to load from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
+        this.mainAudio.src = localAudioSrc;
+        this.r2Available = false;
+      };
+      
+      this.mainAudio.onerror = handleAudioError;
+    }
   
     createVideoElementWithFallback(src, type) {
       const video = document.createElement('video');
@@ -275,54 +313,82 @@ document.getElementById("title").addEventListener("click", function() {
       video.autoplay = true;
       video.loop = true;
     
-      const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.${type}`;
-      const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.${type}`;
-      const fallbackSrc2 = `https://pub-15e524466e7449c997fe1434a0717e91.r2.dev/${src}.${type}`;
+      // R2 sources
+      const r2Sources = [
+        `${this.videoBucketUrls[0]}${src}.${type}`,
+        `${this.videoBucketUrls[1]}${src}.${type}`,
+        `${this.videoBucketUrls[2]}${src}.${type}`
+      ];
+      
+      // Local fallback (only for regular player, not disguise)
+      const localVideoSrc = `${this.videoFolder}${src}.${type}`;
+      const allSources = [...r2Sources, localVideoSrc];
     
       // Track fallback attempts
       let attempt = 0;
-      const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
     
       const tryNextSource = () => {
-        if (attempt >= sources.length) {
-          console.error("All video sources failed to load.");
+        if (attempt >= allSources.length) {
+          console.error("All video sources (R2 and local) failed to load.");
           return;
         }
-        video.src = sources[attempt];
+        
+        video.src = allSources[attempt];
+        
+        // Mark R2 as unavailable if we've exhausted R2 sources
+        if (attempt >= r2Sources.length) {
+          this.r2Available = false;
+          console.warn("R2 video sources failed, using local fallback");
+        }
+        
         attempt++;
       };
     
       // On error, try next fallback source
       video.onerror = () => {
-        console.warn(`Video source failed, switching to fallback #${attempt}: ${sources[attempt]}`);
+        console.warn(`Video source failed: ${allSources[attempt - 1]}, trying next fallback`);
         tryNextSource();
       };
     
-      // Start with primary source
+      // Start with first source
       tryNextSource();
     
       return video;
     }
   
     setVideoSourceWithFallback(src) {
-      const primarySrc = `https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/${src}.mp4`;
-      const fallbackSrc1 = `https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/${src}.mp4`;
-      const fallbackSrc2 = `https://pub-15e524466e7449c997fe1434a0717e91.r2.dev/${src}.mp4`;
+      // R2 sources
+      const r2Sources = [
+        `${this.videoBucketUrls[0]}${src}.mp4`,
+        `${this.videoBucketUrls[1]}${src}.mp4`,
+        `${this.videoBucketUrls[2]}${src}.mp4`
+      ];
+      
+      // Local fallback (only for regular player, not disguise)
+      const localVideoSrc = `${this.videoFolder}${src}.mp4`;
+      const allSources = [...r2Sources, localVideoSrc];
     
-      const sources = [primarySrc, fallbackSrc1, fallbackSrc2];
       let attempt = 0;
     
       const tryNextSource = () => {
-        if (attempt >= sources.length) {
-          console.error("All videoAd sources failed to load.");
+        if (attempt >= allSources.length) {
+          console.error("All videoAd sources (R2 and local) failed to load.");
           return;
         }
-        this.videoAd.src = sources[attempt];
+        
+        this.videoAd.src = allSources[attempt];
+        
+        // Mark R2 as unavailable if we've exhausted R2 sources
+        if (attempt >= r2Sources.length) {
+          this.r2Available = false;
+          console.warn("R2 videoAd sources failed, using local fallback");
+        }
+        
         attempt++;
       };
     
       this.videoAd.onerror = () => {
-        console.warn(`videoAd source failed, switching to fallback #${attempt}: ${sources[attempt]}`);
+        console.warn(`videoAd source failed: ${allSources[attempt - 1]}, trying next fallback`);
         tryNextSource();
       };
     
@@ -331,21 +397,33 @@ document.getElementById("title").addEventListener("click", function() {
   
     createImageElement(src, type) {
       const img = document.createElement('img');
-      // Use R2 bucket URL instead of local folder
-      img.src = `${this.imageBucketUrl}${src}.${type}`;
+      
+      // Try R2 bucket first
+      const r2ImageSrc = `${this.imageBucketUrl}${src}.${type}`;
+      const localImageSrc = `${this.imageFolder}${src}.${type}`;
+      
+      img.src = r2ImageSrc;
       img.alt = this.musicName.textContent;
       
       // Add error handling for image loading
       img.onerror = () => {
-        console.warn(`Failed to load image from R2 bucket: ${img.src}`);
+        console.warn(`Failed to load image from R2 bucket: ${r2ImageSrc}, trying local: ${localImageSrc}`);
         
-        // For disguise player (Player 2), create white fallback instead of trying local folder
+        // For disguise player (Player 2), try local first, then create white fallback
         if (this.suffix === '2') {
-          this.createWhiteFallback(img);
+          img.src = localImageSrc;
+          img.onerror = () => {
+            console.warn(`Failed to load local image: ${localImageSrc}, using white fallback`);
+            this.createWhiteFallback(img);
+          };
         } else {
-          // For regular player, try fallback to local folder
-          img.src = `${this.imageFolder}${src}.${type}`;
+          // For regular player, try local folder
+          img.src = localImageSrc;
+          img.onerror = () => {
+            console.warn(`Failed to load local image: ${localImageSrc}`);
+          };
         }
+        this.r2Available = false;
       };
       
       return img;
@@ -454,13 +532,18 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     changeMusic(direction) {
-      if (this.isShuffleMode) {
-        this.musicIndex = (this.musicIndex + direction + this.shuffledOrder.length - 1) % 
-                          this.shuffledOrder.length + 1;
+      const currentArray = this.isShuffleMode ? this.shuffledOrder : this.originalOrder;
+      const arrayLength = currentArray.length;
+      
+      // Calculate new index with proper wrapping
+      if (direction > 0) {
+        // Next song
+        this.musicIndex = this.musicIndex >= arrayLength ? 1 : this.musicIndex + 1;
       } else {
-        this.musicIndex = (this.musicIndex + direction + this.originalOrder.length - 1) % 
-                          this.originalOrder.length + 1;
+        // Previous song
+        this.musicIndex = this.musicIndex <= 1 ? arrayLength : this.musicIndex - 1;
       }
+      
       this.loadMusic(this.musicIndex);
       this.playMusic();
       this.resetVideoSize();
@@ -497,6 +580,10 @@ document.getElementById("title").addEventListener("click", function() {
         case "repeat_one":
           this.repeatBtn.textContent = "shuffle";
           this.repeatBtn.title = "Playback shuffled";
+          
+          // Store current song index before shuffling
+          this.preShuffleIndex = this.musicIndex;
+          
           this.isShuffleMode = true;
           this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
           this.musicIndex = 1;
@@ -507,12 +594,15 @@ document.getElementById("title").addEventListener("click", function() {
           this.repeatBtn.textContent = "repeat";
           this.repeatBtn.title = "Playlist looped";
           this.isShuffleMode = false;
-          this.musicIndex = 1;
+          
+          // Return to the song that was playing before shuffle
+          this.musicIndex = this.preShuffleIndex;
+          
           this.loadMusic(this.musicIndex);
           this.playMusic();
           break;
       }
-    }  
+    }
   
     handleSongEnd() {
       const mode = this.repeatBtn.textContent;
@@ -521,14 +611,14 @@ document.getElementById("title").addEventListener("click", function() {
         // Replay the same song
         this.mainAudio.currentTime = 0;
         this.playMusic();
-      } else if (this.isShuffleMode || mode === "shuffle") {
-        // Shuffle to a random song
-        this.musicIndex = Math.floor(Math.random() * this.shuffledOrder.length) + 1;
+      } else if (mode === "shuffle" || this.isShuffleMode) {
+        // In shuffle mode, go to next song in shuffled order
+        this.musicIndex = this.musicIndex >= this.shuffledOrder.length ? 1 : this.musicIndex + 1;
         this.loadMusic(this.musicIndex);
         this.playMusic();
       } else {
-        // Go to next song normally
-        this.musicIndex = (this.musicIndex % this.originalOrder.length) + 1;
+        // Normal mode - go to next song
+        this.musicIndex = this.musicIndex >= this.originalOrder.length ? 1 : this.musicIndex + 1;
         this.loadMusic(this.musicIndex);
         this.playMusic();
       }
@@ -603,18 +693,25 @@ document.getElementById("title").addEventListener("click", function() {
         const actualIndex = startIndex + i;
         const liTag = document.createElement("li");
         liTag.setAttribute("li-index", actualIndex + 1);
-  
+    
         liTag.innerHTML = `
           <div class="row">
             <span>${music.name}</span>
             <p>${music.artist}</p>
           </div>
           <span id="${music.src}" class="audio-duration">3:40</span>
-          <audio class="${music.src}" src="https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/${music.src}.mp3"></audio>
+          <audio class="${music.src}" src="${this.audioBucketUrl}${music.src}.mp3"></audio>
         `;
-  
+    
         this.ulTag.appendChild(liTag);
         const liAudioTag = liTag.querySelector(`.${music.src}`);
+        
+        // Add fallback for list audio elements
+        liAudioTag.onerror = () => {
+          console.warn(`List audio failed from R2, trying local: ${this.audioFolder}${music.src}.mp3`);
+          liAudioTag.src = `${this.audioFolder}${music.src}.mp3`;
+          this.r2Available = false;
+        };
         
         liAudioTag.addEventListener("loadeddata", () => {
           const duration = liAudioTag.duration;
@@ -622,19 +719,20 @@ document.getElementById("title").addEventListener("click", function() {
           const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
           liTag.querySelector(".audio-duration").textContent = `${totalMin}:${totalSec}`;
         });
-  
+    
         liTag.addEventListener("click", () => {
-          // When clicking on a list item, find the corresponding index in the current playback order
+          // Set the music index based on current mode
           if (this.isShuffleMode) {
             // Find the index of this song in the shuffled order
             const clickedMusic = this.originalOrder[actualIndex];
-            const shuffledIndex = this.shuffledOrder.findIndex(music => music.src === clickedMusic.src);
-            this.musicIndex = shuffledIndex + 1;
+            const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
+            this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
           } else {
             this.musicIndex = actualIndex + 1;
           }
           this.loadMusic(this.musicIndex);
           this.playMusic();
+          this.resetVideoSize(); // Add this to reset video state
         });
       });
       
