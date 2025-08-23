@@ -25,11 +25,6 @@ body{
   user-select: none;
   color: white;
   user-select: none;
-
-  position: fixed;
-  inset: 0;          /* top:0; right:0; bottom:0; left:0 */
-  width: 100%;
-  overflow: hidden;  /* clip any overflow */
 }
 
 .wrapper{
@@ -57,11 +52,6 @@ body{
   align-items: center;
   justify-content: space-between;
 }
-
-.top-bar {
-  margin-top: 60px;
-}
-
 .top-bar i{
   font-size: 30px;
 }

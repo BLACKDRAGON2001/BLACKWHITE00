@@ -337,8 +337,15 @@ let allMusic = [
 
     {
         name: "Don't Touch It",
-        artist: "Odetari",
+        artist: "Odetari And Cade Clair",
         src: "DontTouchIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Gmfu",
+        artist: "Odetari And 6arelyhuman",
+        src: "Gmfu",
         coverType: "Images"
     },
 
@@ -707,6 +714,13 @@ let allMusic = [
     },
 
     {
+        name: "Bye",
+        artist: "Ariana Grande",
+        src: "Bye",
+        coverType: "Images"
+    },
+
+    {
         name: "Attention",
         artist: "Charlie Puth",
         src: "Attention",
@@ -717,6 +731,13 @@ let allMusic = [
         name: "We Don't Talk Anymore",
         artist: "Charlie Puth And Selena Gomez",
         src: "WeDontTalkAnymore",
+        coverType: "Images"
+    },
+
+    {
+        name: "Treat You Better",
+        artist: "Shawn Mendes",
+        src: "TreatYouBetter",
         coverType: "Images"
     },
 
@@ -780,6 +801,13 @@ let allMusic = [
         name: "Girl On Fire",
         artist: "Katy Perry",
         src: "GirlOnFire",
+        coverType: "Images"
+    },
+
+    {
+        name: "All I Want For Christmas Is You",
+        artist: "Mariah Carey",
+        src: "AllIWantForChristmasIsYou",
         coverType: "Images"
     },
 
@@ -899,6 +927,20 @@ let allMusic = [
         name: "FEIN",
         artist: "Travis Scott",
         src: "Fein",
+        coverType: "Images"
+    },
+
+    {
+        name: "Timeless",
+        artist: "The Weeknd And Playboi Carti",
+        src: "Timeless",
+        coverType: "Images"
+    },
+
+    {
+        name: "Timeless Remix",
+        artist: "The Weeknd Playboi Carti And Doechii",
+        src: "Timeless2",
         coverType: "Images"
     },
 
@@ -1232,6 +1274,20 @@ let allMusic = [
     },
 
     {
+        name: "Love Story",
+        artist: "Indila",
+        src: "LoveStory",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bad Boy",
+        artist: "Marwa Loud",
+        src: "BadBoy",
+        coverType: "Images"
+    },
+
+    {
         name: "Wannabe",
         artist: "Why Mona",
         src: "Wannabe",
@@ -1407,6 +1463,20 @@ let allMusic = [
     },
 
     {
+        name: "Lifetime",
+        artist: "Chris Grey",
+        src: "Lifetime",
+        coverType: "Images"
+    },
+
+    {
+        name: "Make The Angels Cry",
+        artist: "Chris Grey",
+        src: "MakeTheAngelsCry",
+        coverType: "Images"
+    },
+
+    {
         name: "Mine",
         artist: "Allegra Jordyn",
         src: "Mine",
@@ -1438,6 +1508,20 @@ let allMusic = [
         name: "Somebody Else",
         artist: "Allegra Jordyn",
         src: "SomebodyElse",
+        coverType: "Images"
+    },
+
+    {
+        name: "Leave The Light On",
+        artist: "Allegra Jordyn",
+        src: "LeaveTheLightOn",
+        coverType: "Images"
+    },
+
+    {
+        name: "Poltergeist",
+        artist: "Allegra Jordyn",
+        src: "Poltergeist",
         coverType: "Images"
     },
 
@@ -1767,6 +1851,13 @@ let allMusic = [
         name: "Dont Speak",
         artist: "No Doubt",
         src: "DontSpeak",
+        coverType: "Images"
+    },
+
+    {
+        name: "Until I Found You",
+        artist: "Stephen Sanchez",
+        src: "UntilIFoundYou",
         coverType: "Images"
     },
 
@@ -2303,6 +2394,13 @@ let allMusic = [
     },
 
     {
+        name: "Renegade",
+        artist: "Aaryan Shah",
+        src: "Renegade",
+        coverType: "Images"
+    },
+
+    {
         name: "Locked Out Of Heaven",
         artist: "Bruno Mars",
         src: "LockedOutOfHeaven",
@@ -2642,6 +2740,13 @@ let allMusic = [
         name: "Seven Years",
         artist: "Lucas Graham",
         src: "SevenYears",
+        coverType: "Images"
+    },
+
+    {
+        name: "You Are The Reason",
+        artist: "Calum Scott",
+        src: "YouAreTheReason",
         coverType: "Images"
     },
 
