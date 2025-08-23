@@ -14,6 +14,8 @@
 
 html, body{
   touch-action: manipulation;
+  overflow: hidden;
+  height: 100%;
 }
 
 body{
@@ -52,6 +54,11 @@ body{
   align-items: center;
   justify-content: space-between;
 }
+
+.top-bar {
+  margin-top: 60px;
+}
+
 .top-bar i{
   font-size: 30px;
 }
