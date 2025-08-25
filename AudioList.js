@@ -357,6 +357,41 @@ let allMusic = [
     },
 
     {
+        name: "I Love You Hoe",
+        artist: "Odetari And 9lives",
+        src: "ILoveYouHoe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Dice And Roll",
+        artist: "Odetari",
+        src: "DiceAndRoll",
+        coverType: "Images"
+    },
+
+    {
+        name: "I Love Latinas",
+        artist: "Odetari",
+        src: "ILoveLatinas",
+        coverType: "Images"
+    },
+
+    {
+        name: "Double Trouble",
+        artist: "Odetari",
+        src: "DoubleTrouble",
+        coverType: "Images"
+    },
+
+    {
+        name: "Me N U Date",
+        artist: "Odetari",
+        src: "MeNUDate",
+        coverType: "Images"
+    },
+
+    {
         name: "Avangard",
         artist: "Lonown",
         src: "Avangard",
@@ -430,6 +465,20 @@ let allMusic = [
         name: "Faster N Harder",
         artist: "Asteria And 6arelyhuman",
         src: "FasterNHarder",
+        coverType: "Images"
+    },
+
+    {
+        name: "Party Addict",
+        artist: "Kets4eki And Nosgov",
+        src: "PartyAddict",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pretty Scene Girl Remix",
+        artist: "Clover! Kets4eki And D3r",
+        src: "PrettySceneGirl",
         coverType: "Images"
     },
 
@@ -1526,6 +1575,13 @@ let allMusic = [
     },
 
     {
+        name: "Bruised",
+        artist: "Allegra Jordyn",
+        src: "Bruised",
+        coverType: "Images"
+    },
+
+    {
         name: "Taste Of The Divine",
         artist: "Shaker",
         src: "TasteOfTheDivine",
@@ -1753,6 +1809,20 @@ let allMusic = [
         name: "Thats So True",
         artist: "Gracie Abrams",
         src: "ThatsSoTrue",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lust For Life",
+        artist: "Lana Del Rey And The Weeknd",
+        src: "LustForLife",
+        coverType: "Images"
+    },
+
+    {
+        name: "Born To Die",
+        artist: "Lana Del Rey",
+        src: "BornToDie",
         coverType: "Images"
     },
 
@@ -2754,6 +2824,13 @@ let allMusic = [
         name: "All Of Me",
         artist: "John Legend",
         src: "AllOfMe",
+        coverType: "Images"
+    },
+
+    {
+        name: "A Thousand Years",
+        artist: "Christina Perri",
+        src: "AThousandYears",
         coverType: "Images"
     },
 
