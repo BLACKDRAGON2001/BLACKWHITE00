@@ -106,6 +106,8 @@ document.getElementById("title").addEventListener("click", function() {
       this.currentMusicArray = this.originalOrder;
   
       this.controlsToggledManually = false;
+
+      this.videoOverride = false;
       
       // Only set up border box styles for Player 2
       if (suffix === '2') {
@@ -215,6 +217,59 @@ document.getElementById("title").addEventListener("click", function() {
   
       // Scroll event for pagination
       this.ulTag.addEventListener("scroll", () => this.handleScroll());
+
+      const seeVideoBtn = document.querySelector('.seeVideo');
+      if (seeVideoBtn) {
+        seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
+      }
+    }
+
+    toggleVideoOverride() {
+      this.videoOverride = !this.videoOverride;
+      
+      if (this.videoOverride) {
+        // Override mode: always show video
+        this.showVideoOverride();
+      } else {
+        // Normal mode: restore original behavior
+        this.toggleVideoDisplay(this.isMusicPaused);
+      }
+    }
+    
+    showVideoOverride() {
+      if (this.suffix === '2') {
+        this.videoAd.style.display = "none";
+        return;
+      }
+      
+      this.videoAd.style.display = "block";
+      
+      const videoSize = 280;
+      const containerSize = 370;
+      const videoOffset = (containerSize - videoSize) / 2;
+      
+      Object.assign(this.videoAd.style, {
+        top: `${videoOffset}px`,
+        left: `${videoOffset}px`,
+        transform: 'translate(0, 0)'
+      });
+      
+      // Set video mute state based on audio playing state
+      this.videoAd.muted = !this.isMusicPaused;
+      
+      // Force video to play with error handling
+      const playPromise = this.videoAd.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.warn("Video autoplay failed:", error);
+          // Retry after a short delay
+          setTimeout(() => {
+            this.videoAd.play().catch(e => {
+              console.warn("Video retry also failed:", e);
+            });
+          }, 100);
+        });
+      }
     }
   
     loadPersistedState() {
@@ -461,7 +516,15 @@ document.getElementById("title").addEventListener("click", function() {
       this.mainAudio.play();
       this.isMusicPaused = false;
       localStorage.setItem(`isMusicPaused${this.suffix}`, false);
-      this.toggleVideoDisplay(false);
+      
+      if (this.videoOverride) {
+        // In override mode: mute video when audio plays and ensure it's playing
+        this.videoAd.muted = true;
+        this.showVideoOverride();
+      } else {
+        this.toggleVideoDisplay(false);
+      }
+      
       this.resetVideoSize();
       
       // Only update border box for Player 2
@@ -469,15 +532,24 @@ document.getElementById("title").addEventListener("click", function() {
         this.updateBorderBoxDisplay();
       }
     }
-  
+    
+    // Update the existing pauseMusic method to handle video unmuting in override mode:
     pauseMusic() {
       this.wrapper.classList.remove("paused");
       this.playPauseBtn.querySelector("i").textContent = "play_arrow";
       this.mainAudio.pause();
       this.isMusicPaused = true;
       localStorage.setItem(`isMusicPaused${this.suffix}`, true);
-      this.toggleVideoDisplay(true);
-      this.muteVideo();
+      
+      if (this.videoOverride) {
+        // In override mode: unmute video when audio pauses and ensure it's playing
+        this.videoAd.muted = false;
+        this.showVideoOverride();
+      } else {
+        this.toggleVideoDisplay(true);
+        this.muteVideo();
+      }
+      
       this.resetVideoSize();
       
       // Only update border box for Player 2
@@ -495,6 +567,12 @@ document.getElementById("title").addEventListener("click", function() {
     }
     
     toggleVideoDisplay(show) {
+      // If video override is active, use override behavior instead
+      if (this.videoOverride) {
+        this.showVideoOverride();
+        return;
+      }
+      
       const isDarkMode = this.wrapper.classList.contains("dark-mode");
       
       if (show) {
