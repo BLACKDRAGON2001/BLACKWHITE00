@@ -441,6 +441,13 @@ let allMusic = [
     },
 
     {
+        name: "Eeyuh X Fluxxwave",
+        artist: "Clovis Reyes",
+        src: "EeyuhXFluxxwave",
+        coverType: "Images"
+    },
+
+    {
         name: "Sleepwalker X Icewhore",
         artist: "Nxxkz",
         src: "SleepwalkerXIcewhore",
@@ -994,6 +1001,13 @@ let allMusic = [
     },
 
     {
+        name: "Lose My Mind",
+        artist: "Don Toliver And Doja Cat",
+        src: "LoseMyMind",
+        coverType: "Images"
+    },
+
+    {
         name: "Panini",
         artist: "Lil Nas X",
         src: "Panini",
@@ -1165,6 +1179,13 @@ let allMusic = [
         name: "Streets",
         artist: "Doja Cat",
         src: "Streets",
+        coverType: "Images"
+    },
+
+    {
+        name: "Wet Vagina",
+        artist: "Doja Cat",
+        src: "WetVagina",
         coverType: "Images"
     },
 
@@ -1443,7 +1464,7 @@ let allMusic = [
 
     {
         name: "Bring Me Back To Life",
-        artist: "Chris Grey",
+        artist: "Chris Grey And Allegra Jordyn",
         src: "BringMeBackToLife",
         coverType: "Images"
     },
@@ -1522,6 +1543,27 @@ let allMusic = [
         name: "Make The Angels Cry",
         artist: "Chris Grey",
         src: "MakeTheAngelsCry",
+        coverType: "Images"
+    },
+
+    {
+        name: "If I Had You",
+        artist: "Chris Grey",
+        src: "IfIHadYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Castle",
+        artist: "Chris Grey",
+        src: "TheCastle",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Shadows",
+        artist: "Chris Grey",
+        src: "TheShadows",
         coverType: "Images"
     },
 
@@ -1760,6 +1802,13 @@ let allMusic = [
         name: "Cuts",
         artist: "Limi",
         src: "Cuts",
+        coverType: "Images"
+    },
+
+    {
+        name: "SOB",
+        artist: "Limi",
+        src: "Sob",
         coverType: "Images"
     },
 
@@ -2177,6 +2226,13 @@ let allMusic = [
     },
 
     {
+        name: "Favourite",
+        artist: "Isabel LaRosa",
+        src: "Favourite",
+        coverType: "Images"
+    },
+
+    {
         name: "Art Deco",
         artist: "Lana Del Rey",
         src: "ArtDeco",
@@ -2194,6 +2250,13 @@ let allMusic = [
         name: "Mathematical Disrespect",
         artist: "Lil Mabu",
         src: "MathematicalDisrespect",
+        coverType: "Images"
+    },
+
+    {
+        name: "Jenna Jameson",
+        artist: "Fleetwood X Ducati James",
+        src: "JennaJameson",
         coverType: "Images"
     },
 
@@ -2796,6 +2859,20 @@ let allMusic = [
         name: "In The Stars",
         artist: "Benson Boone",
         src: "InTheStars",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lovely",
+        artist: "Billie Eilish And Khalid",
+        src: "Lovely",
+        coverType: "Images"
+    },
+
+    {
+        name: "Arcade",
+        artist: "Duncan Laurence",
+        src: "Arcade",
         coverType: "Images"
     },
 
