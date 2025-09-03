@@ -196,6 +196,13 @@ let allMusic = [
     },
 
     {
+        name: "Montagem Bandido",
+        artist: "Jmilton",
+        src: "MontagemBandido",
+        coverType: "Images"
+    },
+
+    {
         name: "Nada Nada",
         artist: "Jmilton",
         src: "NadaNada",
@@ -392,6 +399,13 @@ let allMusic = [
     },
 
     {
+        name: "Break A Neck",
+        artist: "Odetari And Ayesha Erotica",
+        src: "BreakANeck",
+        coverType: "Images"
+    },
+
+    {
         name: "Avangard",
         artist: "Lonown",
         src: "Avangard",
@@ -486,6 +500,13 @@ let allMusic = [
         name: "Pretty Scene Girl Remix",
         artist: "Clover! Kets4eki And D3r",
         src: "PrettySceneGirl",
+        coverType: "Images"
+    },
+
+    {
+        name: "Rock Your Body",
+        artist: "Kets4eki And Ayesha Erotica",
+        src: "RockYourBody",
         coverType: "Images"
     },
 
@@ -840,6 +861,13 @@ let allMusic = [
     },
 
     {
+        name: "You Belong With Me",
+        artist: "Taylor Swift",
+        src: "YouBelongWithMe",
+        coverType: "Images"
+    },
+
+    {
         name: "California Gurls",
         artist: "Katy Perry",
         src: "CaliforniaGurls",
@@ -1004,6 +1032,13 @@ let allMusic = [
         name: "Lose My Mind",
         artist: "Don Toliver And Doja Cat",
         src: "LoseMyMind",
+        coverType: "Images"
+    },
+
+    {
+        name: "Too Many Nights",
+        artist: "Metro Boomin Future And Don Toliver",
+        src: "TooManyNights",
         coverType: "Images"
     },
 
@@ -1368,6 +1403,13 @@ let allMusic = [
         name: "Just Dance",
         artist: "EQRIC And ISAEV",
         src: "JustDance",
+        coverType: "Images"
+    },
+
+    {
+        name: "White Mercedes",
+        artist: "Charli XCX",
+        src: "WhiteMercedes",
         coverType: "Images"
     },
 
@@ -1963,6 +2005,818 @@ let allMusic = [
         name: "STAY ALIVE",
         artist: "Nessa Barrett",
         src: "StayAlive",
+        coverType: "Images"
+    },
+
+    {
+        name: "I Wanna Cum",
+        artist: "Letha Weapons",
+        src: "IWannaCum",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cum Get It",
+        artist: "Tink",
+        src: "CumGetIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Suck",
+        artist: "COBRAH",
+        src: "Suck",
+        coverType: "Images"
+    },
+
+    {
+        name: "ICONIC",
+        artist: "Ayesha Erotica",
+        src: "Iconic",
+        coverType: "Images"
+    },
+
+    {
+        name: "We Can Do It",
+        artist: "Ayesha Erotica",
+        src: "WeCanDoIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Vacation Bible School",
+        artist: "Ayesha Erotica",
+        src: "VacationBibleSchool",
+        coverType: "Images"
+    },
+
+    {
+        name: "Anal Queen",
+        artist: "Ayesha Erotica",
+        src: "AnalQueen",
+        coverType: "Images"
+    },
+
+    {
+        name: "All Around The World",
+        artist: "Ayesha Erotica",
+        src: "AllAroundTheWorld",
+        coverType: "Images"
+    },
+
+    {
+        name: "Control",
+        artist: "Ayesha Erotica",
+        src: "Control2",
+        coverType: "Images"
+    },
+
+    {
+        name: "Delicious",
+        artist: "Ayesha Erotica",
+        src: "Delicious",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hard",
+        artist: "Ayesha Erotica",
+        src: "Hard",
+        coverType: "Images"
+    },
+
+    {
+        name: "Streets Of LA",
+        artist: "Uncuntfortable Divas",
+        src: "StreetsOfLA",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pretty Wild",
+        artist: "Uncuntfortable Divas",
+        src: "PrettyWild",
+        coverType: "Images"
+    },
+
+    {
+        name: "Coked Up",
+        artist: "Ayesha Erotica",
+        src: "CokedUp",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cocaine Superstar",
+        artist: "Ayesha Erotica",
+        src: "CocaineSuperstar",
+        coverType: "Images"
+    },
+
+    {
+        name: "Big Juicy",
+        artist: "Ayesha Erotica",
+        src: "BigJuicy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cadillacs",
+        artist: "Ayesha Erotica",
+        src: "Cadillacs",
+        coverType: "Images"
+    },
+
+    {
+        name: "Sixteen",
+        artist: "Ayesha Erotica",
+        src: "Sixteen",
+        coverType: "Images"
+    },
+
+    {
+        name: "Make U Cum",
+        artist: "Ayesha Erotica",
+        src: "MakeUCum",
+        coverType: "Images"
+    },
+
+    {
+        name: "Emo Boy",
+        artist: "Ayesha Erotica",
+        src: "EmoBoy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Juicy Couture",
+        artist: "Ayesha Erotica",
+        src: "JuicyCouture",
+        coverType: "Images"
+    },
+
+    {
+        name: "Not Gonna Send You Nudes Chad",
+        artist: "Ayesha Erotica",
+        src: "NotGonnaSendYouNudesChad",
+        coverType: "Images"
+    },
+
+    {
+        name: "Fresh Meat",
+        artist: "Ayesha Erotica",
+        src: "FreshMeat",
+        coverType: "Images"
+    },
+
+    {
+        name: "You Were The Tease",
+        artist: "Ayesha Erotica",
+        src: "YouWereTheTease",
+        coverType: "Images"
+    },
+
+    {
+        name: "Misa Misa",
+        artist: "CORPSE",
+        src: "MisaMisa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hot Demon Bitches Near U",
+        artist: "CORPSE",
+        src: "HotDemonBitchesNearU",
+        coverType: "Images"
+    },
+
+    {
+        name: "F U Lol",
+        artist: "CORPSE",
+        src: "FULol",
+        coverType: "Images"
+    },
+
+    {
+        name: "E-Girls Are Ruining My Life",
+        artist: "CORPSE",
+        src: "EGirlsAreRuiningMyLife",
+        coverType: "Images"
+    },
+
+    {
+        name: "Miss You",
+        artist: "CORPSE",
+        src: "MissYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "Blowjob Queen",
+        artist: "Only Fire",
+        src: "BlowjobQueen",
+        coverType: "Images"
+    },
+
+    {
+        name: "DUMB",
+        artist: "Only Fire",
+        src: "Dumb",
+        coverType: "Images"
+    },
+
+    {
+        name: "Go Harder Only Fire Remix",
+        artist: "Heidi Montag",
+        src: "GoHarder",
+        coverType: "Images"
+    },
+
+    {
+        name: "Moana Lisa",
+        artist: "Only Fire",
+        src: "MoanaLisa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pinata",
+        artist: "Only Fire",
+        src: "Pinata",
+        coverType: "Images"
+    },
+
+    {
+        name: "Squirt",
+        artist: "Only Fire",
+        src: "Squirt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Up N Down",
+        artist: "Only Fire",
+        src: "UpNDown",
+        coverType: "Images"
+    },
+
+    {
+        name: "Dicks And Drugs",
+        artist: "Only Fire",
+        src: "DicksAndDrugs",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hot Dog And Hot Bitch",
+        artist: "Miss Bashful And Only Fire",
+        src: "HotDogAndHotBitch",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cheeks",
+        artist: "Only Fire And Chase Icon",
+        src: "Cheeks",
+        coverType: "Images"
+    },
+
+    {
+        name: "Moana Lisa DJ Sliink Remix",
+        artist: "Only Fire",
+        src: "MoanaLisaRemix",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cruel Summer",
+        artist: "Only Fire",
+        src: "CruelSummer",
+        coverType: "Images"
+    },
+
+    {
+        name: "Handjob",
+        artist: "Ayesha Erotica And Baku",
+        src: "Handjob",
+        coverType: "Images"
+    },
+
+    {
+        name: "Shoulder Boulders",
+        artist: "S3RL",
+        src: "ShoulderBoulders",
+        coverType: "Images"
+    },
+
+    {
+        name: "Yummy",
+        artist: "Ayesha Erotica",
+        src: "Yummy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Whore Idol",
+        artist: "Ayesha Erotica",
+        src: "WhoreIdol",
+        coverType: "Images"
+    },
+
+    {
+        name: "How2Fuck",
+        artist: "Ayesha Erotica",
+        src: "How2Fuck",
+        coverType: "Images"
+    },
+
+    {
+        name: "Star 69",
+        artist: "Ayesha Erotica",
+        src: "Star69",
+        coverType: "Images"
+    },
+
+    {
+        name: "Gang",
+        artist: "Ayesha Erotica",
+        src: "Gang",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bitch",
+        artist: "Ayesha Erotica",
+        src: "Bitch",
+        coverType: "Images"
+    },
+
+    {
+        name: "Giddy Up",
+        artist: "Ayesha Erotica",
+        src: "GiddyUp",
+        coverType: "Images"
+    },
+
+    {
+        name: "Runaway",
+        artist: "Ayesha Erotica",
+        src: "Runaway",
+        coverType: "Images"
+    },
+
+    {
+        name: "Melno Park",
+        artist: "Ayesha Erotica",
+        src: "MelnoPark",
+        coverType: "Images"
+    },
+
+    {
+        name: "Beautiful Loser",
+        artist: "Ayesha Erotica",
+        src: "BeautifulLoser",
+        coverType: "Images"
+    },
+
+    {
+        name: "Do What U Do",
+        artist: "Ayesha Erotica",
+        src: "DoWhatUDo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Fuck The Beat Up",
+        artist: "Ayesha Erotica",
+        src: "FuckTheBeatUp",
+        coverType: "Images"
+    },
+
+    {
+        name: "Loose Teens",
+        artist: "Ayesha Erotica",
+        src: "LooseTeens",
+        coverType: "Images"
+    },
+
+    {
+        name: "Makeup Bag",
+        artist: "Ayesha Erotica",
+        src: "MakeupBag",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pussy Pop",
+        artist: "Ayesha Erotica",
+        src: "PussyPop",
+        coverType: "Images"
+    },
+
+    {
+        name: "Regret",
+        artist: "Ayesha Erotica",
+        src: "Regret",
+        coverType: "Images"
+    },
+
+    {
+        name: "Tina Hick",
+        artist: "Ayesha Erotica",
+        src: "TinaHick",
+        coverType: "Images"
+    },
+
+    {
+        name: "Tina Hick Diss",
+        artist: "Ayesha Erotica",
+        src: "TinaHickDiss",
+        coverType: "Images"
+    },
+
+    {
+        name: "Eat It",
+        artist: "Ayesha Erotica",
+        src: "EatIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "2007",
+        artist: "Ayesha Erotica",
+        src: "TwoThousandAndSeven",
+        coverType: "Images"
+    },
+
+    {
+        name: "For The Girls 2",
+        artist: "Ayesha Erotica",
+        src: "ForTheGirls2",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bitch Track",
+        artist: "Ayesha Erotica",
+        src: "BitchTrack",
+        coverType: "Images"
+    },
+
+    {
+        name: "Nasty",
+        artist: "Ayesha Erotica",
+        src: "Nasty",
+        coverType: "Images"
+    },
+
+    {
+        name: "La Bella Vita",
+        artist: "Ayesha Erotica",
+        src: "LaBellaVita",
+        coverType: "Images"
+    },
+
+    {
+        name: "Expensive",
+        artist: "Ayesha Erotica",
+        src: "Expensive",
+        coverType: "Images"
+    },
+
+    {
+        name: "Synthetic",
+        artist: "Ayesha Erotica",
+        src: "Synthetic",
+        coverType: "Images"
+    },
+
+    {
+        name: "Girl Next Door",
+        artist: "Ayesha Erotica",
+        src: "GirlNextDoor",
+        coverType: "Images"
+    },
+
+    {
+        name: "Control",
+        artist: "Ayesha Erotica",
+        src: "Control3",
+        coverType: "Images"
+    },
+
+    {
+        name: "Excite Me",
+        artist: "Ayesha Erotica",
+        src: "ExciteMe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Begging Fot It",
+        artist: "Ayesha Erotica",
+        src: "BeggingFotIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "IWill",
+        artist: "Ayesha Erotica",
+        src: "IWill",
+        coverType: "Images"
+    },
+
+    {
+        name: "I'll Do It",
+        artist: "Ayesha Erotica",
+        src: "IWillDoIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "I'm Coming Out As A Christian",
+        artist: "Ayesha Erotica",
+        src: "IAmComingOutAsAChristian",
+        coverType: "Images"
+    },
+
+    {
+        name: "Love My Daddy",
+        artist: "Ayesha Erotica",
+        src: "LoveMyDaddy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Love You Down",
+        artist: "Ayesha Erotica",
+        src: "LoveYouDown",
+        coverType: "Images"
+    },
+
+    {
+        name: "Blue Monday",
+        artist: "Ayesha Erotica",
+        src: "BlueMonday",
+        coverType: "Images"
+    },
+
+    {
+        name: "Big Boobs And Fat Cock",
+        artist: "Ayesha Erotica",
+        src: "BigBoobsAndFatCock",
+        coverType: "Images"
+    },
+
+    {
+        name: "Major",
+        artist: "Ayesha Erotica",
+        src: "Major",
+        coverType: "Images"
+    },
+
+    {
+        name: "Let Your Head Go",
+        artist: "Uncuntfortable Divas",
+        src: "LetYourHeadGo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lil' Taboo",
+        artist: "Uncuntfortable Divas",
+        src: "LilTaboo",
+        coverType: "Images"
+    },
+
+    {
+        name: "I Need A Cigarette",
+        artist: "Ayesha Erotica",
+        src: "INeedACigarette",
+        coverType: "Images"
+    },
+
+    {
+        name: "9 Am In Calabasas X Vixen Medley",
+        artist: "Ayesha Erotica",
+        src: "NineAmInCalabasasXVixenMedley",
+        coverType: "Images"
+    },
+
+    {
+        name: "A Little Bit Famous",
+        artist: "Ayesha Erotica",
+        src: "ALittleBitFamous",
+        coverType: "Images"
+    },
+
+    {
+        name: "From The Back",
+        artist: "Ayesha Erotica",
+        src: "FromTheBack",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Boom Boom Doll",
+        artist: "Ayesha Erotica",
+        src: "TheBoomBoomDoll",
+        coverType: "Images"
+    },
+
+    {
+        name: "Yummy Righteous Remix",
+        artist: "Ayesha Erotica",
+        src: "YummyRighteousRemix",
+        coverType: "Images"
+    },
+
+    {
+        name: "Back To Crack",
+        artist: "Ayesha Erotica",
+        src: "BackToCrack",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pussy",
+        artist: "Ayesha Erotica",
+        src: "Pussy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hardcore Anal Banging",
+        artist: "Ayesha Erotica",
+        src: "HardcoreAnalBanging",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hollywood Dream",
+        artist: "Ayesha Erotica",
+        src: "HollywoodDream",
+        coverType: "Images"
+    },
+
+    {
+        name: "Trashy",
+        artist: "Ayesha Erotica",
+        src: "Trashy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Milky",
+        artist: "Ayesha Erotica And AnorexicWallet",
+        src: "Milky",
+        coverType: "Images"
+    },
+
+    {
+        name: "Milky Alternate Mix",
+        artist: "Ayesha Erotica",
+        src: "MilkyAlternateMix",
+        coverType: "Images"
+    },
+
+    {
+        name: "Tome Mi Foto",
+        artist: "Ayesha Erotica",
+        src: "TomeMiFoto",
+        coverType: "Images"
+    },
+
+    {
+        name: "Ride Around",
+        artist: "Ayesha Erotica",
+        src: "RideAround",
+        coverType: "Images"
+    },
+
+    {
+        name: "Where You At",
+        artist: "Ayesha Erotica And AlexZone",
+        src: "WhereYouAt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Political Interlude",
+        artist: "Ayesha Erotica",
+        src: "PoliticalInterlude",
+        coverType: "Images"
+    },
+
+    {
+        name: "Never Marry An Icon",
+        artist: "Ayesha Erotica",
+        src: "NeverMarryAnIcon",
+        coverType: "Images"
+    },
+
+    {
+        name: "Zuzie",
+        artist: "Lamm And Ayesha Erotica",
+        src: "Zuzie",
+        coverType: "Images"
+    },
+
+    {
+        name: "Drugs",
+        artist: "Ayesha Erotica",
+        src: "Drugs",
+        coverType: "Images"
+    },
+
+    {
+        name: "Unrequited Love",
+        artist: "Ayesha Erotica",
+        src: "UnrequitedLove",
+        coverType: "Images"
+    },
+
+    {
+        name: "Feel It",
+        artist: "Ayesha Erotica",
+        src: "FeelIt",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lil Bimbo",
+        artist: "Ayesha Erotica",
+        src: "LilBimbo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Condom",
+        artist: "Ayesha Erotica",
+        src: "Condom",
+        coverType: "Images"
+    },
+
+    {
+        name: "They Like The Way I Grind S And M Remix",
+        artist: "Ayesha Erotica",
+        src: "TheyLikeTheWayIGrind",
+        coverType: "Images"
+    },
+
+    {
+        name: "Nostalgia",
+        artist: "Ayesha Erotica",
+        src: "Nostalgia",
+        coverType: "Images"
+    },
+
+    {
+        name: "Young Rich And Skinny",
+        artist: "Ayesha Erotica",
+        src: "YoungRichAndSkinny",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hands On Me",
+        artist: "Ayesha Erotica",
+        src: "HandsOnMe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Vixen",
+        artist: "Ayesha Erotica",
+        src: "Vixen",
+        coverType: "Images"
+    },
+
+    {
+        name: "The First Lady Of Juicy Couture",
+        artist: "Ayesha Erotica",
+        src: "TheFirstLadyOfJuicyCouture",
+        coverType: "Images"
+    },
+
+    {
+        name: "Boy You Are Heaven",
+        artist: "Ayesha Erotica",
+        src: "BoyYouAreHeaven",
+        coverType: "Images"
+    },
+
+    {
+        name: "You Can Meet Me At My Hotel",
+        artist: "Ayesha Erotica",
+        src: "YouCanMeetMeAtMyHotel",
+        coverType: "Images"
+    },
+
+    {
+        name: "We Still Fuck",
+        artist: "Ayesha Erotica",
+        src: "WeStillFuck",
         coverType: "Images"
     },
 

@@ -249,9 +249,9 @@ document.getElementById("title").addEventListener("click", function() {
       const videoOffset = (containerSize - videoSize) / 2;
       
       Object.assign(this.videoAd.style, {
-        top: `${videoOffset}px`,
-        left: `${videoOffset}px`,
-        transform: 'translate(0, 0)'
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
       });
       
       // Set video mute state based on audio playing state
@@ -330,6 +330,25 @@ document.getElementById("title").addEventListener("click", function() {
       if (this.suffix !== '2') {
         // Original player - full video functionality
         this.setVideoSourceWithFallback(src);
+        
+        // If video override is active, ensure video plays after source change
+        if (this.videoOverride) {
+          // Wait for video to load then apply override behavior
+          const handleVideoLoaded = () => {
+            this.showVideoOverride();
+          };
+          
+          // Use both events to ensure it works across different scenarios
+          this.videoAd.addEventListener('loadeddata', handleVideoLoaded, { once: true });
+          this.videoAd.addEventListener('canplay', handleVideoLoaded, { once: true });
+          
+          // Fallback timeout in case events don't fire
+          setTimeout(() => {
+            if (this.videoOverride) {
+              this.showVideoOverride();
+            }
+          }, 500);
+        }
       } else {
         // Player 2 - NO VIDEO, but keep element for border reference
         this.videoAd.src = "";
@@ -348,18 +367,77 @@ document.getElementById("title").addEventListener("click", function() {
     setAudioSourceWithFallback(src) {
       const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
       const localAudioSrc = `${this.audioFolder}${src}.mp3`;
+      const uploadAudioSrc = `Upload/${src}.mp3`; // New upload folder fallback
+      
+      // Clear any previous event listeners
+      this.mainAudio.onerror = null;
+      this.mainAudio.onloadeddata = null;
       
       // Try R2 first
       this.mainAudio.src = r2AudioSrc;
       
-      // Set up error handling for audio
+      // Set up error handling for audio with proper loading wait
       const handleAudioError = () => {
         console.warn(`Audio failed to load from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
         this.mainAudio.src = localAudioSrc;
-        this.r2Available = false;
+        
+        // Wait for local to load or fail
+        this.mainAudio.onloadeddata = () => {
+          console.log(`Audio loaded successfully from local: ${localAudioSrc}`);
+          this.mainAudio.onloadeddata = null;
+        };
+        
+        // Add upload folder fallback
+        this.mainAudio.onerror = () => {
+          console.warn(`Audio failed to load from local: ${localAudioSrc}, trying upload: ${uploadAudioSrc}`);
+          this.mainAudio.src = uploadAudioSrc;
+          this.r2Available = false;
+          
+          // Wait for upload to load
+          this.mainAudio.onloadeddata = () => {
+            console.log(`Audio loaded successfully from upload: ${uploadAudioSrc}`);
+            this.mainAudio.onloadeddata = null;
+          };
+          
+          this.mainAudio.onerror = () => {
+            console.error(`All audio sources failed for: ${src}`);
+            this.mainAudio.onerror = null;
+          };
+        };
+      };
+      
+      // Wait for R2 to load or fail
+      this.mainAudio.onloadeddata = () => {
+        console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
+        this.mainAudio.onloadeddata = null;
       };
       
       this.mainAudio.onerror = handleAudioError;
+    }
+
+    waitForAudioReady() {
+      return new Promise((resolve) => {
+        if (this.mainAudio.readyState >= 3) { // HAVE_FUTURE_DATA or higher
+          resolve();
+          return;
+        }
+        
+        const handleCanPlay = () => {
+          this.mainAudio.removeEventListener('canplay', handleCanPlay);
+          this.mainAudio.removeEventListener('loadeddata', handleCanPlay);
+          resolve();
+        };
+        
+        this.mainAudio.addEventListener('canplay', handleCanPlay);
+        this.mainAudio.addEventListener('loadeddata', handleCanPlay);
+        
+        // Fallback timeout
+        setTimeout(() => {
+          this.mainAudio.removeEventListener('canplay', handleCanPlay);
+          this.mainAudio.removeEventListener('loadeddata', handleCanPlay);
+          resolve();
+        }, 2000);
+      });
     }
   
     createVideoElementWithFallback(src, type) {
@@ -375,16 +453,17 @@ document.getElementById("title").addEventListener("click", function() {
         `${this.videoBucketUrls[2]}${src}.${type}`
       ];
       
-      // Local fallback (only for regular player, not disguise)
+      // Local and upload fallbacks
       const localVideoSrc = `${this.videoFolder}${src}.${type}`;
-      const allSources = [...r2Sources, localVideoSrc];
+      const uploadVideoSrc = `Upload/${src}.${type}`; // New upload folder fallback
+      const allSources = [...r2Sources, localVideoSrc, uploadVideoSrc];
     
       // Track fallback attempts
       let attempt = 0;
     
       const tryNextSource = () => {
         if (attempt >= allSources.length) {
-          console.error("All video sources (R2 and local) failed to load.");
+          console.error("All video sources (R2, local, and upload) failed to load.");
           return;
         }
         
@@ -393,7 +472,7 @@ document.getElementById("title").addEventListener("click", function() {
         // Mark R2 as unavailable if we've exhausted R2 sources
         if (attempt >= r2Sources.length) {
           this.r2Available = false;
-          console.warn("R2 video sources failed, using local fallback");
+          console.warn("R2 video sources failed, using local/upload fallback");
         }
         
         attempt++;
@@ -419,15 +498,16 @@ document.getElementById("title").addEventListener("click", function() {
         `${this.videoBucketUrls[2]}${src}.mp4`
       ];
       
-      // Local fallback (only for regular player, not disguise)
+      // Local and upload fallbacks
       const localVideoSrc = `${this.videoFolder}${src}.mp4`;
-      const allSources = [...r2Sources, localVideoSrc];
+      const uploadVideoSrc = `Upload/${src}.mp4`; // New upload folder fallback
+      const allSources = [...r2Sources, localVideoSrc, uploadVideoSrc];
     
       let attempt = 0;
     
       const tryNextSource = () => {
         if (attempt >= allSources.length) {
-          console.error("All videoAd sources (R2 and local) failed to load.");
+          console.error("All videoAd sources (R2, local, and upload) failed to load.");
           return;
         }
         
@@ -436,7 +516,7 @@ document.getElementById("title").addEventListener("click", function() {
         // Mark R2 as unavailable if we've exhausted R2 sources
         if (attempt >= r2Sources.length) {
           this.r2Available = false;
-          console.warn("R2 videoAd sources failed, using local fallback");
+          console.warn("R2 videoAd sources failed, using local/upload fallback");
         }
         
         attempt++;
@@ -448,7 +528,7 @@ document.getElementById("title").addEventListener("click", function() {
       };
     
       tryNextSource();
-    }    
+    }   
   
     createImageElement(src, type) {
       const img = document.createElement('img');
@@ -456,6 +536,7 @@ document.getElementById("title").addEventListener("click", function() {
       // Try R2 bucket first
       const r2ImageSrc = `${this.imageBucketUrl}${src}.${type}`;
       const localImageSrc = `${this.imageFolder}${src}.${type}`;
+      const uploadImageSrc = `Upload/${src}.${type}`; // New upload folder fallback
       
       img.src = r2ImageSrc;
       img.alt = this.musicName.textContent;
@@ -464,18 +545,26 @@ document.getElementById("title").addEventListener("click", function() {
       img.onerror = () => {
         console.warn(`Failed to load image from R2 bucket: ${r2ImageSrc}, trying local: ${localImageSrc}`);
         
-        // For disguise player (Player 2), try local first, then create white fallback
+        // For disguise player (Player 2), try local first, then upload, then create white fallback
         if (this.suffix === '2') {
           img.src = localImageSrc;
           img.onerror = () => {
-            console.warn(`Failed to load local image: ${localImageSrc}, using white fallback`);
-            this.createWhiteFallback(img);
+            console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
+            img.src = uploadImageSrc;
+            img.onerror = () => {
+              console.warn(`Failed to load upload image: ${uploadImageSrc}, using white fallback`);
+              this.createWhiteFallback(img);
+            };
           };
         } else {
-          // For regular player, try local folder
+          // For regular player, try local folder then upload folder
           img.src = localImageSrc;
           img.onerror = () => {
-            console.warn(`Failed to load local image: ${localImageSrc}`);
+            console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
+            img.src = uploadImageSrc;
+            img.onerror = () => {
+              console.warn(`Failed to load upload image: ${uploadImageSrc}`);
+            };
           };
         }
         this.r2Available = false;
@@ -510,26 +599,39 @@ document.getElementById("title").addEventListener("click", function() {
       this.isMusicPaused ? this.playMusic() : this.pauseMusic();
     }
   
-    playMusic() {
+    async playMusic() {
       this.wrapper.classList.add("paused");
       this.playPauseBtn.querySelector("i").textContent = "pause";
-      this.mainAudio.play();
-      this.isMusicPaused = false;
-      localStorage.setItem(`isMusicPaused${this.suffix}`, false);
       
-      if (this.videoOverride) {
-        // In override mode: mute video when audio plays and ensure it's playing
-        this.videoAd.muted = true;
-        this.showVideoOverride();
-      } else {
-        this.toggleVideoDisplay(false);
-      }
-      
-      this.resetVideoSize();
-      
-      // Only update border box for Player 2
-      if (this.suffix === '2') {
-        this.updateBorderBoxDisplay();
+      try {
+        // Wait for audio to be ready before playing
+        await this.waitForAudioReady();
+        await this.mainAudio.play();
+        
+        this.isMusicPaused = false;
+        localStorage.setItem(`isMusicPaused${this.suffix}`, false);
+        
+        if (this.videoOverride) {
+          // In override mode: mute video when audio plays and ensure it's playing
+          this.videoAd.muted = true;
+          this.showVideoOverride();
+        } else {
+          this.toggleVideoDisplay(false);
+        }
+        
+        this.resetVideoSize();
+        
+        // Only update border box for Player 2
+        if (this.suffix === '2') {
+          this.updateBorderBoxDisplay();
+        }
+      } catch (error) {
+        console.warn("Failed to play audio:", error);
+        // Reset play button state if play fails
+        this.wrapper.classList.remove("paused");
+        this.playPauseBtn.querySelector("i").textContent = "play_arrow";
+        this.isMusicPaused = true;
+        localStorage.setItem(`isMusicPaused${this.suffix}`, true);
       }
     }
     
@@ -587,9 +689,9 @@ document.getElementById("title").addEventListener("click", function() {
           
           // Batch video positioning updates
           Object.assign(this.videoAd.style, {
-            top: `${videoOffset}px`,
-            left: `${videoOffset}px`,
-            transform: 'translate(0, 0)'
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
           });
           
           this.videoAd.play();
@@ -788,7 +890,13 @@ document.getElementById("title").addEventListener("click", function() {
         liAudioTag.onerror = () => {
           console.warn(`List audio failed from R2, trying local: ${this.audioFolder}${music.src}.mp3`);
           liAudioTag.src = `${this.audioFolder}${music.src}.mp3`;
-          this.r2Available = false;
+          
+          // Add upload folder fallback for list audio
+          liAudioTag.onerror = () => {
+            console.warn(`List audio failed from local, trying upload: Upload/${music.src}.mp3`);
+            liAudioTag.src = `Upload/${music.src}.mp3`;
+            this.r2Available = false;
+          };
         };
         
         liAudioTag.addEventListener("loadeddata", () => {
@@ -1144,9 +1252,9 @@ document.getElementById("title").addEventListener("click", function() {
           const containerSize = 370;
           const videoOffset = (containerSize - videoSize) / 2;
           
-          sizer.style.top = `${videoOffset}px`;
-          sizer.style.left = `${videoOffset}px`;
-          sizer.style.transform = 'translate(0, 0)';
+          sizer.style.top = '50%';
+          sizer.style.left = '50%';
+          sizer.style.transform = 'translate(-50%, -50%)';
         }
       }
     });

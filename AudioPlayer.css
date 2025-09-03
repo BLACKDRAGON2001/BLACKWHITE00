@@ -64,7 +64,7 @@ body{
 }
 .img-area{
   width: 100%;
-  height: 370px;
+  height: 380px;
   overflow: hidden;
   margin-top: 30px;
   border-radius: 15px;
@@ -322,7 +322,7 @@ ul li.playing{
   position: absolute;
   top: 0;
   left: 0;
-  width: 370px;
+  width: 380px;
   display: none; /* Hidden by default */
   transform: translate(0%, 0%);
   border-radius: 15px;
@@ -331,11 +331,11 @@ ul li.playing{
 
 .overlay-video {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 280px;
+  top: 50%;
+  left: 50%;
+  width: 290px;
   display: none; /* Hidden by default */
-  transform: translate(16%, 16%);
+  transform: translate(-50%, -50%);
   border: 8px solid black;
   box-sizing: border-box;
 }
