@@ -56,7 +56,7 @@ body{
   font-size: 30px;
 }
 .top-bar i:first-child{
-  margin-left: -7px;
+  margin-left: -3px;
 }
 .top-bar span{
   font-size: 18px;
@@ -459,4 +459,9 @@ ul li.playing{
   font-weight: 700;
   src: url('fonts/Roboto/Roboto-Bold.woff2') format('woff2'),
        url('fonts/Roboto/Roboto-Bold.ttf') format('truetype');
+}
+
+.music-list ul {
+  scroll-behavior: smooth;
+  transition: scroll-behavior 0.3s ease;
 }
