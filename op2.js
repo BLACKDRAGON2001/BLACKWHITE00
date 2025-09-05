@@ -1,11 +1,87 @@
-// Complete Optimized AudioPlayer - All Features Maintained
+// Complete Optimized AudioPlayer - Enhanced Performance & All Features
+// IndexedDB helper for large data storage
+class AudioStorage {
+    constructor() {
+        this.dbName = 'AudioPlayerDB';
+        this.version = 1;
+        this.db = null;
+        this.init();
+    }
+
+    async init() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                this.db = request.result;
+                resolve(this.db);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('playerState')) {
+                    db.createObjectStore('playerState', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('musicCache')) {
+                    db.createObjectStore('musicCache', { keyPath: 'src' });
+                }
+            };
+        });
+    }
+
+    async set(key, value) {
+        if (!this.db) await this.init();
+        const transaction = this.db.transaction(['playerState'], 'readwrite');
+        const store = transaction.objectStore('playerState');
+        await store.put({ id: key, value });
+    }
+
+    async get(key) {
+        if (!this.db) await this.init();
+        const transaction = this.db.transaction(['playerState'], 'readonly');
+        const store = transaction.objectStore('playerState');
+        const result = await store.get(key);
+        return result ? result.value : null;
+    }
+
+    async remove(key) {
+        if (!this.db) await this.init();
+        const transaction = this.db.transaction(['playerState'], 'readwrite');
+        const store = transaction.objectStore('playerState');
+        await store.delete(key);
+    }
+}
+
+// Web Worker for heavy operations
+const createShuffleWorker = () => {
+    const workerScript = `
+        self.onmessage = function(e) {
+            const { array, action } = e.data;
+            
+            if (action === 'shuffle') {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                self.postMessage(shuffled);
+            }
+        };
+    `;
+    
+    const blob = new Blob([workerScript], { type: 'application/javascript' });
+    return new Worker(URL.createObjectURL(blob));
+};
+
 document.getElementById("title")?.addEventListener("click", function() {
     pauseAudio();
-    localStorage.removeItem("musicIndex");
-    localStorage.removeItem("isMusicPaused");
+    const storage = new AudioStorage();
+    storage.remove("musicIndex");
+    storage.remove("isMusicPaused");
     document.getElementById("HomePage").style.display = "none";
     document.getElementById("LoginPage").style.display = "block";
-    localStorage.removeItem("LoginTime");
+    storage.remove("LoginTime");
     document.body.style.backgroundColor = "white";
     clearInputFields();
     refreshPage();
@@ -13,11 +89,12 @@ document.getElementById("title")?.addEventListener("click", function() {
 
 document.getElementById("title2")?.addEventListener("click", function() {
     pauseAudio2();
-    localStorage.removeItem("musicIndex2");
-    localStorage.removeItem("isMusicPaused2");
+    const storage = new AudioStorage();
+    storage.remove("musicIndex2");
+    storage.remove("isMusicPaused2");
     document.getElementById("DisguisePage").style.display = "none";
     document.getElementById("LoginPage").style.display = "block";
-    localStorage.removeTime("LoginTime");
+    storage.remove("LoginTime");
     document.body.style.backgroundColor = "white";
     clearInputFields();
     refreshPage();
@@ -35,13 +112,18 @@ function pauseAudio2() {
 
 class MusicPlayer {
     constructor(suffix = '') {
-        // Initialize storage with fallback
-        if (!localStorage.getItem(`musicIndex${suffix}`)) {
-            this.musicIndex = 1;
-            localStorage.setItem(`musicIndex${suffix}`, 1);
-        }
+        // Initialize storage with fallback to localStorage if IndexedDB fails
+        this.initializeStorage().then(() => {
+            if (!this.hasStorageValue(`musicIndex${suffix}`)) {
+                this.musicIndex = 1;
+                this.setStorageValue(`musicIndex${suffix}`, 1);
+            }
+        });
         
         this.suffix = suffix;
+        this.storage = new AudioStorage();
+        this.shuffleWorker = createShuffleWorker();
+        
         this.initializeConfiguration();
         this.cacheElements();
         this.initializeState();
@@ -50,9 +132,70 @@ class MusicPlayer {
         this.rafId = null;
         this.updateQueue = new Set();
         this.lastUpdate = 0;
+        this.eventListeners = new Map(); // Track listeners for cleanup
         
         if (this.wrapper) {
             this.initialize();
+        }
+    }
+
+    async initializeStorage() {
+        try {
+            await this.storage.init();
+            this.useIndexedDB = true;
+        } catch (error) {
+            console.warn('IndexedDB failed, falling back to localStorage:', error);
+            this.useIndexedDB = false;
+        }
+    }
+
+    async setStorageValue(key, value) {
+        if (this.useIndexedDB) {
+            try {
+                await this.storage.set(key, value);
+            } catch (error) {
+                console.warn('IndexedDB write failed, using localStorage:', error);
+                localStorage.setItem(key, JSON.stringify(value));
+            }
+        } else {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+    }
+
+    async getStorageValue(key) {
+        if (this.useIndexedDB) {
+            try {
+                return await this.storage.get(key);
+            } catch (error) {
+                console.warn('IndexedDB read failed, using localStorage:', error);
+                const value = localStorage.getItem(key);
+                return value ? JSON.parse(value) : null;
+            }
+        } else {
+            const value = localStorage.getItem(key);
+            return value ? JSON.parse(value) : null;
+        }
+    }
+
+    hasStorageValue(key) {
+        if (this.useIndexedDB) {
+            // For IndexedDB, we'll check asynchronously in initialize
+            return false;
+        } else {
+            return localStorage.getItem(key) !== null;
+        }
+    }
+
+    async removeStorageValue(key) {
+        if (this.useIndexedDB) {
+            try {
+                await this.storage.remove(key);
+            } catch (error) {
+                console.warn('IndexedDB remove failed, using localStorage:', error);
+                localStorage.removeItem(key);
+            }
+        } else {
+            localStorage.removeItem(key);
         }
     }
 
@@ -110,7 +253,16 @@ class MusicPlayer {
         this.musicIndex = 1;
         this.isMusicPaused = true;
         this.isShuffleMode = false;
-        this.originalOrder = [...(window.allMusic || [])];
+        
+        // Set initial music array based on player type
+        if (this.suffix === '2') {
+            this.originalOrder = [...(window.ReducedMusic || [])];
+            this.usingReducedMusic = true;
+        } else {
+            this.originalOrder = [...(window.allMusic || [])];
+            this.usingReducedMusic = false;
+        }
+        
         this.shuffledOrder = [];
         this.isMuted = false;
         this.isInitializing = true;
@@ -119,7 +271,6 @@ class MusicPlayer {
         this.hasUserScrolled = false;
         this.scrollTimeout = null;
         this.preShuffleIndex = 1;
-        this.usingReducedMusic = this.suffix === '2';
         
         // Pagination state
         this.currentPage = 0;
@@ -129,6 +280,10 @@ class MusicPlayer {
         
         this.controlsToggledManually = false;
         this.videoOverride = false;
+        
+        // Audio preloading
+        this.nextAudio = new Audio();
+        this.preloadQueue = [];
         
         // Only set up border box styles for Player 2
         if (this.suffix === '2') {
@@ -142,13 +297,13 @@ class MusicPlayer {
                     borderRadius: '15px'
                 }
             };
-
+    
             this.borderBoxState = {
                 isVisible: false,
                 currentStyle: null,
                 lastUpdate: 0
             };
-
+    
             this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 16);
         }
     }
@@ -185,30 +340,32 @@ class MusicPlayer {
         };
     }
 
-    initialize() {
+    async initialize() {
         if (this.suffix === '2') {
             // Check if we have a stored preference for which music array to use
-            const storedArrayType = localStorage.getItem(`usingReducedMusic${this.suffix}`);
+            const storedArrayType = await this.getStorageValue(`usingReducedMusic${this.suffix}`);
             if (storedArrayType !== null) {
-                this.usingReducedMusic = storedArrayType === 'true';
+                this.usingReducedMusic = storedArrayType;
                 this.originalOrder = this.usingReducedMusic ? [...(window.ReducedMusic || [])] : [...(window.allMusic || [])];
                 
                 // Update button state based on stored preference - but wait for DOM
                 setTimeout(() => {
                     if (this.seeAllMusicBtn) {
-                        this.seeAllMusicBtn.textContent = this.usingReducedMusic ? "star" : "star";
+                        this.seeAllMusicBtn.textContent = "star";
                     }
                 }, 100);
             } else {
-                // Default to ReducedMusic for Player 2
+                // Default to ReducedMusic for Player 2 and store this preference
                 this.originalOrder = [...(window.ReducedMusic || [])];
+                this.usingReducedMusic = true;
+                await this.setStorageValue(`usingReducedMusic${this.suffix}`, true);
             }
         } else {
             this.originalOrder = [...(window.allMusic || [])]; // Use allMusic for player 1
         }
-
+    
         this.setupEventListeners();
-        this.loadPersistedState();
+        await this.loadPersistedState();
         this.populateMusicList(this.originalOrder);
         this.updatePlayingSong();
         
@@ -216,7 +373,10 @@ class MusicPlayer {
         if (this.suffix === '2') {
             this.initializeBorderBox();
         }
-
+    
+        // Preload next track
+        this.preloadNextTrack();
+    
         setTimeout(() => {
             this.isInitializing = false;
         }, 100);
@@ -226,6 +386,8 @@ class MusicPlayer {
     initializeBorderBox() {
         if (this.suffix !== '2' || !this.borderBox) return;
         
+        // Use CSS transforms for better performance
+        this.borderBox.style.transform = 'translateZ(0)'; // Force hardware acceleration
         // Force hide border box with multiple methods to ensure it's gone
         this.borderBox.style.display = "none";
         this.borderBox.style.visibility = "hidden";
@@ -254,37 +416,52 @@ class MusicPlayer {
         }
     }
 
-    setupEventListeners() {
-        // Control events
-        this.playPauseBtn?.addEventListener("click", () => this.togglePlayPause());
-        this.prevBtn?.addEventListener("click", () => this.changeMusic(-1));
-        this.nextBtn?.addEventListener("click", () => this.changeMusic(1));
-        this.progressArea?.addEventListener("click", (e) => this.handleProgressClick(e));
-        this.moreMusicBtn?.addEventListener("click", () => this.toggleMusicList());
-        this.closeMoreMusicBtn?.addEventListener("click", () => this.closeMusicList());
-        this.modeToggle?.addEventListener("click", () => this.toggleDarkMode());
-        this.muteButton?.addEventListener("click", () => this.handleMute());
-        this.repeatBtn?.addEventListener("click", () => this.handleRepeat());
+    addEventListenerWithCleanup(element, event, handler, options = {}) {
+        if (!element) return;
+        
+        const wrappedHandler = handler.bind(this);
+        element.addEventListener(event, wrappedHandler, options);
+        
+        // Store for cleanup
+        const key = `${element.constructor.name}_${event}`;
+        if (!this.eventListeners.has(key)) {
+            this.eventListeners.set(key, []);
+        }
+        this.eventListeners.get(key).push({ element, event, handler: wrappedHandler, options });
+    }
 
-        // Media events - use throttling for performance
+    setupEventListeners() {
+        // Control events with cleanup tracking
+        this.addEventListenerWithCleanup(this.playPauseBtn, "click", this.togglePlayPause);
+        this.addEventListenerWithCleanup(this.prevBtn, "click", () => this.changeMusic(-1));
+        this.addEventListenerWithCleanup(this.nextBtn, "click", () => this.changeMusic(1));
+        this.addEventListenerWithCleanup(this.progressArea, "click", this.handleProgressClick);
+        this.addEventListenerWithCleanup(this.moreMusicBtn, "click", this.toggleMusicList);
+        this.addEventListenerWithCleanup(this.closeMoreMusicBtn, "click", this.closeMusicList);
+        this.addEventListenerWithCleanup(this.modeToggle, "click", this.toggleDarkMode);
+        this.addEventListenerWithCleanup(this.muteButton, "click", this.handleMute);
+        this.addEventListenerWithCleanup(this.repeatBtn, "click", this.handleRepeat);
+
+        // Media events with throttling and cleanup
         if (this.mainAudio) {
-            this.mainAudio.addEventListener("timeupdate", this.throttle((e) => this.updateProgress(e), 100));
-            this.mainAudio.addEventListener("ended", () => this.handleSongEnd());
-            this.mainAudio.addEventListener("pause", () => this.handleAudioPause());
-            this.mainAudio.addEventListener("play", () => this.handleAudioPlay());
+            this.addEventListenerWithCleanup(this.mainAudio, "timeupdate", this.throttle((e) => this.updateProgress(e), 100));
+            this.addEventListenerWithCleanup(this.mainAudio, "ended", this.handleSongEnd);
+            this.addEventListenerWithCleanup(this.mainAudio, "pause", this.handleAudioPause);
+            this.addEventListenerWithCleanup(this.mainAudio, "play", this.handleAudioPlay);
+            this.addEventListenerWithCleanup(this.mainAudio, "error", this.handleAudioError);
         }
         
-        this.videoAd?.addEventListener("ended", () => this.handleVideoEnd());
-        this.musicName?.addEventListener("click", () => this.toggleVideoControls());
+        this.addEventListenerWithCleanup(this.videoAd, "ended", this.handleVideoEnd);
+        this.addEventListenerWithCleanup(this.musicName, "click", this.toggleVideoControls);
 
-        // Scroll event for pagination - optimized with throttling
+        // Optimized scroll event with passive listening
         if (this.ulTag) {
-            this.ulTag.addEventListener("scroll", this.throttle(() => this.handleScroll(), 50), { passive: true });
+            this.addEventListenerWithCleanup(this.ulTag, "scroll", this.throttle(() => this.handleScroll(), 50), { passive: true });
         }
 
         const seeVideoBtn = document.querySelector('.seeVideo');
         if (seeVideoBtn) {
-            seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
+            this.addEventListenerWithCleanup(seeVideoBtn, "click", this.toggleVideoOverride);
         }
 
         if (this.suffix === '2' && this.seeAllMusicBtn) {
@@ -294,12 +471,12 @@ class MusicPlayer {
             
             // Set initial button state based on current mode
             this.seeAllMusicBtn.textContent = "star";
-            this.seeAllMusicBtn.addEventListener("click", () => this.switchToAllMusic());
+            this.addEventListenerWithCleanup(this.seeAllMusicBtn, "click", this.switchToAllMusic);
         }
 
         // Enhanced scroll event listener with manual scroll detection
         if (this.ulTag) {
-            this.ulTag.addEventListener('scroll', (e) => {
+            this.addEventListenerWithCleanup(this.ulTag, 'scroll', (e) => {
                 // Handle pagination
                 this.handleScroll();
                 
@@ -326,6 +503,40 @@ class MusicPlayer {
                     }, 50);
                 }, 150);
             }, { passive: true });
+        }
+
+        // Shuffle worker message handler
+        this.shuffleWorker.onmessage = (e) => {
+            this.shuffledOrder = e.data;
+            this.musicIndex = 1;
+            this.loadMusic(this.musicIndex);
+            this.playMusic();
+        };
+    }
+
+    async preloadNextTrack() {
+        if (!this.originalOrder.length) return;
+        
+        const currentArray = this.isShuffleMode ? this.shuffledOrder : this.originalOrder;
+        const nextIndex = this.musicIndex >= currentArray.length ? 1 : this.musicIndex + 1;
+        const nextTrack = currentArray[nextIndex - 1];
+        
+        if (nextTrack && this.nextAudio) {
+            // Create preload link in document head
+            const existingPreload = document.querySelector('link[rel="preload"][as="audio"]');
+            if (existingPreload) {
+                existingPreload.remove();
+            }
+            
+            const preloadLink = document.createElement('link');
+            preloadLink.rel = 'preload';
+            preloadLink.as = 'audio';
+            preloadLink.href = `${this.audioBucketUrl}${nextTrack.src}.mp3`;
+            document.head.appendChild(preloadLink);
+            
+            // Also preload in audio element
+            this.nextAudio.src = `${this.audioBucketUrl}${nextTrack.src}.mp3`;
+            this.nextAudio.preload = 'auto';
         }
     }
 
@@ -429,6 +640,8 @@ class MusicPlayer {
                         const itemRect = liTag.getBoundingClientRect();
                         const scrollTop = this.ulTag.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2);
                         
+                        // Use CSS transform for smooth scrolling
+                        this.ulTag.style.scrollBehavior = 'smooth';
                         this.ulTag.scrollTo({
                             top: scrollTop,
                             behavior: 'smooth'
@@ -449,9 +662,12 @@ class MusicPlayer {
         }
     }
 
-    switchToAllMusic() {
+    async switchToAllMusic() {
         // Only for player 2
         if (this.suffix !== '2') return;
+        
+        // Check if music list is currently open
+        const isMusicListOpen = this.musicList?.classList.contains("show");
         
         // Get the current song details BEFORE switching arrays
         const currentSong = this.isShuffleMode ? 
@@ -460,6 +676,11 @@ class MusicPlayer {
             
         const wasPlaying = !this.isMusicPaused;
         const wasShuffleMode = this.isShuffleMode;
+        
+        // IMPORTANT: Pause the audio first to prevent errors during transition
+        if (this.mainAudio && !this.mainAudio.paused) {
+            this.mainAudio.pause();
+        }
         
         // Toggle between arrays
         if (this.usingReducedMusic) {
@@ -481,7 +702,7 @@ class MusicPlayer {
         }
         
         // Store the preference
-        localStorage.setItem(`usingReducedMusic${this.suffix}`, this.usingReducedMusic);
+        await this.setStorageValue(`usingReducedMusic${this.suffix}`, this.usingReducedMusic);
         
         this.currentMusicArray = this.originalOrder;
         
@@ -492,65 +713,205 @@ class MusicPlayer {
             song.artist === currentSong.artist
         );
         
+        // Handle the transition based on whether the song exists in the new array
         if (newIndex >= 0) {
-            // Song found in new array
+            // Song found in new array - smooth transition
             this.musicIndex = newIndex + 1;
             
             // If we were in shuffle mode, recreate the shuffle with the new array
             if (wasShuffleMode) {
-                this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
+                // Use Web Worker for shuffling
+                this.shuffleWorker.postMessage({
+                    array: this.originalOrder,
+                    action: 'shuffle'
+                });
                 
-                // Find the song's new position in the new shuffled order
-                const shuffledIndex = this.shuffledOrder.findIndex(song => 
-                    song.src === currentSong.src && 
-                    song.name === currentSong.name && 
-                    song.artist === currentSong.artist
-                );
-                
-                if (shuffledIndex >= 0) {
-                    this.musicIndex = shuffledIndex + 1;
-                }
+                // Wait for shuffle to complete before finding the song's new position
+                await new Promise(resolve => {
+                    const originalHandler = this.shuffleWorker.onmessage;
+                    this.shuffleWorker.onmessage = (e) => {
+                        // Restore original handler
+                        this.shuffleWorker.onmessage = originalHandler;
+                        
+                        // Find the song's new position in the shuffled order
+                        const shuffledIndex = this.shuffledOrder.findIndex(song => 
+                            song.src === currentSong.src && 
+                            song.name === currentSong.name && 
+                            song.artist === currentSong.artist
+                        );
+                        
+                        if (shuffledIndex >= 0) {
+                            this.musicIndex = shuffledIndex + 1;
+                        }
+                        resolve();
+                    };
+                });
+            }
+            
+            // Load the same song in the new array context
+            this.loadMusic(this.musicIndex);
+            
+            // Restore playing state if it was playing before
+            if (wasPlaying) {
+                // Use a timeout to ensure the audio source is fully loaded
+                setTimeout(async () => {
+                    try {
+                        await this.waitForAudioReady();
+                        await this.playMusic();
+                    } catch (error) {
+                        console.warn('Failed to resume playback after array switch:', error);
+                        this.pauseMusic();
+                    }
+                }, 300);
+            } else {
+                // Ensure paused state is maintained
+                this.pauseMusic();
             }
         } else {
-            // Song not found in new array - stay at current position or go to first song
-            this.musicIndex = 1;
+            // Song not found in new array - find the closest song
+            let closestIndex = 0;
+            
+            if (this.usingReducedMusic) {
+                // Switching to ReducedMusic - find closest song by artist or similar characteristics
+                console.log('Finding closest song in ReducedMusic array for:', currentSong.name, 'by', currentSong.artist);
+                
+                // Try to find a song by the same artist first
+                const sameArtistIndex = this.originalOrder.findIndex(song => 
+                    song.artist.toLowerCase() === currentSong.artist.toLowerCase()
+                );
+                
+                if (sameArtistIndex >= 0) {
+                    closestIndex = sameArtistIndex;
+                    console.log('Found song by same artist:', this.originalOrder[closestIndex].name);
+                } else {
+                    // If no same artist, try to find similar genre or style
+                    // Look for songs with similar words in the title
+                    const currentSongWords = currentSong.name.toLowerCase().split(' ');
+                    let bestMatch = -1;
+                    let bestMatchScore = 0;
+                    
+                    this.originalOrder.forEach((song, index) => {
+                        const songWords = song.name.toLowerCase().split(' ');
+                        let matchScore = 0;
+                        
+                        // Calculate similarity score based on common words
+                        currentSongWords.forEach(word => {
+                            if (word.length > 3 && songWords.some(songWord => songWord.includes(word) || word.includes(songWord))) {
+                                matchScore++;
+                            }
+                        });
+                        
+                        // Also check artist similarity
+                        const currentArtistWords = currentSong.artist.toLowerCase().split(' ');
+                        const artistWords = song.artist.toLowerCase().split(' ');
+                        currentArtistWords.forEach(word => {
+                            if (word.length > 2 && artistWords.some(artistWord => artistWord.includes(word) || word.includes(artistWord))) {
+                                matchScore += 0.5;
+                            }
+                        });
+                        
+                        if (matchScore > bestMatchScore) {
+                            bestMatchScore = matchScore;
+                            bestMatch = index;
+                        }
+                    });
+                    
+                    if (bestMatch >= 0 && bestMatchScore > 0) {
+                        closestIndex = bestMatch;
+                        console.log('Found closest match by similarity:', this.originalOrder[closestIndex].name, 'score:', bestMatchScore);
+                    } else {
+                        // Fall back to middle of the array for a more varied selection
+                        closestIndex = Math.floor(this.originalOrder.length / 2);
+                        console.log('No close matches found, selecting middle song:', this.originalOrder[closestIndex].name);
+                    }
+                }
+            } else {
+                // Switching to allMusic - use first song as before
+                closestIndex = 0;
+                console.log('Switching to allMusic, using first song');
+            }
+            
+            // Set to closest song
+            this.musicIndex = closestIndex + 1;
             
             // Recreate shuffle if needed
             if (wasShuffleMode) {
-                this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
+                this.shuffleWorker.postMessage({
+                    array: this.originalOrder,
+                    action: 'shuffle'
+                });
+                
+                // Wait for shuffle to complete
+                await new Promise(resolve => {
+                    const originalHandler = this.shuffleWorker.onmessage;
+                    this.shuffleWorker.onmessage = (e) => {
+                        this.shuffleWorker.onmessage = originalHandler;
+                        // Find the closest song's position in shuffled order
+                        const shuffledIndex = this.shuffledOrder.findIndex(song => 
+                            song.src === this.originalOrder[closestIndex].src
+                        );
+                        this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+                        resolve();
+                    };
+                });
             }
+            
+            // Load the closest song
+            this.loadMusic(this.musicIndex);
+            
+            // Autoplay the closest song after a short delay to ensure it's loaded
+            setTimeout(async () => {
+                try {
+                    await this.waitForAudioReady();
+                    await this.playMusic();
+                    console.log('Autoplaying closest song after array switch:', this.originalOrder[closestIndex]?.name);
+                } catch (error) {
+                    console.warn('Failed to autoplay closest song after array switch:', error);
+                    this.pauseMusic();
+                }
+            }, 400);
         }
         
         // Update the stored music index to match the new array
-        localStorage.setItem(`musicIndex${this.suffix}`, this.musicIndex);
+        await this.setStorageValue(`musicIndex${this.suffix}`, this.musicIndex);
         
         // Reset pagination and reload list
         this.resetPagination();
         
-        // Load the music at the determined index
-        this.loadMusic(this.musicIndex);
-        
+        // Update playing song status
         setTimeout(() => {
-            this.updatePlayingSong(); // Ensure playing state is updated after array switch
-        }, 300);
+            this.updatePlayingSong();
+        }, 400);
         
-        // Restore playing state if the same song was found
-        if (wasPlaying && newIndex >= 0) {
+        // Auto-scroll to current song if music list was open
+        if (isMusicListOpen) {
+            console.log('Music list was open during array switch - triggering auto scroll');
+            this.hasUserScrolled = false; // Reset scroll state
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout);
+            }
+            
+            // Multiple scroll attempts with increasing delays to ensure it works
             setTimeout(() => {
-                if (!this.isMusicPaused) {
-                    this.playMusic();
-                }
-            }, 800);
-        } else if (wasPlaying && newIndex === -1) {
+                console.log('switchToAllMusic - first scroll attempt');
+                this.scrollToCurrentSong();
+            }, 600);
+            
             setTimeout(() => {
-                this.pauseMusic();
-            }, 500);
-        }
-        
-        // Reset scroll state
-        this.hasUserScrolled = false;
-        if (this.scrollTimeout) {
-            clearTimeout(this.scrollTimeout);
+                console.log('switchToAllMusic - second scroll attempt');  
+                this.scrollToCurrentSong();
+            }, 900);
+            
+            setTimeout(() => {
+                console.log('switchToAllMusic - third scroll attempt');
+                this.scrollToCurrentSong();  
+            }, 1200);
+        } else {
+            // Reset scroll state even if list is closed
+            this.hasUserScrolled = false;
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout);
+            }
         }
     }
 
@@ -574,20 +935,15 @@ class MusicPlayer {
         
         this.videoAd.style.display = "block";
         
-        const videoSize = 280;
-        const containerSize = 370;
-        const videoOffset = (containerSize - videoSize) / 2;
-        
-        Object.assign(this.videoAd.style, {
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)'
-        });
+        // Use CSS transforms for better performance
+        this.videoAd.style.transform = 'translate(-50%, -50%) translateZ(0)';
+        this.videoAd.style.top = '50%';
+        this.videoAd.style.left = '50%';
         
         // Set video mute state based on audio playing state
         this.videoAd.muted = !this.isMusicPaused;
         
-        // Force video to play with error handling
+        // Enhanced autoplay with proper error handling
         const playPromise = this.videoAd.play();
         if (playPromise !== undefined) {
             playPromise.catch(error => {
@@ -602,8 +958,8 @@ class MusicPlayer {
         }
     }
 
-    loadPersistedState() {
-        const storedMusicIndex = localStorage.getItem(`musicIndex${this.suffix}`);
+    async loadPersistedState() {
+        const storedMusicIndex = await this.getStorageValue(`musicIndex${this.suffix}`);
         if (storedMusicIndex) {
             const parsedIndex = parseInt(storedMusicIndex, 10);
             // Ensure the index is valid for the current array
@@ -612,11 +968,12 @@ class MusicPlayer {
             } else {
                 // Index is invalid for current array, reset to first song
                 this.musicIndex = 1;
-                localStorage.setItem(`musicIndex${this.suffix}`, 1);
+                await this.setStorageValue(`musicIndex${this.suffix}`, 1);
             }
             
             this.loadMusic(this.musicIndex);
-            if (localStorage.getItem(`isMusicPaused${this.suffix}`) === "false") {
+            const isPaused = await this.getStorageValue(`isMusicPaused${this.suffix}`);
+            if (isPaused === false) {
                 this.playMusic();
             }
         } else {
@@ -688,7 +1045,7 @@ class MusicPlayer {
             this.videoAd.style.display = "none";
         }
 
-        localStorage.setItem(`musicIndex${this.suffix}`, index);
+        this.setStorageValue(`musicIndex${this.suffix}`, index);
         this.updatePlayingSong();
         
         // Only update border box for Player 2
@@ -719,6 +1076,7 @@ class MusicPlayer {
         }, 500);
         
         this.updatePlayingSong();
+        this.preloadNextTrack(); // Preload next track after loading current
     }
     
     resetScrollState() {
@@ -974,7 +1332,7 @@ class MusicPlayer {
             await this.mainAudio.play();
             
             this.isMusicPaused = false;
-            localStorage.setItem(`isMusicPaused${this.suffix}`, false);
+            await this.setStorageValue(`isMusicPaused${this.suffix}`, false);
             
             if (this.videoOverride) {
                 // In override mode: mute video when audio plays and ensure it's playing
@@ -996,17 +1354,17 @@ class MusicPlayer {
             this.wrapper.classList.remove("paused");
             this.playPauseBtn.querySelector("i").textContent = "play_arrow";
             this.isMusicPaused = true;
-            localStorage.setItem(`isMusicPaused${this.suffix}`, true);
+            await this.setStorageValue(`isMusicPaused${this.suffix}`, true);
         }
         this.updatePlayingSong();
     }
     
-    pauseMusic() {
+    async pauseMusic() {
         this.wrapper.classList.remove("paused");
         this.playPauseBtn.querySelector("i").textContent = "play_arrow";
         this.mainAudio.pause();
         this.isMusicPaused = true;
-        localStorage.setItem(`isMusicPaused${this.suffix}`, true);
+        await this.setStorageValue(`isMusicPaused${this.suffix}`, true);
         
         if (this.videoOverride) {
             // In override mode: unmute video when audio pauses and ensure it's playing
@@ -1044,24 +1402,16 @@ class MusicPlayer {
             return;
         }
         
-        const isDarkMode = this.wrapper.classList.contains("dark-mode");
-        
         if (show) {
             if (this.suffix === '2') {
                 this.videoAd.style.display = "none";
             } else {
                 this.videoAd.style.display = "block";
                 
-                const videoSize = 280;
-                const containerSize = 370;
-                const videoOffset = (containerSize - videoSize) / 2;
-                
-                // Batch video positioning updates
-                Object.assign(this.videoAd.style, {
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)'
-                });
+                // Use CSS transforms for better performance
+                this.videoAd.style.transform = 'translate(-50%, -50%) translateZ(0)';
+                this.videoAd.style.top = '50%';
+                this.videoAd.style.left = '50%';
                 
                 this.videoAd.play();
             }
@@ -1113,7 +1463,9 @@ class MusicPlayer {
         // Use RAF for smooth progress updates
         requestAnimationFrame(() => {
             if (this.progressBar) {
-                this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
+                // Use CSS transform for smoother progress updates while maintaining compatibility
+                const percentage = (currentTime / duration) * 100;
+                this.progressBar.style.width = `${percentage}%`;
             }
 
             const currentMin = Math.floor(currentTime / 60);
@@ -1148,10 +1500,12 @@ class MusicPlayer {
                 this.preShuffleIndex = this.musicIndex;
                 
                 this.isShuffleMode = true;
-                this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
-                this.musicIndex = 1;
-                this.loadMusic(this.musicIndex);
-                this.playMusic();
+                
+                // Use Web Worker for shuffling
+                this.shuffleWorker.postMessage({
+                    array: this.originalOrder,
+                    action: 'shuffle'
+                });
                 break;
             case "shuffle":
                 this.repeatBtn.textContent = "repeat";
@@ -1324,7 +1678,7 @@ class MusicPlayer {
                 liTag.querySelector(".audio-duration").textContent = `${totalMin}:${totalSec}`;
             });
 
-            liTag.addEventListener("click", () => {
+            this.addEventListenerWithCleanup(liTag, "click", () => {
                 const clickedMusic = this.originalOrder[actualIndex];
                 
                 if (this.isShuffleMode) {
@@ -1629,6 +1983,20 @@ class MusicPlayer {
         this.playMusic();
     }
 
+    handleAudioError(e) {
+        console.error('Audio playback error:', e);
+        // Enhanced autoplay fallback
+        setTimeout(() => {
+            if (this.mainAudio.paused && !this.isMusicPaused) {
+                this.mainAudio.play().catch(err => {
+                    console.warn('Autoplay retry failed:', err);
+                    // Reset to paused state if all attempts fail
+                    this.pauseMusic();
+                });
+            }
+        }, 1000);
+    }
+
     handleVideoEnd() {
         if (this.muteButton) {
             this.muteButton.disabled = false;
@@ -1712,15 +2080,16 @@ class MusicPlayer {
         if (shouldShow && styleKey) {
             const styles = this.borderBoxStyles[styleKey];
             
-            // Use CSS transform for better performance
+            // Use CSS transform for better performance with hardware acceleration
             const cssText = `
                 display: block;
                 top: ${styles.top};
                 left: ${styles.left};
                 width: ${styles.width};
                 height: ${styles.height};
-                transform: ${styles.transform};
+                transform: ${styles.transform} translateZ(0);
                 border-radius: ${styles.borderRadius};
+                will-change: transform;
             `;
             
             // Apply all styles at once using cssText (single reflow)
@@ -1744,6 +2113,70 @@ class MusicPlayer {
             
             observer.observe(this.borderBox);
         }
+    }
+
+    // Cleanup method to prevent memory leaks
+    cleanup() {
+        // Clean up event listeners
+        this.eventListeners.forEach((listeners, key) => {
+            listeners.forEach(({ element, event, handler, options }) => {
+                try {
+                    element.removeEventListener(event, handler, options);
+                } catch (error) {
+                    console.warn(`Failed to remove event listener: ${key}`, error);
+                }
+            });
+        });
+        this.eventListeners.clear();
+
+        // Clean up Web Worker
+        if (this.shuffleWorker) {
+            this.shuffleWorker.terminate();
+            this.shuffleWorker = null;
+        }
+
+        // Clean up audio elements
+        if (this.mainAudio) {
+            this.mainAudio.pause();
+            this.mainAudio.src = '';
+            this.mainAudio.load();
+        }
+
+        if (this.nextAudio) {
+            this.nextAudio.pause();
+            this.nextAudio.src = '';
+            this.nextAudio.load();
+        }
+
+        // Clean up video element
+        if (this.videoAd) {
+            this.videoAd.pause();
+            this.videoAd.src = '';
+            this.videoAd.load();
+        }
+
+        // Cancel any pending animation frames
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+
+        // Clear timeouts
+        if (this.scrollTimeout) {
+            clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = null;
+        }
+
+        // Clear preload links
+        const preloadLinks = document.querySelectorAll('link[rel="preload"][as="audio"]');
+        preloadLinks.forEach(link => link.remove());
+
+        // Close IndexedDB connection
+        if (this.storage && this.storage.db) {
+            this.storage.db.close();
+        }
+
+        console.log(`MusicPlayer${this.suffix} cleaned up successfully`);
     }
 }
 
@@ -1769,34 +2202,73 @@ function handleSize() {
         // Update video positioning based on new size
         if (player && sizer.style.display !== "none") {
             if (sizer.classList.contains('bigger-video')) {
-                // Full size video positioning
+                // Use CSS transforms for better performance
+                sizer.style.transform = 'translate(0, 0) translateZ(0)';
                 sizer.style.top = '0px';
                 sizer.style.left = '0px';
-                sizer.style.transform = 'translate(0, 0)';
             } else {
-                // Overlay size video positioning (centered)
-                const videoSize = 280;
-                const containerSize = 370;
-                const videoOffset = (containerSize - videoSize) / 2;
-                
+                // Use CSS transforms for smooth centering
+                sizer.style.transform = 'translate(-50%, -50%) translateZ(0)';
                 sizer.style.top = '50%';
                 sizer.style.left = '50%';
-                sizer.style.transform = 'translate(-50%, -50%)';
             }
         }
     });
 }
 
-// Initialize players when DOM loads with optimized approach
+// Enhanced initialization with error handling and cleanup
 document.addEventListener("DOMContentLoaded", () => {
-    // Use requestAnimationFrame to prevent blocking during initialization
+    // Clean up any existing players first
+    if (window.homePlayer) {
+        window.homePlayer.cleanup();
+    }
+    if (window.disguisePlayer) {
+        window.disguisePlayer.cleanup();
+    }
+
+    // Initialize with performance optimization
     requestAnimationFrame(() => {
         try {
-            window.homePlayer = new MusicPlayer();       // Original page
-            window.disguisePlayer = new MusicPlayer('2'); // Disguise page
+            window.homePlayer = new MusicPlayer();
+            window.disguisePlayer = new MusicPlayer('2');
+            
+            // Set up performance monitoring
+            if (window.homePlayer.setupPerformanceMonitoring) {
+                window.homePlayer.setupPerformanceMonitoring();
+            }
+            if (window.disguisePlayer.setupPerformanceMonitoring) {
+                window.disguisePlayer.setupPerformanceMonitoring();
+            }
+            
             handleSize();
+            
+            console.log('Music players initialized successfully');
         } catch (error) {
             console.error("Failed to initialize music players:", error);
         }
     });
 });
+
+// Clean up on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    if (window.homePlayer) {
+        window.homePlayer.cleanup();
+    }
+    if (window.disguisePlayer) {
+        window.disguisePlayer.cleanup();
+    }
+});
+
+// Additional performance optimizations
+// Optimize scroll performance with passive event listeners
+if ('serviceWorker' in navigator) {
+    // Register service worker for audio caching (optional)
+    navigator.serviceWorker.register('/audio-cache-sw.js').catch(error => {
+        console.log('Service Worker registration failed:', error);
+    });
+}
+
+// Enable hardware acceleration for better performance
+document.documentElement.style.transform = 'translateZ(0)';
+
+console.log('Complete Optimized Audio Player initialized with all features and enhanced performance');
