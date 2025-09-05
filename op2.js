@@ -262,11 +262,6 @@ class MusicPlayer {
             this.originalOrder = [...(window.allMusic || [])];
             this.usingReducedMusic = false;
         }
-
-        if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-            const AudioContextClass = AudioContext || webkitAudioContext;
-            this.audioContext = new AudioContextClass();
-        }
         
         this.shuffledOrder = [];
         this.isMuted = false;
@@ -1093,53 +1088,55 @@ class MusicPlayer {
     }
 
     setAudioSourceWithFallback(src) {
-    const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
-    const localAudioSrc = `${this.audioFolder}${src}.mp3`;
-    const uploadAudioSrc = `Upload/${src}.mp3`;
-    
-    // Clear any previous event listeners
-    this.mainAudio.onerror = null;
-    this.mainAudio.onloadeddata = null;
-    
-    // iOS Safari: Set preload to metadata for better initial loading
-    this.mainAudio.preload = 'metadata';
-    
-    // Try R2 first
-    this.mainAudio.src = r2AudioSrc;
-    
-    const handleAudioError = () => {
-        console.warn(`Audio failed to load from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
-        this.mainAudio.src = localAudioSrc;
+        const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
+        const localAudioSrc = `${this.audioFolder}${src}.mp3`;
+        const uploadAudioSrc = `Upload/${src}.mp3`; // New upload folder fallback
         
-        this.mainAudio.onloadeddata = () => {
-            console.log(`Audio loaded successfully from local: ${localAudioSrc}`);
-            this.mainAudio.onloadeddata = null;
-        };
+        // Clear any previous event listeners
+        this.mainAudio.onerror = null;
+        this.mainAudio.onloadeddata = null;
         
-        this.mainAudio.onerror = () => {
-            console.warn(`Audio failed to load from local: ${localAudioSrc}, trying upload: ${uploadAudioSrc}`);
-            this.mainAudio.src = uploadAudioSrc;
-            this.r2Available = false;
+        // Try R2 first
+        this.mainAudio.src = r2AudioSrc;
+        
+        // Set up error handling for audio with proper loading wait
+        const handleAudioError = () => {
+            console.warn(`Audio failed to load from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
+            this.mainAudio.src = localAudioSrc;
             
+            // Wait for local to load or fail
             this.mainAudio.onloadeddata = () => {
-                console.log(`Audio loaded successfully from upload: ${uploadAudioSrc}`);
+                console.log(`Audio loaded successfully from local: ${localAudioSrc}`);
                 this.mainAudio.onloadeddata = null;
             };
             
+            // Add upload folder fallback
             this.mainAudio.onerror = () => {
-                console.error(`All audio sources failed for: ${src}`);
-                this.mainAudio.onerror = null;
+                console.warn(`Audio failed to load from local: ${localAudioSrc}, trying upload: ${uploadAudioSrc}`);
+                this.mainAudio.src = uploadAudioSrc;
+                this.r2Available = false;
+                
+                // Wait for upload to load
+                this.mainAudio.onloadeddata = () => {
+                    console.log(`Audio loaded successfully from upload: ${uploadAudioSrc}`);
+                    this.mainAudio.onloadeddata = null;
+                };
+                
+                this.mainAudio.onerror = () => {
+                    console.error(`All audio sources failed for: ${src}`);
+                    this.mainAudio.onerror = null;
+                };
             };
         };
-    };
-    
-    this.mainAudio.onloadeddata = () => {
-        console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
-        this.mainAudio.onloadeddata = null;
-    };
-    
-    this.mainAudio.onerror = handleAudioError;
-}
+        
+        // Wait for R2 to load or fail
+        this.mainAudio.onloadeddata = () => {
+            console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
+            this.mainAudio.onloadeddata = null;
+        };
+        
+        this.mainAudio.onerror = handleAudioError;
+    }
 
     waitForAudioReady() {
         return new Promise((resolve) => {
@@ -1326,77 +1323,51 @@ class MusicPlayer {
     }
 
     async playMusic() {
-    this.wrapper.classList.add("paused");
-    this.playPauseBtn.querySelector("i").textContent = "pause";
-    
-    try {
-        // iOS Safari specific: ensure audio context is resumed
-        if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-            const AudioContextClass = AudioContext || webkitAudioContext;
-            if (this.audioContext && this.audioContext.state === 'suspended') {
-                await this.audioContext.resume();
+        this.wrapper.classList.add("paused");
+        this.playPauseBtn.querySelector("i").textContent = "pause";
+        
+        try {
+            // Wait for audio to be ready before playing
+            await this.waitForAudioReady();
+            
+            // Temporarily remove event handlers to prevent loops
+            const originalPlayHandler = this.mainAudio.onplay;
+            this.mainAudio.onplay = null;
+            
+            await this.mainAudio.play();
+            
+            // Restore handler after successful play
+            setTimeout(() => {
+                this.mainAudio.onplay = originalPlayHandler;
+            }, 100);
+            
+            this.isMusicPaused = false;
+            await this.setStorageValue(`isMusicPaused${this.suffix}`, false);
+            
+            if (this.videoOverride) {
+                // In override mode: mute video when audio plays and ensure it's playing
+                this.videoAd.muted = true;
+                this.showVideoOverride();
+            } else {
+                this.toggleVideoDisplay(false);
             }
-        }
-
-        // Wait for audio to be ready before playing
-        await this.waitForAudioReady();
-        
-        // iOS Safari: Load the audio explicitly before playing
-        this.mainAudio.load();
-        
-        // Wait a bit for load to complete on iOS
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Temporarily remove event handlers to prevent loops
-        const originalPlayHandler = this.mainAudio.onplay;
-        this.mainAudio.onplay = null;
-        
-        // iOS Safari: Use a more aggressive play approach
-        const playPromise = this.mainAudio.play();
-        
-        if (playPromise !== undefined) {
-            await playPromise;
-        }
-        
-        // Restore handler after successful play
-        setTimeout(() => {
-            this.mainAudio.onplay = originalPlayHandler;
-        }, 150);
-        
-        this.isMusicPaused = false;
-        await this.setStorageValue(`isMusicPaused${this.suffix}`, false);
-        
-        if (this.videoOverride) {
-            this.videoAd.muted = true;
-            this.showVideoOverride();
-        } else {
-            this.toggleVideoDisplay(false);
-        }
-        
-        this.resetVideoSize();
-        
-        if (this.suffix === '2') {
-            this.updateBorderBoxDisplay();
-        }
-    } catch (error) {
-        console.warn("Failed to play audio:", error);
-        // iOS Safari fallback: try again after a longer delay
-        setTimeout(async () => {
-            try {
-                await this.mainAudio.play();
-                this.isMusicPaused = false;
-                await this.setStorageValue(`isMusicPaused${this.suffix}`, false);
-            } catch (retryError) {
-                console.warn("Retry also failed:", retryError);
-                this.wrapper.classList.remove("paused");
-                this.playPauseBtn.querySelector("i").textContent = "play_arrow";
-                this.isMusicPaused = true;
-                await this.setStorageValue(`isMusicPaused${this.suffix}`, true);
+            
+            this.resetVideoSize();
+            
+            // Only update border box for Player 2
+            if (this.suffix === '2') {
+                this.updateBorderBoxDisplay();
             }
-        }, 300);
+        } catch (error) {
+            console.warn("Failed to play audio:", error);
+            // Reset play button state if play fails
+            this.wrapper.classList.remove("paused");
+            this.playPauseBtn.querySelector("i").textContent = "play_arrow";
+            this.isMusicPaused = true;
+            await this.setStorageValue(`isMusicPaused${this.suffix}`, true);
+        }
+        this.updatePlayingSong();
     }
-    this.updatePlayingSong();
-}
     
     async pauseMusic() {
         this.wrapper.classList.remove("paused");
