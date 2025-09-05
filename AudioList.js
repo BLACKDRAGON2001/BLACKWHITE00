@@ -6364,3 +6364,6 @@ let ReducedMusic = [
         coverType: "Images"
     },
   ];
+
+window.allMusic = allMusic;
+window.ReducedMusic = ReducedMusic;
