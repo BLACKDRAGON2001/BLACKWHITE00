@@ -1329,7 +1329,17 @@ class MusicPlayer {
         try {
             // Wait for audio to be ready before playing
             await this.waitForAudioReady();
+            
+            // Temporarily remove event handlers to prevent loops
+            const originalPlayHandler = this.mainAudio.onplay;
+            this.mainAudio.onplay = null;
+            
             await this.mainAudio.play();
+            
+            // Restore handler after successful play
+            setTimeout(() => {
+                this.mainAudio.onplay = originalPlayHandler;
+            }, 100);
             
             this.isMusicPaused = false;
             await this.setStorageValue(`isMusicPaused${this.suffix}`, false);
@@ -1973,14 +1983,24 @@ class MusicPlayer {
         if (this.muteButton) {
             this.muteButton.disabled = false;
         }
-        this.pauseMusic();
+        // Don't call pauseMusic() here as it creates a loop
+        // Just update the UI state to reflect the pause
+        this.wrapper.classList.remove("paused");
+        this.playPauseBtn.querySelector("i").textContent = "play_arrow";
+        this.isMusicPaused = true;
+        this.setStorageValue(`isMusicPaused${this.suffix}`, true);
     }
-
+    
     handleAudioPlay() {
         if (this.muteButton) {
             this.muteButton.disabled = true;
         }
-        this.playMusic();
+        // Don't call playMusic() here as it creates a loop  
+        // Just update the UI state to reflect the play
+        this.wrapper.classList.add("paused");
+        this.playPauseBtn.querySelector("i").textContent = "pause";
+        this.isMusicPaused = false;
+        this.setStorageValue(`isMusicPaused${this.suffix}`, false);
     }
 
     handleAudioError(e) {
