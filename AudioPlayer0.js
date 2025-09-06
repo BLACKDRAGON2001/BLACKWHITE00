@@ -152,14 +152,34 @@ class MusicPlayer {
     this.populateMusicList(this.originalOrder);
     this.updatePlayingSong();
     
+    // Test autoplay capability on mobile
+    this.testAutoplaySupport();
+    
     // Only initialize border box for Player 2
     if (this.suffix === '2') {
       this.initializeBorderBox();
     }
-
+  
     setTimeout(() => {
       this.isInitializing = false;
     }, 100)
+  }
+  
+  testAutoplaySupport() {
+    // Create a silent audio element to test autoplay
+    const testAudio = document.createElement('audio');
+    testAudio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG'; // Minimal silent WAV
+    testAudio.volume = 0;
+    
+    const playPromise = testAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.autoplayAllowed = true;
+      }).catch(() => {
+        this.autoplayAllowed = false;
+        console.log("Autoplay not allowed - user interaction required");
+      });
+    }
   }
 
   // Only used for Player 2
@@ -286,13 +306,9 @@ class MusicPlayer {
       
       this.loadMusic(this.musicIndex);
       if (localStorage.getItem(`isMusicPaused${this.suffix}`) === "false") {
-        // Wait for audio to be ready before attempting to play
-        this.waitForAudioReady().then(() => {
-          this.playMusic();
-        }).catch(() => {
-          // If audio fails to load, don't try to play
-          console.warn("Audio not ready for autoplay");
-        });
+        // Don't auto-play on mobile due to autoplay restrictions
+        // Just load the music and let user manually start it
+        console.log("Music loaded, ready to play when user interacts");
       }
     } else {
       this.musicIndex = 1;
@@ -606,14 +622,14 @@ class MusicPlayer {
   }
 
   async playMusic() {
-    this.wrapper.classList.add("paused");
-    this.playPauseBtn.querySelector("i").textContent = "pause";
-    
     try {
-      // Wait for audio to be ready before playing
+      // Wait for audio to be ready before changing UI state
       await this.waitForAudioReady();
       await this.mainAudio.play();
       
+      // Only update UI state after successful play
+      this.wrapper.classList.add("paused");
+      this.playPauseBtn.querySelector("i").textContent = "pause";
       this.isMusicPaused = false;
       localStorage.setItem(`isMusicPaused${this.suffix}`, false);
       
