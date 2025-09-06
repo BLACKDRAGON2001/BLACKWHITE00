@@ -286,7 +286,13 @@ class MusicPlayer {
       
       this.loadMusic(this.musicIndex);
       if (localStorage.getItem(`isMusicPaused${this.suffix}`) === "false") {
-        this.playMusic();
+        // Wait for audio to be ready before attempting to play
+        this.waitForAudioReady().then(() => {
+          this.playMusic();
+        }).catch(() => {
+          // If audio fails to load, don't try to play
+          console.warn("Audio not ready for autoplay");
+        });
       }
     } else {
       this.musicIndex = 1;
