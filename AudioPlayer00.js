@@ -157,7 +157,7 @@ document.getElementById("title").addEventListener("click", function() {
           lastUpdate: 0
         };
   
-        this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 16);
+        this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 50);
       }
       
       this.initialize();
@@ -191,23 +191,17 @@ document.getElementById("title").addEventListener("click", function() {
     initialize() {
       // Check if we have a stored preference for which music array to use - Player 2 only
       if (this.suffix === '2') {
-        const storedArrayType = this.getStorageValue(`usingReducedMusic${this.suffix}`);
-        if (storedArrayType !== null) {
-          this.usingReducedMusic = storedArrayType;
-          this.originalOrder = this.usingReducedMusic ? [...(window.ReducedMusic || [])] : [...(window.allMusic || [])];
-          
-          // Update button state based on stored preference - but wait for DOM
-          setTimeout(() => {
-            if (this.seeAllMusicBtn) {
-              this.seeAllMusicBtn.textContent = "star";
-            }
-          }, 100);
-        } else {
-          // Default to ReducedMusic for Player 2 and store this preference
-          this.originalOrder = [...(window.ReducedMusic || [])];
-          this.usingReducedMusic = true;
-          this.setStorageValue(`usingReducedMusic${this.suffix}`, true);
-        }
+        // Always start Player 2 with ReducedMusic array
+        this.originalOrder = [...(window.ReducedMusic || [])];
+        this.usingReducedMusic = true;
+        this.setStorageValue(`usingReducedMusic${this.suffix}`, true);
+        
+        // Set button state
+        setTimeout(() => {
+          if (this.seeAllMusicBtn) {
+            this.seeAllMusicBtn.textContent = "star";
+          }
+        }, 100);
       }
   
       this.setupEventListeners();
@@ -240,7 +234,6 @@ document.getElementById("title").addEventListener("click", function() {
           this.autoplayAllowed = true;
         }).catch(() => {
           this.autoplayAllowed = false;
-          console.log("Autoplay not allowed - user interaction required");
         });
       }
     }
@@ -300,32 +293,28 @@ document.getElementById("title").addEventListener("click", function() {
   
       // Enhanced scroll event listener with manual scroll detection - NEW FEATURE FROM OP2
       if (this.ulTag) {
+        // Throttled scroll handler for better performance
+        let scrollThrottleTimeout = null;
+        
         this.ulTag.addEventListener('scroll', (e) => {
-          // Handle pagination
-          this.handleScroll();
+          // Immediate scroll detection
+          this.hasUserScrolled = true;
           
-          // Handle manual scroll detection with debouncing
+          // Throttle expensive operations
+          if (!scrollThrottleTimeout) {
+            scrollThrottleTimeout = setTimeout(() => {
+              this.handleScroll();
+              scrollThrottleTimeout = null;
+            }, 100); // Reduced from multiple timeouts to single 100ms throttle
+          }
+          
+          // Simple debounced reset of scroll state
           if (this.scrollTimeout) {
             clearTimeout(this.scrollTimeout);
           }
-          
-          // Mark as manually scrolled immediately for responsive feel
-          this.hasUserScrolled = true;
-          
-          // Set a longer timeout to allow for programmatic scrolling
           this.scrollTimeout = setTimeout(() => {
-            // Only keep the manual scroll flag if user is still actively scrolling
-            const scrollTime = Date.now();
-            this.lastScrollTime = scrollTime;
-            
-            // Check if this was likely a programmatic scroll by checking timing
-            setTimeout(() => {
-              if (this.lastScrollTime === scrollTime) {
-                // No new scroll events, this was likely the last in a series
-                // Keep hasUserScrolled true for user-initiated scrolling
-              }
-            }, 50);
-          }, 150);
+            // Keep manual scroll flag - removed complex timing logic
+          }, 300);
         }, { passive: true });
       }
   
@@ -348,15 +337,12 @@ document.getElementById("title").addEventListener("click", function() {
   
     // Auto-scroll functionality - NEW FEATURE FROM OP2
     scrollToCurrentSong() {
-      console.log('scrollToCurrentSong called - hasUserScrolled:', this.hasUserScrolled, 'list visible:', this.musicList?.classList.contains("show"));
-      
       if (this.hasUserScrolled || !this.musicList?.classList.contains("show")) {
         return;
       }
       
-      // Additional check: ensure the music list container is actually visible
-      if (this.ulTag?.offsetParent === null || this.ulTag?.clientHeight === 0) {
-        console.log('Music list container not visible, skipping scroll');
+      // Single visibility check - removed redundant checks
+      if (!this.ulTag?.offsetParent) {
         return;
       }
       
@@ -364,35 +350,24 @@ document.getElementById("title").addEventListener("click", function() {
         this.shuffledOrder[this.musicIndex - 1] : 
         this.originalOrder[this.musicIndex - 1];
       
-      console.log('Current song:', currentSong, 'musicIndex:', this.musicIndex, 'isShuffleMode:', this.isShuffleMode);
+      if (!currentSong) return;
       
-      if (!currentSong) {
-        console.log('No current song found');
-        return;
-      }
-      
-      // First, find the song's index in the originalOrder array
       const songIndexInOriginal = this.originalOrder.findIndex(song => song.src === currentSong.src);
-      console.log('Song index in originalOrder:', songIndexInOriginal);
+      if (songIndexInOriginal === -1) return;
       
-      if (songIndexInOriginal === -1) {
-        console.log('Song not found in originalOrder');
-        return;
-      }
-      
-      // Check if the song is in the currently loaded items
       const currentlyLoadedCount = (this.currentPage + 1) * this.itemsPerPage;
-      console.log('Currently loaded items:', currentlyLoadedCount, 'Song needs to be at index:', songIndexInOriginal);
       
       if (songIndexInOriginal >= currentlyLoadedCount) {
-        // Song is not loaded yet, load more items until we reach it
-        console.log('Song not loaded yet, loading more items...');
-        this.loadItemsUntilSong(songIndexInOriginal, currentSong.src);
+        // Simplified loading - removed recursive approach
+        if (!this.isLoading && this.currentPage * this.itemsPerPage < this.originalOrder.length) {
+          this.loadMoreItems();
+          // Single retry after loading
+          setTimeout(() => {
+            this.attemptScrollToSong(currentSong.src);
+          }, 200);
+        }
       } else {
-        // Song should be in the current list, try to scroll to it
-        setTimeout(() => {
-          this.attemptScrollToSong(currentSong.src);
-        }, 100);
+        this.attemptScrollToSong(currentSong.src);
       }
     }
   
@@ -410,7 +385,6 @@ document.getElementById("title").addEventListener("click", function() {
         
         // Load more items
         if (!this.isLoading && this.currentPage * this.itemsPerPage < this.originalOrder.length) {
-          console.log('Loading more items to reach song...');
           this.loadMoreItems();
           
           // Continue loading after a delay
@@ -422,50 +396,33 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     attemptScrollToSong(targetSrc) {
-      // Double-check that the list is still visible before attempting scroll
-      if (!this.musicList?.classList.contains("show") || this.ulTag?.offsetParent === null) {
-        console.log('Music list no longer visible, aborting scroll');
+      if (!this.musicList?.classList.contains("show")) {
         return;
       }
       
       const allLiTags = this.ulTag.querySelectorAll("li");
-      console.log('Attempting to scroll to:', targetSrc, 'in', allLiTags.length, 'loaded items');
       
-      let foundMatch = false;
-      
-      allLiTags.forEach((liTag, index) => {
+      for (let i = 0; i < allLiTags.length; i++) {
+        const liTag = allLiTags[i];
         const audioTag = liTag.querySelector(".audio-duration");
+        
         if (audioTag && audioTag.id === targetSrc) {
-          console.log('Found matching song at index:', index, 'src:', audioTag.id);
-          foundMatch = true;
-          
-          // Additional check: ensure the target element is within the visible container
-          if (liTag.offsetParent !== null && this.ulTag.contains(liTag)) {
-            try {
-              // Use scrollTo on the container instead of scrollIntoView to prevent page scroll
-              const containerRect = this.ulTag.getBoundingClientRect();
-              const itemRect = liTag.getBoundingClientRect();
-              const scrollTop = this.ulTag.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2);
-              
-              // Use CSS transform for smooth scrolling
-              this.ulTag.style.scrollBehavior = 'smooth';
-              this.ulTag.scrollTo({
-                top: scrollTop,
-                behavior: 'smooth'
-              });
-              
-              console.log('Scroll attempted successfully using scrollTo');
-            } catch (error) {
-              console.warn('Scroll failed:', error);
-            }
-          } else {
-            console.log('Target element not properly visible, skipping scroll');
+          try {
+            // Simplified smooth scrolling
+            const containerRect = this.ulTag.getBoundingClientRect();
+            const itemRect = liTag.getBoundingClientRect();
+            const scrollTop = this.ulTag.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2);
+            
+            this.ulTag.scrollTo({
+              top: scrollTop,
+              behavior: 'smooth'
+            });
+            
+            break; // Exit loop once found
+          } catch (error) {
+            console.warn('Scroll failed:', error);
           }
         }
-      });
-      
-      if (!foundMatch) {
-        console.log('Still no matching song found after loading. Target src:', targetSrc);
       }
     }
   
@@ -567,7 +524,6 @@ document.getElementById("title").addEventListener("click", function() {
         
         if (this.usingReducedMusic) {
           // Switching to ReducedMusic - find closest song by artist or similar characteristics
-          console.log('Finding closest song in ReducedMusic array for:', currentSong.name, 'by', currentSong.artist);
           
           // Try to find a song by the same artist first
           const sameArtistIndex = this.originalOrder.findIndex(song => 
@@ -576,7 +532,6 @@ document.getElementById("title").addEventListener("click", function() {
           
           if (sameArtistIndex >= 0) {
             closestIndex = sameArtistIndex;
-            console.log('Found song by same artist:', this.originalOrder[closestIndex].name);
           } else {
             // If no same artist, try to find similar genre or style
             // Look for songs with similar words in the title
@@ -612,17 +567,14 @@ document.getElementById("title").addEventListener("click", function() {
             
             if (bestMatch >= 0 && bestMatchScore > 0) {
               closestIndex = bestMatch;
-              console.log('Found closest match by similarity:', this.originalOrder[closestIndex].name, 'score:', bestMatchScore);
             } else {
               // Fall back to middle of the array for a more varied selection
               closestIndex = Math.floor(this.originalOrder.length / 2);
-              console.log('No close matches found, selecting middle song:', this.originalOrder[closestIndex].name);
             }
           }
         } else {
           // Switching to allMusic - use first song as before
           closestIndex = 0;
-          console.log('Switching to allMusic, using first song');
         }
         
         // Set to closest song
@@ -646,7 +598,6 @@ document.getElementById("title").addEventListener("click", function() {
           try {
             await this.waitForAudioReady();
             await this.playMusic();
-            console.log('Autoplaying closest song after array switch:', this.originalOrder[closestIndex]?.name);
           } catch (error) {
             console.warn('Failed to autoplay closest song after array switch:', error);
             this.pauseMusic();
@@ -667,7 +618,6 @@ document.getElementById("title").addEventListener("click", function() {
       
       // Auto-scroll to current song if music list was open
       if (isMusicListOpen) {
-        console.log('Music list was open during array switch - triggering auto scroll');
         this.hasUserScrolled = false; // Reset scroll state
         if (this.scrollTimeout) {
           clearTimeout(this.scrollTimeout);
@@ -675,19 +625,8 @@ document.getElementById("title").addEventListener("click", function() {
         
         // Multiple scroll attempts with increasing delays to ensure it works
         setTimeout(() => {
-          console.log('switchToAllMusic - first scroll attempt');
           this.scrollToCurrentSong();
-        }, 600);
-        
-        setTimeout(() => {
-          console.log('switchToAllMusic - second scroll attempt');  
-          this.scrollToCurrentSong();
-        }, 900);
-        
-        setTimeout(() => {
-          console.log('switchToAllMusic - third scroll attempt');
-          this.scrollToCurrentSong();  
-        }, 1200);
+        }, 400);
       } else {
         // Reset scroll state even if list is closed
         this.hasUserScrolled = false;
@@ -761,7 +700,6 @@ document.getElementById("title").addEventListener("click", function() {
         if (this.getStorageValue(`isMusicPaused${this.suffix}`) === false) {
           // Don't auto-play on mobile due to autoplay restrictions
           // Just load the music and let user manually start it
-          console.log("Music loaded, ready to play when user interacts");
         }
       } else {
         this.musicIndex = 1;
@@ -847,18 +785,10 @@ document.getElementById("title").addEventListener("click", function() {
         clearTimeout(this.scrollTimeout);
       }
   
-      console.log('loadMusic end - calling scrollToCurrentSong after delay');
-  
       // Use multiple attempts with increasing delays
       setTimeout(() => {
-        console.log('First scroll attempt');
         this.scrollToCurrentSong();
-      }, 200);
-  
-      setTimeout(() => {
-        console.log('Second scroll attempt');
-        this.scrollToCurrentSong();
-      }, 500);
+      }, 300);
     }
   
     setAudioSourceWithFallback(src) {
@@ -880,7 +810,6 @@ document.getElementById("title").addEventListener("click", function() {
         
         // Wait for local to load or fail
         this.mainAudio.onloadeddata = () => {
-          console.log(`Audio loaded successfully from local: ${localAudioSrc}`);
           this.mainAudio.onloadeddata = null;
         };
         
@@ -892,7 +821,6 @@ document.getElementById("title").addEventListener("click", function() {
           
           // Wait for upload to load
           this.mainAudio.onloadeddata = () => {
-            console.log(`Audio loaded successfully from upload: ${uploadAudioSrc}`);
             this.mainAudio.onloadeddata = null;
           };
           
@@ -905,7 +833,6 @@ document.getElementById("title").addEventListener("click", function() {
       
       // Wait for R2 to load or fail
       this.mainAudio.onloadeddata = () => {
-        console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
         this.mainAudio.onloadeddata = null;
       };
       
@@ -1308,7 +1235,6 @@ document.getElementById("title").addEventListener("click", function() {
       
       // Auto-scroll when music list is opened - NEW FEATURE FROM OP2
       if (wasClosed && this.musicList?.classList.contains("show")) {
-        console.log('Music list opened - resetting scroll state');
         // FORCE reset manual scroll flag
         this.hasUserScrolled = false;
         if (this.scrollTimeout) {
@@ -1317,19 +1243,8 @@ document.getElementById("title").addEventListener("click", function() {
         
         // Multiple scroll attempts
         setTimeout(() => {
-          console.log('toggleMusicList - first scroll attempt');
           this.scrollToCurrentSong();
-        }, 100);
-        
-        setTimeout(() => {
-          console.log('toggleMusicList - second scroll attempt');  
-          this.scrollToCurrentSong();
-        }, 300);
-        
-        setTimeout(() => {
-          console.log('toggleMusicList - third scroll attempt');
-          this.scrollToCurrentSong();  
-        }, 600);
+        }, 200);
       }
     }
   
@@ -1468,11 +1383,8 @@ document.getElementById("title").addEventListener("click", function() {
       }
   
       if (!currentMusic) {
-        console.log('No current music found, musicIndex:', this.musicIndex, 'shuffleMode:', this.isShuffleMode);
         return;
       }
-  
-      console.log('Updating playing song for:', currentMusic.name, 'src:', currentMusic.src, 'isPaused:', this.isMusicPaused);
   
       // First pass: Clear all playing states and restore durations
       allLiTags.forEach(liTag => {
@@ -1506,7 +1418,6 @@ document.getElementById("title").addEventListener("click", function() {
   
         // Check if this matches the current song
         if (audioTag.id === currentMusic.src) {
-          console.log('Found current song in list:', currentMusic.name);
           foundCurrentSong = true;
           
           // Mark as currently selected
@@ -1527,18 +1438,15 @@ document.getElementById("title").addEventListener("click", function() {
   
       // If song not found, try to load it
       if (!foundCurrentSong) {
-        console.log('Current song not found in loaded items. Looking for:', currentMusic.src);
         
         // Find song position in original order
         const songIndexInOriginal = this.originalOrder.findIndex(song => song.src === currentMusic.src);
         
         if (songIndexInOriginal >= 0) {
           const currentlyLoadedCount = (this.currentPage + 1) * this.itemsPerPage;
-          console.log('Song index in original:', songIndexInOriginal, 'currently loaded:', currentlyLoadedCount);
           
           if (songIndexInOriginal >= currentlyLoadedCount) {
             // Load more items to reach the current song
-            console.log('Loading more items to reach current song...');
             this.loadItemsUntilSongForPlaying(songIndexInOriginal, currentMusic.src);
           }
         } else {
@@ -1765,38 +1673,27 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     updateBorderBoxImmediate() {
-      // Only handle border box for Player 2
-      if (this.suffix !== '2' || !this.borderBox) return;
-  
-      if (this.isInitializing) {
-        this.borderBox.style.display = "none";
+      if (this.suffix !== '2' || !this.borderBox || this.isInitializing) {
+        if (this.borderBox) this.borderBox.style.display = "none";
         return;
       }
       
       const now = performance.now();
       
-      // Throttle updates to avoid excessive DOM manipulation
-      if (now - this.borderBoxState.lastUpdate < 16) return;
+      // Increased throttling from 16ms to 50ms
+      if (now - this.borderBoxState.lastUpdate < 50) return;
       
       const isDarkMode = this.wrapper.classList.contains("dark-mode");
       
-      // Determine visibility and style in one pass
-      let shouldShowBorder = false;
-      let targetStyle = null;
+      let shouldShowBorder = isDarkMode;
+      let targetStyle = isDarkMode ? 'player2DarkMode' : null;
       
-      if (isDarkMode) {
-        shouldShowBorder = true;
-        targetStyle = 'player2DarkMode';
-      }
-      
-      // Only update if state actually changed
+      // Only update if state changed
       if (this.borderBoxState.isVisible !== shouldShowBorder || 
           this.borderBoxState.currentStyle !== targetStyle) {
         
-        // Batch all DOM operations together
         this.applyBorderBoxChanges(shouldShowBorder, targetStyle);
         
-        // Update cached state
         this.borderBoxState.isVisible = shouldShowBorder;
         this.borderBoxState.currentStyle = targetStyle;
         this.borderBoxState.lastUpdate = now;
