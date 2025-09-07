@@ -137,6 +137,11 @@ document.getElementById("title").addEventListener("click", function() {
       this.hasScrolledToCurrentSong = false;
       this.hasUserScrolled = false;
       this.scrollTimeout = null;
+
+      this.preloadedSongs = new Set(); // Track which songs are preloaded
+      this.nextSongIndex = null; // Cache next song index
+      this.prevSongIndex = null; // Cache previous song index
+      this.returnToNormalIndex = null; // Index to return to when shuffle is disabled
       
       // Only set up border box styles for Player 2
       if (suffix === '2') {
@@ -789,6 +794,11 @@ document.getElementById("title").addEventListener("click", function() {
       setTimeout(() => {
         this.scrollToCurrentSong();
       }, 300);
+
+      this.calculateNextPrevSongs();
+      setTimeout(() => {
+        this.preloadCriticalSongs();
+      }, 100);
     }
   
     setAudioSourceWithFallback(src) {
@@ -1186,12 +1196,18 @@ document.getElementById("title").addEventListener("click", function() {
           this.repeatBtn.textContent = "shuffle";
           this.repeatBtn.title = "Playbook shuffled";
           
-          // Store current song index before shuffling
+          // Store current song for return from shuffle
           this.preShuffleIndex = this.musicIndex;
+          this.returnToNormalIndex = this.musicIndex - 1; // Store as 0-based index
           
           this.isShuffleMode = true;
           this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
           this.musicIndex = 1;
+          
+          // Calculate and preload critical songs
+          this.calculateNextPrevSongs();
+          this.preloadCriticalSongs();
+          
           this.loadMusic(this.musicIndex);
           this.playMusic();
           break;
@@ -1203,8 +1219,16 @@ document.getElementById("title").addEventListener("click", function() {
           // Return to the song that was playing before shuffle
           this.musicIndex = this.preShuffleIndex;
           
+          // Clear shuffle-related data
+          this.returnToNormalIndex = null;
+          
+          // Calculate and preload for normal mode
+          this.calculateNextPrevSongs();
+          this.preloadCriticalSongs();
+          
           this.loadMusic(this.musicIndex);
           this.playMusic();
+          this.updatePlayingSong();
           break;
       }
     }
@@ -1308,9 +1332,239 @@ document.getElementById("title").addEventListener("click", function() {
       this.currentPage = 0;
       this.ulTag.innerHTML = "";
       
-      // Load initial batch from original order
-      const initialItems = this.originalOrder.slice(0, this.itemsPerPage);
-      this.appendMusicItems(initialItems, 0);
+      // Always load exactly 25 items, starting from current song position
+      const currentSongIndex = this.findCurrentSongIndex();
+      const startIndex = Math.max(0, currentSongIndex - 12); // Center current song
+      const endIndex = Math.min(startIndex + 25, this.originalOrder.length);
+      
+      // Adjust startIndex if we can't load 25 items from current position
+      const actualStartIndex = Math.max(0, endIndex - 25);
+      
+      const itemsToLoad = this.originalOrder.slice(actualStartIndex, endIndex);
+      this.appendMusicItems(itemsToLoad, actualStartIndex);
+      
+      // Update currentPage to reflect the loaded range
+      this.currentPage = Math.floor(actualStartIndex / this.itemsPerPage);
+      
+      // Preload critical songs
+      this.preloadCriticalSongs();
+    }
+
+    findCurrentSongIndex() {
+      const currentMusic = this.isShuffleMode ? 
+        this.shuffledOrder[this.musicIndex - 1] : 
+        this.originalOrder[this.musicIndex - 1];
+      
+      if (!currentMusic) return 0;
+      
+      return this.originalOrder.findIndex(song => song.src === currentMusic.src);
+    }
+    
+    preloadCriticalSongs() {
+      // Calculate which songs need to be preloaded
+      this.calculateNextPrevSongs();
+      
+      const songsToPreload = [];
+      
+      // Always preload next song in current mode
+      if (this.nextSongIndex !== null) {
+        songsToPreload.push(this.nextSongIndex);
+      }
+      
+      // Always preload previous song in current mode  
+      if (this.prevSongIndex !== null) {
+        songsToPreload.push(this.prevSongIndex);
+      }
+      
+      // If in shuffle mode, preload the song we'll return to when shuffle is disabled
+      if (this.isShuffleMode && this.returnToNormalIndex !== null) {
+        songsToPreload.push(this.returnToNormalIndex);
+      }
+      
+      // Preload these songs if not already loaded
+      songsToPreload.forEach(index => {
+        this.ensureSongIsLoaded(index);
+      });
+    }
+    
+    calculateNextPrevSongs() {
+      if (this.isShuffleMode) {
+        // In shuffle mode
+        const currentArray = this.shuffledOrder;
+        const currentIndex = this.musicIndex - 1;
+        
+        // Next song in shuffle
+        this.nextSongIndex = this.findOriginalIndex(
+          currentArray[(currentIndex + 1) % currentArray.length]
+        );
+        
+        // Previous song in shuffle  
+        this.prevSongIndex = this.findOriginalIndex(
+          currentArray[currentIndex === 0 ? currentArray.length - 1 : currentIndex - 1]
+        );
+        
+        // Song to return to when shuffle is disabled (store current normal mode position)
+        if (this.returnToNormalIndex === null) {
+          this.returnToNormalIndex = this.findOriginalIndex(
+            this.shuffledOrder[this.musicIndex - 1]
+          );
+        }
+      } else {
+        // In normal mode
+        const currentIndex = this.musicIndex - 1;
+        
+        // Next song in normal mode
+        this.nextSongIndex = (currentIndex + 1) % this.originalOrder.length;
+        
+        // Previous song in normal mode
+        this.prevSongIndex = currentIndex === 0 ? this.originalOrder.length - 1 : currentIndex - 1;
+        
+        // Clear return index when not in shuffle
+        this.returnToNormalIndex = null;
+      }
+    }
+    
+    findOriginalIndex(song) {
+      if (!song) return null;
+      return this.originalOrder.findIndex(s => s.src === song.src);
+    }
+    
+    ensureSongIsLoaded(originalIndex) {
+      if (originalIndex === null || this.preloadedSongs.has(originalIndex)) {
+        return; // Already loaded or invalid index
+      }
+      
+      const allLiTags = this.ulTag.querySelectorAll("li");
+      let songFound = false;
+      
+      // Check if song is already in the current 25 items
+      allLiTags.forEach(liTag => {
+        const liIndex = parseInt(liTag.getAttribute("li-index")) - 1;
+        if (liIndex === originalIndex) {
+          songFound = true;
+          this.preloadedSongs.add(originalIndex);
+        }
+      });
+      
+      if (!songFound) {
+        // Song not in current view, need to strategically load it
+        this.loadSongAtIndex(originalIndex);
+      }
+    }
+    
+    loadSongAtIndex(targetIndex) {
+      if (this.preloadedSongs.has(targetIndex)) return;
+      
+      // Find the range of currently loaded items
+      const allLiTags = this.ulTag.querySelectorAll("li");
+      if (allLiTags.length === 0) return;
+      
+      const firstIndex = parseInt(allLiTags[0].getAttribute("li-index")) - 1;
+      const lastIndex = parseInt(allLiTags[allLiTags.length - 1].getAttribute("li-index")) - 1;
+      
+      // If target is within current range, mark as preloaded
+      if (targetIndex >= firstIndex && targetIndex <= lastIndex) {
+        this.preloadedSongs.add(targetIndex);
+        return;
+      }
+      
+      // Need to adjust the loaded range to include target song
+      // Remove the song furthest from current playing song
+      const currentSongIndex = this.findCurrentSongIndex();
+      
+      let indexToRemove = null;
+      let maxDistance = 0;
+      
+      allLiTags.forEach(liTag => {
+        const liIndex = parseInt(liTag.getAttribute("li-index")) - 1;
+        const distance = Math.abs(liIndex - currentSongIndex);
+        
+        if (distance > maxDistance) {
+          maxDistance = distance;
+          indexToRemove = liIndex;
+        }
+      });
+      
+      // Remove the furthest song and add the target song
+      if (indexToRemove !== null) {
+        // Remove the furthest li element
+        allLiTags.forEach(liTag => {
+          const liIndex = parseInt(liTag.getAttribute("li-index")) - 1;
+          if (liIndex === indexToRemove) {
+            liTag.remove();
+            this.preloadedSongs.delete(indexToRemove);
+          }
+        });
+        
+        // Add the target song
+        this.addSingleSongToList(targetIndex);
+        this.preloadedSongs.add(targetIndex);
+      }
+    }
+    
+    addSingleSongToList(songIndex) {
+      if (songIndex < 0 || songIndex >= this.originalOrder.length) return;
+      
+      const music = this.originalOrder[songIndex];
+      const liTag = document.createElement("li");
+      liTag.setAttribute("li-index", songIndex + 1);
+    
+      liTag.innerHTML = `
+        <div class="row">
+          <span>${music.name}</span>
+          <p>${music.artist}</p>
+        </div>
+        <span id="${music.src}" class="audio-duration">3:40</span>
+        <audio class="${music.src}" src="${this.audioBucketUrl}${music.src}.mp3"></audio>
+      `;
+    
+      // Insert in correct position to maintain order
+      const allLiTags = this.ulTag.querySelectorAll("li");
+      let insertBeforeElement = null;
+      
+      for (let i = 0; i < allLiTags.length; i++) {
+        const existingIndex = parseInt(allLiTags[i].getAttribute("li-index")) - 1;
+        if (existingIndex > songIndex) {
+          insertBeforeElement = allLiTags[i];
+          break;
+        }
+      }
+      
+      if (insertBeforeElement) {
+        this.ulTag.insertBefore(liTag, insertBeforeElement);
+      } else {
+        this.ulTag.appendChild(liTag);
+      }
+      
+      // Set up audio and event listeners
+      const liAudioTag = liTag.querySelector(`.${music.src}`);
+      
+      liAudioTag.onerror = () => {
+        liAudioTag.src = `${this.audioFolder}${music.src}.mp3`;
+        liAudioTag.onerror = () => {
+          liAudioTag.src = `Upload/${music.src}.mp3`;
+        };
+      };
+      
+      liAudioTag.addEventListener("loadeddata", () => {
+        const duration = liAudioTag.duration;
+        const totalMin = Math.floor(duration / 60);
+        const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
+        liTag.querySelector(".audio-duration").textContent = `${totalMin}:${totalSec}`;
+      });
+    
+      liTag.addEventListener("click", () => {
+        if (this.isShuffleMode) {
+          const clickedMusic = this.originalOrder[songIndex];
+          const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
+          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+        } else {
+          this.musicIndex = songIndex + 1;
+        }
+        this.loadMusic(this.musicIndex);
+        this.playMusic();
+        this.resetVideoSize();
+      });
     }
   
     appendMusicItems(musicItems, startIndex) {
