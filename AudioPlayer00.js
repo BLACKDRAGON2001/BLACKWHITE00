@@ -95,6 +95,8 @@ document.getElementById("title").addEventListener("click", function() {
       this.ulTag = this.wrapper.querySelector("ul");
       this.repeatBtn = this.wrapper.querySelector(`#repeat-plist${suffix}`);
       this.seeAllMusicBtn = this.wrapper.querySelector('.seeAllMusic');
+      this.currentTimeElement = this.wrapper.querySelector(".current-time");
+      this.maxDurationElement = this.wrapper.querySelector(".max-duration");
       
       // Only initialize border box for Player 2
       if (suffix === '2') {
@@ -125,7 +127,7 @@ document.getElementById("title").addEventListener("click", function() {
   
       // Pagination state
       this.currentPage = 0;
-      this.itemsPerPage = 25;
+      this.itemsPerPage = 15;
       this.isLoading = false;
       this.currentMusicArray = this.originalOrder;
   
@@ -161,8 +163,8 @@ document.getElementById("title").addEventListener("click", function() {
           currentStyle: null,
           lastUpdate: 0
         };
-  
-        this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 50);
+
+        this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 100);
       }
       
       this.initialize();
@@ -208,11 +210,15 @@ document.getElementById("title").addEventListener("click", function() {
           }
         }, 100);
       }
-  
+    
       this.setupEventListeners();
       this.loadPersistedState();
-      this.populateMusicList(this.originalOrder);
-      this.updatePlayingSong();
+      
+      // MOBILE OPTIMIZATION: Delay heavy operations
+      requestAnimationFrame(() => {
+        this.populateMusicList(this.originalOrder);
+        this.updatePlayingSong();
+      });
       
       // Test autoplay capability on mobile
       this.testAutoplaySupport();
@@ -224,7 +230,7 @@ document.getElementById("title").addEventListener("click", function() {
     
       setTimeout(() => {
         this.isInitializing = false;
-      }, 100)
+      }, 100);
     }
     
     testAutoplaySupport() {
@@ -286,55 +292,50 @@ document.getElementById("title").addEventListener("click", function() {
       this.modeToggle.addEventListener("click", () => this.toggleDarkMode());
       this.muteButton.addEventListener("click", () => this.handleMute());
       this.repeatBtn.addEventListener("click", () => this.handleRepeat());
-  
+    
       // Media events
-      this.mainAudio.addEventListener("timeupdate", (e) => this.updateProgress(e));
+      // MOBILE OPTIMIZATION: Use throttled progress update
+      this.mainAudio.addEventListener("timeupdate", this.throttle((e) => this.updateProgress(e), 100));
       this.mainAudio.addEventListener("ended", () => this.handleSongEnd());
       this.mainAudio.addEventListener("pause", () => this.handleAudioPause());
       this.mainAudio.addEventListener("play", () => this.handleAudioPlay());
       this.videoAd.addEventListener("ended", () => this.handleVideoEnd());
-  
+    
       this.musicName.addEventListener("click", () => this.toggleVideoControls());
-  
-      // Enhanced scroll event listener with manual scroll detection - NEW FEATURE FROM OP2
+    
+      // MOBILE OPTIMIZATION: More aggressive scroll throttling for mobile
       if (this.ulTag) {
-        // Throttled scroll handler for better performance
         let scrollThrottleTimeout = null;
         
         this.ulTag.addEventListener('scroll', (e) => {
-          // Immediate scroll detection
           this.hasUserScrolled = true;
           
-          // Throttle expensive operations
+          // MOBILE OPTIMIZATION: Increased throttle to 150ms for mobile
           if (!scrollThrottleTimeout) {
             scrollThrottleTimeout = setTimeout(() => {
               this.handleScroll();
               scrollThrottleTimeout = null;
-            }, 100); // Reduced from multiple timeouts to single 100ms throttle
+            }, 150);
           }
           
-          // Simple debounced reset of scroll state
           if (this.scrollTimeout) {
             clearTimeout(this.scrollTimeout);
           }
           this.scrollTimeout = setTimeout(() => {
-            // Keep manual scroll flag - removed complex timing logic
-          }, 300);
+            // Keep manual scroll flag
+          }, 400);
         }, { passive: true });
       }
-  
+    
       const seeVideoBtn = document.querySelector('.seeVideo');
       if (seeVideoBtn) {
         seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
       }
-  
-      // ReducedMusic/AllMusic switching for Player 2 - NEW FEATURE FROM OP2
+    
+      // ReducedMusic/AllMusic switching for Player 2
       if (this.suffix === '2' && this.seeAllMusicBtn) {
-        // Remove the pointer-events: none and make it clickable
         this.seeAllMusicBtn.style.pointerEvents = 'auto';
         this.seeAllMusicBtn.style.cursor = 'pointer';
-        
-        // Set initial button state based on current mode
         this.seeAllMusicBtn.textContent = "star";
         this.seeAllMusicBtn.addEventListener("click", () => this.switchToAllMusic());
       }
@@ -413,17 +414,18 @@ document.getElementById("title").addEventListener("click", function() {
         
         if (audioTag && audioTag.id === targetSrc) {
           try {
-            // Simplified smooth scrolling
             const containerRect = this.ulTag.getBoundingClientRect();
             const itemRect = liTag.getBoundingClientRect();
             const scrollTop = this.ulTag.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2);
             
+            // MOBILE OPTIMIZATION: Use instant scroll on mobile for better performance
+            const isMobile = window.innerWidth <= 768;
             this.ulTag.scrollTo({
               top: scrollTop,
-              behavior: 'smooth'
+              behavior: isMobile ? 'auto' : 'smooth' // Changed behavior based on device
             });
             
-            break; // Exit loop once found
+            break;
           } catch (error) {
             console.warn('Scroll failed:', error);
           }
@@ -851,7 +853,7 @@ document.getElementById("title").addEventListener("click", function() {
   
     waitForAudioReady() {
       return new Promise((resolve) => {
-        if (this.mainAudio.readyState >= 3) { // HAVE_FUTURE_DATA or higher
+        if (this.mainAudio.readyState >= 3) {
           resolve();
           return;
         }
@@ -865,12 +867,12 @@ document.getElementById("title").addEventListener("click", function() {
         this.mainAudio.addEventListener('canplay', handleCanPlay);
         this.mainAudio.addEventListener('loadeddata', handleCanPlay);
         
-        // Fallback timeout
+        // MOBILE OPTIMIZATION: Reduced timeout from 2000ms to 1500ms
         setTimeout(() => {
           this.mainAudio.removeEventListener('canplay', handleCanPlay);
           this.mainAudio.removeEventListener('loadeddata', handleCanPlay);
           resolve();
-        }, 2000);
+        }, 1500); // Changed from 2000ms
       });
     }
   
@@ -1171,18 +1173,33 @@ document.getElementById("title").addEventListener("click", function() {
       this.playMusic();
     }
   
+    // MOBILE OPTIMIZATION: Cached DOM elements and reduced calculations
     updateProgress(e) {
       const { currentTime, duration } = e.target;
       this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
-  
+
       const currentMin = Math.floor(currentTime / 60);
       const currentSec = Math.floor(currentTime % 60).toString().padStart(2, "0");
-      this.wrapper.querySelector(".current-time").textContent = `${currentMin}:${currentSec}`;
-  
+      this.currentTimeElement.textContent = `${currentMin}:${currentSec}`; // Use cached element
+
       if (!isNaN(duration)) {
         const totalMin = Math.floor(duration / 60);
         const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
-        this.wrapper.querySelector(".max-duration").textContent = `${totalMin}:${totalSec}`;
+        this.maxDurationElement.textContent = `${totalMin}:${totalSec}`; // Use cached element
+      }
+    }
+
+        // MOBILE OPTIMIZATION: Add throttle function for frequent events
+    throttle(func, limit) {
+      let inThrottle;
+      return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
       }
     }
   
@@ -1289,8 +1306,8 @@ document.getElementById("title").addEventListener("click", function() {
       const scrollHeight = this.ulTag.scrollHeight;
       const clientHeight = this.ulTag.clientHeight;
       
-      // Check if user scrolled to bottom (with small threshold)
-      if (scrollTop + clientHeight >= scrollHeight - 10) {
+      // MOBILE OPTIMIZATION: Increased threshold for mobile touch scrolling
+      if (scrollTop + clientHeight >= scrollHeight - 20) { // Changed from -10
         if (isDarkMode) {
           this.loadMoreItems();
           this.listcolourblack();
@@ -1332,22 +1349,29 @@ document.getElementById("title").addEventListener("click", function() {
       this.currentPage = 0;
       this.ulTag.innerHTML = "";
       
-      // Always load exactly 25 items, starting from current song position
-      const currentSongIndex = this.findCurrentSongIndex();
-      const startIndex = Math.max(0, currentSongIndex - 12); // Center current song
-      const endIndex = Math.min(startIndex + 25, this.originalOrder.length);
+      // MOBILE OPTIMIZATION: Load fewer items initially on mobile
+      const isMobile = window.innerWidth <= 768;
+      const initialLoadCount = isMobile ? 10 : 15; // Reduced for mobile
       
-      // Adjust startIndex if we can't load 25 items from current position
-      const actualStartIndex = Math.max(0, endIndex - 25);
+      const currentSongIndex = this.findCurrentSongIndex();
+      const startIndex = Math.max(0, currentSongIndex - Math.floor(initialLoadCount / 2));
+      const endIndex = Math.min(startIndex + initialLoadCount, this.originalOrder.length);
+      
+      const actualStartIndex = Math.max(0, endIndex - initialLoadCount);
       
       const itemsToLoad = this.originalOrder.slice(actualStartIndex, endIndex);
       this.appendMusicItems(itemsToLoad, actualStartIndex);
       
-      // Update currentPage to reflect the loaded range
       this.currentPage = Math.floor(actualStartIndex / this.itemsPerPage);
       
-      // Preload critical songs
-      this.preloadCriticalSongs();
+      // MOBILE OPTIMIZATION: Delay preloading on mobile
+      if (!isMobile) {
+        this.preloadCriticalSongs();
+      } else {
+        setTimeout(() => {
+          this.preloadCriticalSongs();
+        }, 500);
+      }
     }
 
     findCurrentSongIndex() {
@@ -1361,28 +1385,32 @@ document.getElementById("title").addEventListener("click", function() {
     }
     
     preloadCriticalSongs() {
-      // Calculate which songs need to be preloaded
+      // Skip preloading on slower connections
+      if (navigator.connection && navigator.connection.effectiveType === 'slow-2g') {
+        return;
+      }
+      
       this.calculateNextPrevSongs();
       
       const songsToPreload = [];
       
-      // Always preload next song in current mode
       if (this.nextSongIndex !== null) {
         songsToPreload.push(this.nextSongIndex);
       }
       
-      // Always preload previous song in current mode  
       if (this.prevSongIndex !== null) {
         songsToPreload.push(this.prevSongIndex);
       }
       
-      // If in shuffle mode, preload the song we'll return to when shuffle is disabled
       if (this.isShuffleMode && this.returnToNormalIndex !== null) {
         songsToPreload.push(this.returnToNormalIndex);
       }
       
-      // Preload these songs if not already loaded
-      songsToPreload.forEach(index => {
+      // MOBILE OPTIMIZATION: Limit preloading on mobile
+      const isMobile = window.innerWidth <= 768;
+      const maxPreload = isMobile ? 1 : songsToPreload.length;
+      
+      songsToPreload.slice(0, maxPreload).forEach(index => {
         this.ensureSongIsLoaded(index);
       });
     }
@@ -2034,8 +2062,32 @@ document.getElementById("title").addEventListener("click", function() {
   }
   
   // Initialize players when DOM loads
-  document.addEventListener("DOMContentLoaded", () => {
-    window.homePlayer = new MusicPlayer();       // Original page
-    window.disguisePlayer = new MusicPlayer('2'); // Disguise page
-    handleSize();
-  });
+  // Replace the existing DOMContentLoaded listener with:
+document.addEventListener("DOMContentLoaded", () => {
+  // Critical initialization first
+  window.homePlayer = new MusicPlayer();
+  window.disguisePlayer = new MusicPlayer('2');
+  
+  // MOBILE OPTIMIZATION: Defer non-critical setup
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      handleSize();
+    });
+  } else {
+    setTimeout(() => {
+      handleSize();
+    }, 100);
+  }
+  
+  // MOBILE OPTIMIZATION: Add mobile-specific optimizations
+  let viewport = document.querySelector('meta[name=viewport]');
+  if (!viewport) {
+    viewport = document.createElement('meta');
+    viewport.name = 'viewport';
+    document.head.appendChild(viewport);
+  }
+  viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+  
+  // Better touch performance
+  document.body.style.touchAction = 'manipulation';
+});
