@@ -746,23 +746,20 @@ document.getElementById("title").addEventListener("click", function() {
       // Set audio source with R2 fallback to local
       this.setAudioSourceWithFallback(src);
     
-      // Only set video source for player 1, but keep video element for player 2 (for border positioning)
+      // VIDEO FIX: Only set video source for player 1, remove duplicate calls
       if (this.suffix !== '2') {
-        // Original player - full video functionality
+        // Only for Player 1 - set video source once
         this.setVideoSourceWithFallback(src);
         
-        // If video override is active, ensure video plays after source change
+        // Handle video override if active
         if (this.videoOverride) {
-          // Wait for video to load then apply override behavior
           const handleVideoLoaded = () => {
             this.showVideoOverride();
           };
           
-          // Use both events to ensure it works across different scenarios
           this.videoAd.addEventListener('loadeddata', handleVideoLoaded, { once: true });
           this.videoAd.addEventListener('canplay', handleVideoLoaded, { once: true });
           
-          // Fallback timeout in case events don't fire
           setTimeout(() => {
             if (this.videoOverride) {
               this.showVideoOverride();
@@ -770,9 +767,10 @@ document.getElementById("title").addEventListener("click", function() {
           }, 500);
         }
       } else {
-        // Player 2 - NO VIDEO, but keep element for border reference
+        // Player 2 - ensure video is completely disabled
         this.videoAd.src = "";
         this.videoAd.style.display = "none";
+        this.videoAd.pause(); // Ensure it's stopped
       }
     
       this.setStorageValue(`musicIndex${this.suffix}`, index);
@@ -782,21 +780,18 @@ document.getElementById("title").addEventListener("click", function() {
       if (this.suffix === '2' && !this.isInitializing) {
         this.updateBorderBoxDisplay();
       }
-  
-      // Auto-scroll functionality - reset scroll state and scroll to current song - NEW FEATURE FROM OP2
+    
+      // Auto-scroll functionality
       this.hasScrolledToCurrentSong = false;
-  
-      // FORCE reset of scroll state and scroll to current song
-      this.hasUserScrolled = false; // Force reset
+      this.hasUserScrolled = false;
       if (this.scrollTimeout) {
         clearTimeout(this.scrollTimeout);
       }
-  
-      // Use multiple attempts with increasing delays
+    
       setTimeout(() => {
         this.scrollToCurrentSong();
       }, 300);
-
+    
       this.calculateNextPrevSongs();
       setTimeout(() => {
         this.preloadCriticalSongs();
@@ -1215,38 +1210,358 @@ document.getElementById("title").addEventListener("click", function() {
           
           // Store current song for return from shuffle
           this.preShuffleIndex = this.musicIndex;
-          this.returnToNormalIndex = this.musicIndex - 1; // Store as 0-based index
+          this.returnToNormalIndex = this.musicIndex - 1;
           
           this.isShuffleMode = true;
-          this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
+          this.shuffledOrder = this.fisherYatesShuffle([...this.originalOrder]);
           this.musicIndex = 1;
           
-          // Calculate and preload critical songs
-          this.calculateNextPrevSongs();
-          this.preloadCriticalSongs();
+          // Load music lightweight
+          this.loadMusicLightweight(this.musicIndex);
           
-          this.loadMusic(this.musicIndex);
-          this.playMusic();
+          // FIXED: Use your existing playMusic method directly
+          setTimeout(() => {
+            this.playMusic(); // This should work since shuffle click = user interaction
+          }, 200);
+          
+          // Defer expensive operations
+          setTimeout(() => {
+            this.calculateNextPrevSongs();
+            this.updatePlayingSong();
+          }, 50);
+          
+          setTimeout(() => {
+            this.preloadCriticalSongs();
+          }, 300);
           break;
+          
         case "shuffle":
           this.repeatBtn.textContent = "repeat";
           this.repeatBtn.title = "Playlist looped";
           this.isShuffleMode = false;
           
-          // Return to the song that was playing before shuffle
           this.musicIndex = this.preShuffleIndex;
-          
-          // Clear shuffle-related data
           this.returnToNormalIndex = null;
           
-          // Calculate and preload for normal mode
+          this.loadMusicLightweight(this.musicIndex);
+          
+          // FIXED: Use your existing playMusic method directly
+          setTimeout(() => {
+            this.playMusic(); // This should work since shuffle click = user interaction
+          }, 200);
+          
+          setTimeout(() => {
+            this.calculateNextPrevSongs();
+            this.preloadCriticalSongs();
+            this.updatePlayingSong();
+          }, 50);
+          break;
+      }
+    }
+
+    fisherYatesShuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    loadMusicLightweight(index) {
+      const music = this.isShuffleMode ?
+        this.shuffledOrder[index - 1] :
+        this.originalOrder[index - 1];
+    
+      // Only update essential info immediately
+      this.musicName.textContent = music.name;
+      this.musicArtist.textContent = music.artist;
+    
+      // Load cover image (this is relatively fast)
+      this.loadCoverOnly(music);
+    
+      // Set audio source (essential for playback)
+      this.setAudioSourceWithFallback(music.src);
+    
+      // Store state
+      this.setStorageValue(`musicIndex${this.suffix}`, index);
+      
+      // VIDEO FIX: Only set video for Player 1, and only once
+      if (this.suffix !== '2') {
+        this.setVideoSourceWithFallback(music.src);
+      } else {
+        // For Player 2: ensure video is hidden and has no source
+        this.videoAd.src = "";
+        this.videoAd.style.display = "none";
+      }
+    }
+
+    loadCoverOnly(music) {
+      const { coverType = 'Images', src, type = 'jpg' } = music;
+      this.coverArea.innerHTML = '';
+    
+      // For Player 2 or when not using video covers, always use image
+      const mediaElement = (this.suffix === '2' || coverType !== 'video')
+        ? this.createImageElement(src, type)
+        : this.createVideoElementWithFallback(src, type);
+    
+      this.coverArea.appendChild(mediaElement);
+    }
+
+    async startShuffleMode() {
+      // Show loading state immediately
+      this.repeatBtn.style.opacity = '0.6';
+      this.repeatBtn.style.pointerEvents = 'none';
+      
+      try {
+        // Step 1: Set shuffle mode flag
+        this.isShuffleMode = true;
+        
+        // Step 2: Create shuffled array asynchronously
+        await this.createShuffledArrayAsync();
+        
+        // Step 3: Set starting position
+        this.musicIndex = 1;
+        
+        // Step 4: Load new song with minimal operations
+        await this.loadMusicOptimized(this.musicIndex);
+        
+        // Step 5: Defer expensive calculations
+        requestIdleCallback(() => {
           this.calculateNextPrevSongs();
           this.preloadCriticalSongs();
-          
-          this.loadMusic(this.musicIndex);
-          this.playMusic();
+        });
+        
+        // Step 6: Attempt playback (respecting mobile autoplay policies)
+        await this.playMusicSafe();
+        
+      } catch (error) {
+        console.warn('Shuffle mode failed:', error);
+        // Fallback to normal mode
+        this.exitShuffleModeQuick();
+      } finally {
+        // Restore button state
+        this.repeatBtn.style.opacity = '1';
+        this.repeatBtn.style.pointerEvents = 'auto';
+      }
+    }
+    
+    // Async exit shuffle for better performance
+    async exitShuffleMode() {
+      // Show loading state
+      this.repeatBtn.style.opacity = '0.6';
+      this.repeatBtn.style.pointerEvents = 'none';
+      
+      try {
+        this.isShuffleMode = false;
+        
+        // Return to pre-shuffle position
+        this.musicIndex = this.preShuffleIndex;
+        this.returnToNormalIndex = null;
+        
+        // Load music with minimal operations
+        await this.loadMusicOptimized(this.musicIndex);
+        
+        // Defer expensive calculations
+        requestIdleCallback(() => {
+          this.calculateNextPrevSongs();
+          this.preloadCriticalSongs();
           this.updatePlayingSong();
-          break;
+        });
+        
+        // Attempt playback
+        await this.playMusicSafe();
+        
+      } catch (error) {
+        console.warn('Exit shuffle failed:', error);
+      } finally {
+        // Restore button state
+        this.repeatBtn.style.opacity = '1';
+        this.repeatBtn.style.pointerEvents = 'auto';
+      }
+    }
+    
+    // Quick shuffle exit without animations (fallback)
+    exitShuffleModeQuick() {
+      this.isShuffleMode = false;
+      this.musicIndex = this.preShuffleIndex || 1;
+      this.returnToNormalIndex = null;
+      this.repeatBtn.textContent = "repeat";
+      this.repeatBtn.title = "Playlist looped";
+      this.repeatBtn.style.opacity = '1';
+      this.repeatBtn.style.pointerEvents = 'auto';
+    }
+    
+    // Async array shuffling to prevent main thread blocking
+    createShuffledArrayAsync() {
+      return new Promise((resolve) => {
+        // For smaller arrays, do it immediately
+        if (this.originalOrder.length <= 50) {
+          this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
+          resolve();
+          return;
+        }
+        
+        // For larger arrays, chunk the work
+        this.shuffledOrder = [...this.originalOrder];
+        let i = this.shuffledOrder.length;
+        
+        const shuffleChunk = () => {
+          const startTime = performance.now();
+          
+          // Process for max 5ms chunks to avoid blocking
+          while (i > 1 && (performance.now() - startTime) < 5) {
+            const j = Math.floor(Math.random() * i);
+            i--;
+            [this.shuffledOrder[i], this.shuffledOrder[j]] = [this.shuffledOrder[j], this.shuffledOrder[i]];
+          }
+          
+          if (i <= 1) {
+            resolve();
+          } else {
+            // Continue in next frame
+            requestAnimationFrame(shuffleChunk);
+          }
+        };
+        
+        requestAnimationFrame(shuffleChunk);
+      });
+    }
+    
+    // Optimized music loading with minimal DOM operations
+    async loadMusicOptimized(index) {
+      const music = this.isShuffleMode ?
+        this.shuffledOrder[index - 1] :
+        this.originalOrder[index - 1];
+    
+      // Batch DOM updates to minimize reflows
+      requestAnimationFrame(() => {
+        this.musicName.textContent = music.name;
+        this.musicArtist.textContent = music.artist;
+      });
+    
+      // Load cover image efficiently
+      this.loadCoverImageOptimized(music);
+    
+      // Set audio source with better error handling
+      await this.setAudioSourceOptimized(music.src);
+    
+      // Store state
+      this.setStorageValue(`musicIndex${this.suffix}`, index);
+    }
+    
+    // Optimized cover image loading
+    loadCoverImageOptimized(music) {
+      const { coverType = 'Images', src, type = 'jpg' } = music;
+      
+      // Clear previous content efficiently
+      if (this.coverArea.firstChild) {
+        this.coverArea.removeChild(this.coverArea.firstChild);
+      }
+    
+      const mediaElement = (this.suffix === '2' || coverType !== 'video')
+        ? this.createImageElement(src, type)
+        : this.createVideoElementWithFallback(src, type);
+    
+      this.coverArea.appendChild(mediaElement);
+    }
+    
+    // Optimized audio source setting
+    setAudioSourceOptimized(src) {
+      return new Promise((resolve) => {
+        const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
+        const localAudioSrc = `${this.audioFolder}${src}.mp3`;
+        const uploadAudioSrc = `Upload/${src}.mp3`;
+        
+        // Clear previous handlers
+        this.mainAudio.onloadeddata = null;
+        this.mainAudio.onerror = null;
+        
+        const handleSuccess = () => {
+          this.mainAudio.onloadeddata = null;
+          this.mainAudio.onerror = null;
+          resolve();
+        };
+        
+        const tryLocal = () => {
+          this.mainAudio.src = localAudioSrc;
+          this.mainAudio.onloadeddata = handleSuccess;
+          this.mainAudio.onerror = () => {
+            this.mainAudio.src = uploadAudioSrc;
+            this.mainAudio.onloadeddata = handleSuccess;
+            this.mainAudio.onerror = () => {
+              console.error(`All audio sources failed for: ${src}`);
+              resolve(); // Continue anyway
+            };
+          };
+        };
+        
+        // Try R2 first
+        this.mainAudio.src = r2AudioSrc;
+        this.mainAudio.onloadeddata = handleSuccess;
+        this.mainAudio.onerror = tryLocal;
+        
+        // Timeout for mobile networks
+        setTimeout(() => {
+          if (this.mainAudio.onloadeddata) {
+            console.warn('Audio loading timeout, continuing anyway');
+            this.mainAudio.onloadeddata = null;
+            this.mainAudio.onerror = null;
+            resolve();
+          }
+        }, 3000);
+      });
+    }
+    
+    // Safe play method respecting mobile autoplay policies
+    async playMusicSafe() {
+      try {
+        // Check if we can autoplay
+        if (!this.autoplayAllowed) {
+          // On mobile, often need user gesture first
+          console.log('Autoplay not allowed, waiting for user interaction');
+          return;
+        }
+        
+        await this.waitForAudioReady();
+        await this.mainAudio.play();
+        
+        // Update UI state
+        this.wrapper.classList.add("paused");
+        this.playPauseBtn.querySelector("i").textContent = "pause";
+        this.isMusicPaused = false;
+        this.setStorageValue(`isMusicPaused${this.suffix}`, false);
+        
+        // Handle video display efficiently
+        this.updateVideoDisplayOptimized();
+        
+      } catch (error) {
+        console.warn("Safe play failed:", error);
+        // Set paused state
+        this.wrapper.classList.remove("paused");
+        this.playPauseBtn.querySelector("i").textContent = "play_arrow";
+        this.isMusicPaused = true;
+        this.setStorageValue(`isMusicPaused${this.suffix}`, true);
+      }
+    }
+    
+    // Optimized video display updates
+    updateVideoDisplayOptimized() {
+      if (this.videoOverride) {
+        this.showVideoOverride();
+      } else {
+        this.toggleVideoDisplay(!this.isMusicPaused);
+      }
+      
+      this.resetVideoSize();
+      
+      // Only update border box for Player 2 with debouncing
+      if (this.suffix === '2') {
+        if (this.borderBoxUpdateTimeout) {
+          clearTimeout(this.borderBoxUpdateTimeout);
+        }
+        this.borderBoxUpdateTimeout = setTimeout(() => {
+          this.updateBorderBoxDisplay();
+        }, 100);
       }
     }
   
