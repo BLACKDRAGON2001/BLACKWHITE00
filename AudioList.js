@@ -196,6 +196,41 @@ let allMusic = [
     },
 
     {
+        name: "Montagem Direcao",
+        artist: "DJ FKU And Farofinat",
+        src: "MontagemDirecao",
+        coverType: "Images"
+    },
+
+    {
+        name: "Lsd-Genius",
+        artist: "Sia Diplo And Labrinth",
+        src: "LsdGenius",
+        coverType: "Images"
+    },
+
+    {
+        name: "Toxic",
+        artist: "Britney Spears",
+        src: "Toxic",
+        coverType: "Images"
+    },
+
+    {
+        name: "So What",
+        artist: "P!nk",
+        src: "SoWhat",
+        coverType: "Images"
+    },
+
+    {
+        name: "Baby One More Time",
+        artist: "Britney Spears",
+        src: "BabyOneMoreTime",
+        coverType: "Images"
+    },
+
+    {
         name: "Montagem Bandido",
         artist: "Jmilton",
         src: "MontagemBandido",
@@ -1491,9 +1526,16 @@ let allMusic = [
     },
 
     {
-        name: "Let the World Burn",
+        name: "Let The World Burn",
         artist: "Chris Grey",
         src: "LetTheWorldBurn",
+        coverType: "Images"
+    },
+
+    {
+        name: "Let The World Burn Remix",
+        artist: "Chris Grey G-Eazy And Ari",
+        src: "LetTheWorldBurnRemix",
         coverType: "Images"
     },
 
