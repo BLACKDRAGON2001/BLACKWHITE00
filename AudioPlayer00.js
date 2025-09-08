@@ -513,9 +513,6 @@ class MusicPlayer {
 
   // Replace setAudioSourceWithFallback method:
   setAudioSourceWithFallback(src) {
-    const isMobile = this.detectMobile();
-    const timeout = isMobile ? 8000 : 5000; // Longer timeout for mobile
-    
     const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
     const localAudioSrc = `${this.audioFolder}${src}.mp3`;
     const uploadAudioSrc = `Upload/${src}.mp3`;
@@ -523,38 +520,38 @@ class MusicPlayer {
     this.mainAudio.onerror = null;
     this.mainAudio.onloadeddata = null;
     
-    let loadTimeout;
+    this.mainAudio.src = r2AudioSrc;
     
-    const trySource = (source, fallbackSources) => {
-      return new Promise((resolve, reject) => {
-        this.mainAudio.src = source;
-        
-        // Set loading timeout
-        loadTimeout = setTimeout(() => {
-          console.warn(`Audio loading timeout for: ${source}`);
-          reject(new Error('Loading timeout'));
-        }, timeout);
+    this.mainAudio.onloadeddata = () => {
+      console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
+      this.mainAudio.onloadeddata = null;
+    };
+    
+    this.mainAudio.onerror = () => {
+      console.warn(`Audio failed from R2, trying local: ${localAudioSrc}`);
+      this.mainAudio.src = localAudioSrc;
+      
+      this.mainAudio.onloadeddata = () => {
+        console.log(`Audio loaded from local: ${localAudioSrc}`);
+        this.mainAudio.onloadeddata = null;
+      };
+      
+      this.mainAudio.onerror = () => {
+        console.warn(`Audio failed from local, trying upload: ${uploadAudioSrc}`);
+        this.mainAudio.src = uploadAudioSrc;
+        this.r2Available = false;
         
         this.mainAudio.onloadeddata = () => {
-          clearTimeout(loadTimeout);
-          console.log(`Audio loaded successfully: ${source}`);
-          resolve();
+          console.log(`Audio loaded from upload: ${uploadAudioSrc}`);
+          this.mainAudio.onloadeddata = null;
         };
         
         this.mainAudio.onerror = () => {
-          clearTimeout(loadTimeout);
-          reject(new Error(`Failed to load: ${source}`));
+          console.error(`All audio sources failed for: ${src}`);
+          this.mainAudio.onerror = null;
         };
-      });
+      };
     };
-    
-    // Try sources in sequence
-    trySource(r2AudioSrc)
-      .catch(() => trySource(localAudioSrc))
-      .catch(() => trySource(uploadAudioSrc))
-      .catch(() => {
-        console.error(`All audio sources failed for: ${src}`);
-      });
   }
 
   setInitialAudioSource(src) {
@@ -731,46 +728,32 @@ class MusicPlayer {
 
   createImageElement(src, type) {
     const img = document.createElement('img');
-    const isMobile = this.detectMobile();
     
-    // Smaller images for mobile to reduce bandwidth
-    const imageSuffix = isMobile ? '_mobile' : '';
-    
-    const r2ImageSrc = `${this.imageBucketUrl}${src}${imageSuffix}.${type}`;
+    const r2ImageSrc = `${this.imageBucketUrl}${src}.${type}`;
     const localImageSrc = `${this.imageFolder}${src}.${type}`;
     const uploadImageSrc = `Upload/${src}.${type}`;
     
+    img.src = r2ImageSrc;
     img.alt = this.musicName.textContent;
     
-    // Set loading timeout for mobile
-    let loadTimeout;
-    if (isMobile) {
-      loadTimeout = setTimeout(() => {
-        console.warn(`Image loading timeout, using fallback`);
-        img.src = localImageSrc;
-      }, 6000);
-    }
-    
-    img.onload = () => {
-      if (loadTimeout) clearTimeout(loadTimeout);
-    };
-    
     img.onerror = () => {
-      if (loadTimeout) clearTimeout(loadTimeout);
-      console.warn(`Failed to load image: ${img.src}`);
+      console.warn(`Failed to load image from R2: ${r2ImageSrc}, trying local: ${localImageSrc}`);
+      img.src = localImageSrc;
       
-      // Try local, then upload, then white fallback for mobile
-      if (img.src === r2ImageSrc) {
-        img.src = localImageSrc;
-      } else if (img.src === localImageSrc) {
+      img.onerror = () => {
+        console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
         img.src = uploadImageSrc;
-      } else if (this.suffix === '2') {
-        this.createWhiteFallback(img);
-      }
+        
+        img.onerror = () => {
+          console.warn(`Failed to load upload image: ${uploadImageSrc}`);
+          if (this.suffix === '2') {
+            this.createWhiteFallback(img);
+          }
+        };
+      };
       this.r2Available = false;
     };
     
-    img.src = r2ImageSrc;
     return img;
   }
 
@@ -801,18 +784,7 @@ class MusicPlayer {
   }
 
   async playMusic() {
-    const isMobile = this.detectMobile();
-    
     try {
-      // On mobile, ensure user interaction before playing
-      if (isMobile && !this.hasUserInteracted) {
-        console.log("Mobile detected - waiting for user interaction");
-        return;
-      }
-      
-      // Wait for audio to be ready with timeout
-      await this.waitForAudioReady(3000);
-      
       const playPromise = this.mainAudio.play();
       
       if (playPromise !== undefined) {
@@ -822,10 +794,10 @@ class MusicPlayer {
         this.playPauseBtn.querySelector("i").textContent = "pause";
         this.isMusicPaused = false;
         
-        if (this.videoOverride && !isMobile) {
+        if (this.videoOverride) {
           this.videoAd.muted = true;
           this.showVideoOverride();
-        } else if (!isMobile) {
+        } else {
           this.toggleVideoDisplay(false);
         }
         
@@ -841,11 +813,6 @@ class MusicPlayer {
       this.wrapper.classList.remove("paused");
       this.playPauseBtn.querySelector("i").textContent = "play_arrow";
       this.isMusicPaused = true;
-      
-      // Show user-friendly message for mobile
-      if (isMobile) {
-        this.showMobilePlayMessage();
-      }
     }
     this.updatePlayingSong();
   }
