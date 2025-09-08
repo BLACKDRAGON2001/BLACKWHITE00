@@ -107,7 +107,7 @@ class MusicPlayer {
 
     // Virtualization properties
     this.ROW_HEIGHT = 60; // Height of each music list item in pixels
-    this.BUFFER = 5; // Buffer items above/below viewport
+    this.BUFFER = 20; // Buffer items above/below viewport
     this.lastRenderStart = -1;
     this.lastRenderEnd = -1;
     this.renderTicking = false;
@@ -160,7 +160,7 @@ class MusicPlayer {
     this.setupResizeObserver();
     
     // Test autoplay capability on mobile
-    this.testAutoplaySupport();
+    //this.testAutoplaySupport();
     
     // Only initialize border box for Player 2
     if (this.suffix === '2') {
@@ -170,23 +170,6 @@ class MusicPlayer {
     setTimeout(() => {
       this.isInitializing = false;
     }, 100)
-  }
-  
-  testAutoplaySupport() {
-    // Create a silent audio element to test autoplay
-    const testAudio = document.createElement('audio');
-    testAudio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG'; // Minimal silent WAV
-    testAudio.volume = 0;
-    
-    const playPromise = testAudio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        this.autoplayAllowed = true;
-      }).catch(() => {
-        this.autoplayAllowed = false;
-        console.log("Autoplay not allowed - user interaction required");
-      });
-    }
   }
 
   // Only used for Player 2
@@ -344,19 +327,23 @@ class MusicPlayer {
     const storedMusicIndex = localStorage.getItem(`musicIndex${this.suffix}`);
     if (storedMusicIndex) {
       const parsedIndex = parseInt(storedMusicIndex, 10);
-      // Ensure the index is valid
       if (parsedIndex >= 1 && parsedIndex <= this.musicSource.length) {
         this.musicIndex = parsedIndex;
       } else {
-        this.musicIndex = 1; // Reset to first song if invalid
+        this.musicIndex = 1;
         localStorage.setItem(`musicIndex${this.suffix}`, 1);
       }
       
       this.loadMusic(this.musicIndex);
-      if (localStorage.getItem(`isMusicPaused${this.suffix}`) === "false") {
-        // Don't auto-play on mobile due to autoplay restrictions
-        // Just load the music and let user manually start it
-        console.log("Music loaded, ready to play when user interacts");
+      
+      // Don't auto-play on mobile or when page loads
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const wasPaused = localStorage.getItem(`isMusicPaused${this.suffix}`) !== "false";
+      
+      if (!isMobile && !wasPaused) {
+        // Only try to resume on desktop and if it was previously playing
+        console.log("Desktop - ready to resume playback");
+        // Don't auto-play even on desktop - let user initiate
       }
     } else {
       this.musicIndex = 1;
@@ -546,7 +533,7 @@ class MusicPlayer {
     this.mainAudio.onerror = handleInitialAudioError;
   }
 
-  waitForAudioReady() {
+  /*waitForAudioReady() {
     return new Promise((resolve) => {
       if (this.mainAudio.readyState >= 3) { // HAVE_FUTURE_DATA or higher
         resolve();
@@ -569,7 +556,7 @@ class MusicPlayer {
         resolve();
       }, 2000);
     });
-  }
+  }*/
 
   createVideoElementWithFallback(src, type) {
     const video = document.createElement('video');
@@ -732,37 +719,47 @@ class MusicPlayer {
 
   async playMusic() {
     try {
-      // Wait for audio to be ready before changing UI state
-      await this.waitForAudioReady();
-      await this.mainAudio.play();
+      // Remove the waitForAudioReady call that might be causing delays
+      // Just try to play directly
       
-      // Only update UI state after successful play
-      this.wrapper.classList.add("paused");
-      this.playPauseBtn.querySelector("i").textContent = "pause";
-      this.isMusicPaused = false;
-      localStorage.setItem(`isMusicPaused${this.suffix}`, false);
+      const playPromise = this.mainAudio.play();
       
-      if (this.videoOverride) {
-        // In override mode: mute video when audio plays and ensure it's playing
-        this.videoAd.muted = true;
-        this.showVideoOverride();
-      } else {
-        this.toggleVideoDisplay(false);
-      }
-      
-      this.resetVideoSize();
-      
-      // Only update border box for Player 2
-      if (this.suffix === '2') {
-        this.updateBorderBoxDisplay();
+      if (playPromise !== undefined) {
+        await playPromise;
+        
+        // Only update UI state after successful play
+        this.wrapper.classList.add("paused");
+        this.playPauseBtn.querySelector("i").textContent = "pause";
+        this.isMusicPaused = false;
+        localStorage.setItem(`isMusicPaused${this.suffix}`, false);
+        
+        if (this.videoOverride) {
+          this.videoAd.muted = true;
+          this.showVideoOverride();
+        } else {
+          this.toggleVideoDisplay(false);
+        }
+        
+        this.resetVideoSize();
+        
+        if (this.suffix === '2') {
+          this.updateBorderBoxDisplay();
+        }
       }
     } catch (error) {
-      console.warn("Failed to play audio:", error);
+      console.warn("Failed to play audio - user interaction may be required:", error);
+      
       // Reset play button state if play fails
       this.wrapper.classList.remove("paused");
       this.playPauseBtn.querySelector("i").textContent = "play_arrow";
       this.isMusicPaused = true;
       localStorage.setItem(`isMusicPaused${this.suffix}`, true);
+      
+      // Show a user-friendly message for mobile users
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // You could show a toast or notification here
+        console.log("Tap the play button to start music");
+      }
     }
     this.updatePlayingSong();
   }
