@@ -138,8 +138,6 @@ class MusicPlayer {
     }
     
     this.initialize();
-    this.hasUserInteracted = false;
-    this.setupUserInteractionDetection();
   }
 
   debounce(func, wait) {
@@ -199,37 +197,6 @@ class MusicPlayer {
     });
   }
 
-  setupUserInteractionDetection() {
-    const isMobile = this.detectMobile();
-    
-    if (isMobile) {
-      const detectInteraction = () => {
-        this.hasUserInteracted = true;
-        document.removeEventListener('touchstart', detectInteraction);
-        document.removeEventListener('click', detectInteraction);
-      };
-      
-      document.addEventListener('touchstart', detectInteraction, { once: true, passive: true });
-      document.addEventListener('click', detectInteraction, { once: true });
-    } else {
-      this.hasUserInteracted = true;
-    }
-  }
-
-  detectPerformanceMode() {
-    // Detect mobile devices and performance capabilities
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isLowMemory = navigator.deviceMemory && navigator.deviceMemory < 4;
-    const isSlowCPU = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
-    
-    if (isMobile || isLowMemory || isSlowCPU) {
-      return 'mobile';
-    } else if (navigator.deviceMemory && navigator.deviceMemory < 8) {
-      return 'medium';
-    }
-    return 'desktop';
-  }
-
   updateBorderBoxDisplay() {
     // Only update border box for Player 2
     if (this.suffix === '2') {
@@ -243,90 +210,42 @@ class MusicPlayer {
   }
 
   setupEventListeners() {
-    // Use passive listeners where possible to improve scroll performance
-    const passiveOptions = { passive: true };
-    const activeOptions = { passive: false };
-
     // Control events
-    this.playPauseBtn.addEventListener("click", () => this.togglePlayPause(), passiveOptions);
-    this.prevBtn.addEventListener("click", () => this.changeMusic(-1), passiveOptions);
-    this.nextBtn.addEventListener("click", () => this.changeMusic(1), passiveOptions);
-    this.progressArea.addEventListener("click", (e) => this.handleProgressClick(e), activeOptions);
-    this.moreMusicBtn.addEventListener("click", () => this.toggleMusicList(), passiveOptions);
-    this.closeMoreMusicBtn.addEventListener("click", () => this.closeMusicList(), passiveOptions);
-    this.modeToggle.addEventListener("click", () => this.toggleDarkMode(), passiveOptions);
-    this.muteButton.addEventListener("click", () => this.handleMute(), passiveOptions);
-    this.repeatBtn.addEventListener("click", () => this.handleRepeat(), passiveOptions);
+    this.playPauseBtn.addEventListener("click", () => this.togglePlayPause());
+    this.prevBtn.addEventListener("click", () => this.changeMusic(-1));
+    this.nextBtn.addEventListener("click", () => this.changeMusic(1));
+    this.progressArea.addEventListener("click", (e) => this.handleProgressClick(e));
+    this.moreMusicBtn.addEventListener("click", () => this.toggleMusicList());
+    this.closeMoreMusicBtn.addEventListener("click", () => this.closeMusicList());
+    this.modeToggle.addEventListener("click", () => this.toggleDarkMode());
+    this.muteButton.addEventListener("click", () => this.handleMute());
+    this.repeatBtn.addEventListener("click", () => this.handleRepeat());
 
-    // Media events - throttle the heavy ones
-    this.mainAudio.addEventListener("timeupdate", this.throttle((e) => this.updateProgress(e), this.updateInterval));
-    this.mainAudio.addEventListener("ended", () => this.handleSongEnd(), passiveOptions);
-    this.mainAudio.addEventListener("pause", () => this.handleAudioPause(), passiveOptions);
-    this.mainAudio.addEventListener("play", () => this.handleAudioPlay(), passiveOptions);
-    this.videoAd.addEventListener("ended", () => this.handleVideoEnd(), passiveOptions);
+    // Media events
+    this.mainAudio.addEventListener("timeupdate", (e) => this.updateProgress(e));
+    this.mainAudio.addEventListener("ended", () => this.handleSongEnd());
+    this.mainAudio.addEventListener("pause", () => this.handleAudioPause());
+    this.mainAudio.addEventListener("play", () => this.handleAudioPlay());
+    this.videoAd.addEventListener("ended", () => this.handleVideoEnd());
 
-    this.musicName.addEventListener("click", () => this.toggleVideoControls(), passiveOptions);
+    this.musicName.addEventListener("click", () => this.toggleVideoControls());
 
-    // Optimized scroll event
-    this.ulTag.addEventListener("scroll", () => this.handleVirtualizedScroll(), passiveOptions);
+    // Virtualized scroll event
+    this.ulTag.addEventListener("scroll", () => this.handleVirtualizedScroll(), { passive: true });
 
     const seeVideoBtn = document.querySelector('.seeVideo');
     if (seeVideoBtn) {
-      seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride(), passiveOptions);
+      seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
     }
-  }
-
-  // Add throttle utility
-  throttle(func, delay) {
-    let timeoutId;
-    let lastExecTime = 0;
-    return (...args) => {
-      const currentTime = Date.now();
-      
-      if (currentTime - lastExecTime > delay) {
-        func.apply(this, args);
-        lastExecTime = currentTime;
-      } else {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          func.apply(this, args);
-          lastExecTime = Date.now();
-        }, delay - (currentTime - lastExecTime));
-      }
-    };
-  }
-
-  cleanup() {
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
-    }
-    if (this.scrollTimeout) {
-      clearTimeout(this.scrollTimeout);
-    }
-    
-    // Clean up any unused audio elements
-    const unusedAudio = document.querySelectorAll('audio:not(#main-audio):not(#main-audio2)');
-    unusedAudio.forEach(audio => audio.remove());
   }
 
   handleVirtualizedScroll() {
-    if (this.performanceMode === 'mobile') {
-      // More aggressive throttling on mobile
-      if (this.scrollTimeout) return;
-      
-      this.scrollTimeout = setTimeout(() => {
+    if (!this.renderTicking) {
+      requestAnimationFrame(() => {
         this.renderVisibleItems();
-        this.scrollTimeout = null;
-      }, 50);
-    } else {
-      // Original implementation for desktop
-      if (!this.renderTicking) {
-        requestAnimationFrame(() => {
-          this.renderVisibleItems();
-          this.renderTicking = false;
-        });
-        this.renderTicking = true;
-      }
+        this.renderTicking = false;
+      });
+      this.renderTicking = true;
     }
   }
 
@@ -506,43 +425,38 @@ class MusicPlayer {
     }
   }
 
-    // Add this method to detect mobile
-  detectMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  }
-
-  // Replace setAudioSourceWithFallback method:
   setAudioSourceWithFallback(src) {
     const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
     const localAudioSrc = `${this.audioFolder}${src}.mp3`;
-    const uploadAudioSrc = `Upload/${src}.mp3`;
+    const uploadAudioSrc = `Upload/${src}.mp3`; // New upload folder fallback
     
+    // Clear any previous event listeners
     this.mainAudio.onerror = null;
     this.mainAudio.onloadeddata = null;
     
+    // Try R2 first
     this.mainAudio.src = r2AudioSrc;
     
-    this.mainAudio.onloadeddata = () => {
-      console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
-      this.mainAudio.onloadeddata = null;
-    };
-    
-    this.mainAudio.onerror = () => {
-      console.warn(`Audio failed from R2, trying local: ${localAudioSrc}`);
+    // Set up error handling for audio with proper loading wait
+    const handleAudioError = () => {
+      console.warn(`Audio failed to load from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
       this.mainAudio.src = localAudioSrc;
       
+      // Wait for local to load or fail
       this.mainAudio.onloadeddata = () => {
-        console.log(`Audio loaded from local: ${localAudioSrc}`);
+        console.log(`Audio loaded successfully from local: ${localAudioSrc}`);
         this.mainAudio.onloadeddata = null;
       };
       
+      // Add upload folder fallback
       this.mainAudio.onerror = () => {
-        console.warn(`Audio failed from local, trying upload: ${uploadAudioSrc}`);
+        console.warn(`Audio failed to load from local: ${localAudioSrc}, trying upload: ${uploadAudioSrc}`);
         this.mainAudio.src = uploadAudioSrc;
         this.r2Available = false;
         
+        // Wait for upload to load
         this.mainAudio.onloadeddata = () => {
-          console.log(`Audio loaded from upload: ${uploadAudioSrc}`);
+          console.log(`Audio loaded successfully from upload: ${uploadAudioSrc}`);
           this.mainAudio.onloadeddata = null;
         };
         
@@ -552,6 +466,14 @@ class MusicPlayer {
         };
       };
     };
+    
+    // Wait for R2 to load or fail
+    this.mainAudio.onloadeddata = () => {
+      console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
+      this.mainAudio.onloadeddata = null;
+    };
+    
+    this.mainAudio.onerror = handleAudioError;
   }
 
   setInitialAudioSource(src) {
@@ -729,28 +651,40 @@ class MusicPlayer {
   createImageElement(src, type) {
     const img = document.createElement('img');
     
+    // Try R2 bucket first
     const r2ImageSrc = `${this.imageBucketUrl}${src}.${type}`;
     const localImageSrc = `${this.imageFolder}${src}.${type}`;
-    const uploadImageSrc = `Upload/${src}.${type}`;
+    const uploadImageSrc = `Upload/${src}.${type}`; // New upload folder fallback
     
     img.src = r2ImageSrc;
     img.alt = this.musicName.textContent;
     
+    // Add error handling for image loading
     img.onerror = () => {
-      console.warn(`Failed to load image from R2: ${r2ImageSrc}, trying local: ${localImageSrc}`);
-      img.src = localImageSrc;
+      console.warn(`Failed to load image from R2 bucket: ${r2ImageSrc}, trying local: ${localImageSrc}`);
       
-      img.onerror = () => {
-        console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
-        img.src = uploadImageSrc;
-        
+      // For disguise player (Player 2), try local first, then upload, then create white fallback
+      if (this.suffix === '2') {
+        img.src = localImageSrc;
         img.onerror = () => {
-          console.warn(`Failed to load upload image: ${uploadImageSrc}`);
-          if (this.suffix === '2') {
+          console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
+          img.src = uploadImageSrc;
+          img.onerror = () => {
+            console.warn(`Failed to load upload image: ${uploadImageSrc}, using white fallback`);
             this.createWhiteFallback(img);
-          }
+          };
         };
-      };
+      } else {
+        // For regular player, try local folder then upload folder
+        img.src = localImageSrc;
+        img.onerror = () => {
+          console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
+          img.src = uploadImageSrc;
+          img.onerror = () => {
+            console.warn(`Failed to load upload image: ${uploadImageSrc}`);
+          };
+        };
+      }
       this.r2Available = false;
     };
     
@@ -785,14 +719,19 @@ class MusicPlayer {
 
   async playMusic() {
     try {
+      // Remove the waitForAudioReady call that might be causing delays
+      // Just try to play directly
+      
       const playPromise = this.mainAudio.play();
       
       if (playPromise !== undefined) {
         await playPromise;
         
+        // Only update UI state after successful play
         this.wrapper.classList.add("paused");
         this.playPauseBtn.querySelector("i").textContent = "pause";
         this.isMusicPaused = false;
+        localStorage.setItem(`isMusicPaused${this.suffix}`, false);
         
         if (this.videoOverride) {
           this.videoAd.muted = true;
@@ -808,43 +747,21 @@ class MusicPlayer {
         }
       }
     } catch (error) {
-      console.warn("Failed to play audio:", error);
+      console.warn("Failed to play audio - user interaction may be required:", error);
       
+      // Reset play button state if play fails
       this.wrapper.classList.remove("paused");
       this.playPauseBtn.querySelector("i").textContent = "play_arrow";
       this.isMusicPaused = true;
+      localStorage.setItem(`isMusicPaused${this.suffix}`, true);
+      
+      // Show a user-friendly message for mobile users
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // You could show a toast or notification here
+        console.log("Tap the play button to start music");
+      }
     }
     this.updatePlayingSong();
-  }
-  
-  // Add this helper method:
-  waitForAudioReady(timeout = 3000) {
-    return new Promise((resolve) => {
-      if (this.mainAudio.readyState >= 2) {
-        resolve();
-        return;
-      }
-      
-      let timeoutId = setTimeout(() => {
-        console.warn("Audio ready timeout");
-        resolve();
-      }, timeout);
-      
-      const handleReady = () => {
-        clearTimeout(timeoutId);
-        this.mainAudio.removeEventListener('canplay', handleReady);
-        this.mainAudio.removeEventListener('loadeddata', handleReady);
-        resolve();
-      };
-      
-      this.mainAudio.addEventListener('canplay', handleReady);
-      this.mainAudio.addEventListener('loadeddata', handleReady);
-    });
-  }
-  
-  showMobilePlayMessage() {
-    // You can implement a user-friendly notification here
-    console.log("Tap the play button to start music on mobile");
   }
   
   // Update the existing pauseMusic method to handle video unmuting in override mode:
@@ -881,12 +798,6 @@ class MusicPlayer {
   }
   
   toggleVideoDisplay(show) {
-    // Skip video operations entirely on mobile for Player 2
-    if (this.suffix === '2' || (this.performanceMode === 'mobile' && this.suffix === '2')) {
-      this.videoAd.style.display = "none";
-      return;
-    }
-    
     // If video override is active, use override behavior instead
     if (this.videoOverride) {
       this.showVideoOverride();
@@ -896,17 +807,32 @@ class MusicPlayer {
     const isDarkMode = this.wrapper.classList.contains("dark-mode");
     
     if (show) {
-      this.videoAd.style.display = "block";
-      
-      // Use transform3d for hardware acceleration
-      this.videoAd.style.transform = 'translate3d(-50%, -50%, 0)';
-      this.videoAd.style.top = '50%';
-      this.videoAd.style.left = '50%';
-      
-      this.videoAd.play();
+      if (this.suffix === '2') {
+        this.videoAd.style.display = "none";
+      } else {
+        this.videoAd.style.display = "block";
+        
+        const videoSize = 280;
+        const containerSize = 370;
+        const videoOffset = (containerSize - videoSize) / 2;
+        
+        // Batch video positioning updates
+        Object.assign(this.videoAd.style, {
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        });
+        
+        this.videoAd.play();
+      }
     } else {
-      this.videoAd.style.display = "none";
-      this.videoAd.pause();
+      if (this.suffix === '2') {
+        this.videoAd.style.display = "none";
+        this.videoAd.pause();
+      } else {
+        this.videoAd.style.display = "none";
+        this.videoAd.pause();
+      }
     }
   }
 
@@ -940,45 +866,18 @@ class MusicPlayer {
   }
 
   updateProgress(e) {
-    // Skip updates if already updating (prevent stacking)
-    if (this.isUpdating) return;
-    
-    this.isUpdating = true;
-    
-    // Use requestAnimationFrame for smooth updates
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
+    const { currentTime, duration } = e.target;
+    this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
+
+    const currentMin = Math.floor(currentTime / 60);
+    const currentSec = Math.floor(currentTime % 60).toString().padStart(2, "0");
+    this.wrapper.querySelector(".current-time").textContent = `${currentMin}:${currentSec}`;
+
+    if (!isNaN(duration)) {
+      const totalMin = Math.floor(duration / 60);
+      const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
+      this.wrapper.querySelector(".max-duration").textContent = `${totalMin}:${totalSec}`;
     }
-    
-    this.rafId = requestAnimationFrame(() => {
-      const { currentTime, duration } = e.target;
-      
-      // Only update if values actually changed significantly
-      const progressPercent = (currentTime / duration) * 100;
-      const currentProgressPercent = parseFloat(this.progressBar.style.width) || 0;
-      
-      if (Math.abs(progressPercent - currentProgressPercent) > 0.1) {
-        this.progressBar.style.width = `${progressPercent}%`;
-      }
-
-      // Throttle time display updates (only update every second)
-      const currentTimeInt = Math.floor(currentTime);
-      if (this.lastTimeUpdate !== currentTimeInt) {
-        const currentMin = Math.floor(currentTime / 60);
-        const currentSec = Math.floor(currentTime % 60).toString().padStart(2, "0");
-        this.wrapper.querySelector(".current-time").textContent = `${currentMin}:${currentSec}`;
-
-        if (!isNaN(duration) && !this.durationSet) {
-          const totalMin = Math.floor(duration / 60);
-          const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
-          this.wrapper.querySelector(".max-duration").textContent = `${totalMin}:${totalSec}`;
-        }
-        
-        this.lastTimeUpdate = currentTimeInt;
-      }
-      
-      this.isUpdating = false;
-    });
   }
 
   handleRepeat() {
@@ -1091,22 +990,16 @@ class MusicPlayer {
     try {
       if (!this.musicListItems || !this.ulTag) return;
       
-      // Skip rendering if performance mode is mobile and list isn't visible
-      if (this.performanceMode === 'mobile' && !this.musicList.classList.contains('show')) {
-        return;
-      }
-      
       const scrollTop = this.ulTag.scrollTop;
       const viewportHeight = this.ulTag.clientHeight;
       const totalItems = this.musicSource.length;
 
-      // Reduce buffer size on mobile for better performance
-      const buffer = this.performanceMode === 'mobile' ? 3 : this.BUFFER;
-      
-      const startIndex = Math.max(0, Math.floor(scrollTop / this.ROW_HEIGHT) - buffer);
-      const visibleCount = Math.ceil(viewportHeight / this.ROW_HEIGHT) + buffer * 2;
+      // Calculate visible range
+      const startIndex = Math.max(0, Math.floor(scrollTop / this.ROW_HEIGHT) - this.BUFFER);
+      const visibleCount = Math.ceil(viewportHeight / this.ROW_HEIGHT) + this.BUFFER * 2;
       const endIndex = Math.min(totalItems - 1, startIndex + visibleCount - 1);
 
+      // Force render if shuffle state changed (don't skip based on range)
       if (startIndex === this.lastRenderStart && endIndex === this.lastRenderEnd && !this.forceRender) {
         return;
       }
@@ -1115,21 +1008,27 @@ class MusicPlayer {
       this.lastRenderEnd = endIndex;
       this.forceRender = false;
 
-      // Use transform3d for hardware acceleration
-      this.musicListItems.style.transform = `translate3d(0, ${startIndex * this.ROW_HEIGHT}px, 0)`;
+      // Position items container
+      const translateY = startIndex * this.ROW_HEIGHT;
+      this.musicListItems.style.transform = `translateY(${translateY}px)`;
 
-      // Batch DOM operations
+      // Create document fragment for better performance
       const fragment = document.createDocumentFragment();
+
+      // Render visible items
       for (let i = startIndex; i <= endIndex; i++) {
         if (i < this.musicSource.length) {
           const music = this.musicSource[i];
-          const liTag = this.createOptimizedMusicListItem(music, i);
+          const liTag = this.createMusicListItem(music, i);
           fragment.appendChild(liTag);
         }
       }
 
+      // Replace content efficiently
       this.musicListItems.innerHTML = '';
       this.musicListItems.appendChild(fragment);
+
+      // Update playing song indicators
       this.updatePlayingSong();
     } catch (error) {
       this.throttledLog('render_error', `Render error: ${error.message}`);
@@ -1137,59 +1036,25 @@ class MusicPlayer {
   }
 
   
-  createOptimizedMusicListItem(music, actualIndex) {
+  createMusicListItem(music, actualIndex) {
     const liTag = document.createElement("li");
     liTag.setAttribute("li-index", actualIndex + 1);
-  
+
+    // Check if we already have the duration cached
     const cachedDuration = this.getDurationCache(music.src);
     const displayDuration = cachedDuration || "3:40";
-  
+
     liTag.innerHTML = `
       <div class="row">
         <span>${music.name}</span>
         <p>${music.artist}</p>
       </div>
       <span id="${music.src}" class="audio-duration">${displayDuration}</span>
+      <audio class="${music.src}" src="${this.audioBucketUrl}${music.src}.mp3"></audio>
     `;
-  
-    // ALWAYS check and apply dark mode styles when creating items
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    this.applyListItemStyles(liTag, isDarkMode);
-  
-    // Skip creating audio elements for cached durations on mobile
-    if (!cachedDuration && this.performanceMode !== 'mobile') {
-      const audio = document.createElement('audio');
-      audio.className = music.src;
-      audio.src = `${this.audioBucketUrl}${music.src}.mp3`;
-      
-      audio.addEventListener("loadeddata", () => {
-        const duration = audio.duration;
-        if (!isNaN(duration) && duration > 0) {
-          const totalMin = Math.floor(duration / 60);
-          const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
-          const formattedDuration = `${totalMin}:${totalSec}`;
-          
-          this.setDurationCache(music.src, formattedDuration);
-          const durationSpan = liTag.querySelector(".audio-duration");
-          if (durationSpan && durationSpan.isConnected) {
-            durationSpan.textContent = formattedDuration;
-          }
-        }
-        audio.remove();
-      }, { once: true });
-      
-      liTag.appendChild(audio);
-    }
-  
-    liTag.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.handleMusicItemClick(actualIndex);
-    }, { passive: true });
-  
-    return liTag;
-  }
 
-  applyListItemStyles(liTag, isDarkMode) {
+    // Apply dark mode styles immediately if in dark mode
+    const isDarkMode = this.wrapper.classList.contains("dark-mode");
     if (isDarkMode) {
       liTag.style.color = 'white';
       liTag.style.borderBottom = '3px solid white';
@@ -1197,23 +1062,72 @@ class MusicPlayer {
       liTag.style.color = 'black';
       liTag.style.borderBottom = '3px solid black';
     }
-  }
 
-  handleMusicItemClick(actualIndex) {
-    try {
-      if (this.isShuffleMode) {
-        const clickedMusic = this.musicSource[actualIndex];
-        const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
-        this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
-      } else {
-        this.musicIndex = actualIndex + 1;
-      }
-      this.loadMusic(this.musicIndex);
-      this.playMusic();
-      this.resetVideoSize();
-    } catch (error) {
-      console.warn(`Click handler error: ${error.message}`);
+    const liAudioTag = liTag.querySelector(`.${music.src}`);
+    const durationSpan = liTag.querySelector(".audio-duration");
+    
+    // Add fallback for list audio elements with throttled logging
+    liAudioTag.onerror = () => {
+      this.throttledLog('audio_r2', `List audio failed from R2, trying local: ${this.audioFolder}${music.src}.mp3`, music.src);
+      liAudioTag.src = `${this.audioFolder}${music.src}.mp3`;
+      
+      liAudioTag.onerror = () => {
+        this.throttledLog('audio_local', `List audio failed from local, trying upload: Upload/${music.src}.mp3`, music.src);
+        liAudioTag.src = `Upload/${music.src}.mp3`;
+        this.r2Available = false;
+        
+        liAudioTag.onerror = () => {
+          this.throttledLog('audio_all', `All audio sources failed for: ${music.src}`, music.src);
+        };
+      };
+    };
+    
+    // Only load duration if not already cached
+    if (!cachedDuration) {
+      liAudioTag.addEventListener("loadeddata", () => {
+        try {
+          const duration = liAudioTag.duration;
+          if (isNaN(duration) || duration === 0) {
+            this.throttledLog('duration', `Invalid duration for: ${music.src}`, music.src);
+            return;
+          }
+          
+          const totalMin = Math.floor(duration / 60);
+          const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
+          const formattedDuration = `${totalMin}:${totalSec}`;
+          
+          // Cache the duration
+          this.setDurationCache(music.src, formattedDuration);
+          
+          // Update display only if this element is still in the DOM
+          if (durationSpan && durationSpan.isConnected) {
+            durationSpan.textContent = formattedDuration;
+          }
+        } catch (error) {
+          this.throttledLog('duration_error', `Duration calculation error for ${music.src}: ${error.message}`, music.src);
+        }
+      });
     }
+
+    liTag.addEventListener("click", () => {
+      try {
+        // Set the music index based on current mode
+        if (this.isShuffleMode) {
+          const clickedMusic = this.musicSource[actualIndex];
+          const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
+          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+        } else {
+          this.musicIndex = actualIndex + 1;
+        }
+        this.loadMusic(this.musicIndex);
+        this.playMusic();
+        this.resetVideoSize();
+      } catch (error) {
+        this.throttledLog('click_error', `Click handler error: ${error.message}`, music.src);
+      }
+    });
+
+    return liTag;
   }
 
   getDurationCache(src) {
@@ -1432,10 +1346,10 @@ class MusicPlayer {
   }
 
   listcolourblack() {
-    // Update currently visible items
     const listItems = this.musicListItems?.querySelectorAll("li") || [];
     listItems.forEach(item => {
-      this.applyListItemStyles(item, true);
+      item.style.color = 'white';
+      item.style.borderBottom = '3px solid white';
     });
     this.musicList.style.backgroundColor = "black";
     this.closeMoreMusicBtn.style.color = "white";
@@ -1443,10 +1357,10 @@ class MusicPlayer {
   }
   
   listcolourwhite() {
-    // Update currently visible items
     const listItems = this.musicListItems?.querySelectorAll("li") || [];
     listItems.forEach(item => {
-      this.applyListItemStyles(item, false);
+      item.style.color = 'black';
+      item.style.borderBottom = '3px solid black';
     });
     this.musicList.style.backgroundColor = "white";
     this.closeMoreMusicBtn.style.color = "black";
@@ -1454,7 +1368,8 @@ class MusicPlayer {
   }
 
   updateBorderBoxImmediate() {
-    if (this.suffix !== '2' || !this.borderBox || !this.enableBorderAnimations) return;
+    // Only handle border box for Player 2
+    if (this.suffix !== '2' || !this.borderBox) return;
 
     if (this.isInitializing) {
       this.borderBox.style.display = "none";
@@ -1463,12 +1378,12 @@ class MusicPlayer {
     
     const now = performance.now();
     
-    // More aggressive throttling on mobile
-    const throttleTime = this.performanceMode === 'mobile' ? 100 : 16;
-    if (now - this.borderBoxState.lastUpdate < throttleTime) return;
+    // Throttle updates to avoid excessive DOM manipulation
+    if (now - this.borderBoxState.lastUpdate < 16) return;
     
     const isDarkMode = this.wrapper.classList.contains("dark-mode");
     
+    // Determine visibility and style in one pass
     let shouldShowBorder = false;
     let targetStyle = null;
     
@@ -1477,11 +1392,14 @@ class MusicPlayer {
       targetStyle = 'player2DarkMode';
     }
     
+    // Only update if state actually changed
     if (this.borderBoxState.isVisible !== shouldShowBorder || 
         this.borderBoxState.currentStyle !== targetStyle) {
       
+      // Batch all DOM operations together
       this.applyBorderBoxChanges(shouldShowBorder, targetStyle);
       
+      // Update cached state
       this.borderBoxState.isVisible = shouldShowBorder;
       this.borderBoxState.currentStyle = targetStyle;
       this.borderBoxState.lastUpdate = now;
@@ -1578,29 +1496,9 @@ function handleSize() {
   });
 }
 
-if ('PerformanceObserver' in window) {
-  const observer = new PerformanceObserver((list) => {
-    const entries = list.getEntries();
-    entries.forEach((entry) => {
-      if (entry.name === 'long-task') {
-        console.warn('Long task detected:', entry.duration);
-      }
-    });
-  });
-  
-  try {
-    observer.observe({ entryTypes: ['longtask'] });
-  } catch (e) {
-    // Long task observer not supported
-  }
-}
-
 // Initialize players when DOM loads
 document.addEventListener("DOMContentLoaded", () => {
-  // Add slight delay to prevent blocking initial page load
-  requestIdleCallback(() => {
-    window.homePlayer = new MusicPlayer();
-    window.disguisePlayer = new MusicPlayer('2');
-    handleSize();
-  }, { timeout: 1000 });
+  window.homePlayer = new MusicPlayer();       // Original page
+  window.disguisePlayer = new MusicPlayer('2'); // Disguise page
+  handleSize();
 });
