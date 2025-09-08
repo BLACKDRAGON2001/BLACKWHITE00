@@ -328,7 +328,7 @@ class MusicPlayer {
     }
   }
     
-  loadMusic(index) {
+  /*loadMusic(index) {
     const music = this.isShuffleMode ?
       this.shuffledOrder[index - 1] :
       this.originalOrder[index - 1];
@@ -348,6 +348,68 @@ class MusicPlayer {
   
     // Set audio source with R2 fallback to local
     this.setAudioSourceWithFallback(src);
+  
+    // Only set video source for player 1, but keep video element for player 2 (for border positioning)
+    if (this.suffix !== '2') {
+      // Original player - full video functionality
+      this.setVideoSourceWithFallback(src);
+      
+      // If video override is active, ensure video plays after source change
+      if (this.videoOverride) {
+        // Wait for video to load then apply override behavior
+        const handleVideoLoaded = () => {
+          this.showVideoOverride();
+        };
+        
+        // Use both events to ensure it works across different scenarios
+        this.videoAd.addEventListener('loadeddata', handleVideoLoaded, { once: true });
+        this.videoAd.addEventListener('canplay', handleVideoLoaded, { once: true });
+        
+        // Fallback timeout in case events don't fire
+        setTimeout(() => {
+          if (this.videoOverride) {
+            this.showVideoOverride();
+          }
+        }, 500);
+      }
+    } else {
+      // Player 2 - NO VIDEO, but keep element for border reference
+      this.videoAd.src = "";
+      this.videoAd.style.display = "none";
+    }
+  
+    localStorage.setItem(`musicIndex${this.suffix}`, index);
+    this.updatePlayingSong();
+    
+    // Only update border box for Player 2
+    if (this.suffix === '2' && !this.isInitializing) {
+      this.updateBorderBoxDisplay();
+    }
+  }*/
+  loadMusic(index) {
+    const music = this.isShuffleMode ?
+      this.shuffledOrder[index - 1] :
+      this.musicSource[index - 1];
+  
+    this.musicName.textContent = music.name;
+    this.musicArtist.textContent = music.artist;
+  
+    const { coverType = 'Images', src, type = 'jpg' } = music;
+    this.coverArea.innerHTML = '';
+  
+    // Choose image or video element
+    const mediaElement = (this.suffix === '2' || coverType !== 'video')
+      ? this.createImageElement(src, type)
+      : this.createVideoElementWithFallback(src, type);
+  
+    this.coverArea.appendChild(mediaElement);
+  
+    // Use backup fallback only for the first song (index 1)
+    if (index === 1) {
+      this.setInitialAudioSource(src);
+    } else {
+      this.setAudioSourceWithFallback(src);
+    }
   
     // Only set video source for player 1, but keep video element for player 2 (for border positioning)
     if (this.suffix !== '2') {
@@ -436,6 +498,63 @@ class MusicPlayer {
     };
     
     this.mainAudio.onerror = handleAudioError;
+  }
+
+  setInitialAudioSource(src) {
+    const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
+    const localAudioSrc = `${this.audioFolder}${src}.mp3`;
+    const uploadAudioSrc = `Upload/${src}.mp3`;
+    const backupAudioSrc = `Backup/${src}.mp3`; // New backup folder
+    
+    // Clear any previous event listeners
+    this.mainAudio.onerror = null;
+    this.mainAudio.onloadeddata = null;
+    
+    // Try R2 first
+    this.mainAudio.src = r2AudioSrc;
+    
+    const handleInitialAudioError = () => {
+      console.warn(`Initial audio failed from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
+      this.mainAudio.src = localAudioSrc;
+      
+      this.mainAudio.onloadeddata = () => {
+        console.log(`Initial audio loaded from local: ${localAudioSrc}`);
+        this.mainAudio.onloadeddata = null;
+      };
+      
+      this.mainAudio.onerror = () => {
+        console.warn(`Initial audio failed from local: ${localAudioSrc}, trying upload: ${uploadAudioSrc}`);
+        this.mainAudio.src = uploadAudioSrc;
+        
+        this.mainAudio.onloadeddata = () => {
+          console.log(`Initial audio loaded from upload: ${uploadAudioSrc}`);
+          this.mainAudio.onloadeddata = null;
+        };
+        
+        this.mainAudio.onerror = () => {
+          console.warn(`Initial audio failed from upload: ${uploadAudioSrc}, trying backup: ${backupAudioSrc}`);
+          this.mainAudio.src = backupAudioSrc;
+          this.r2Available = false;
+          
+          this.mainAudio.onloadeddata = () => {
+            console.log(`Initial audio loaded from backup: ${backupAudioSrc}`);
+            this.mainAudio.onloadeddata = null;
+          };
+          
+          this.mainAudio.onerror = () => {
+            console.error(`All audio sources failed for initial song: ${src}`);
+            this.mainAudio.onerror = null;
+          };
+        };
+      };
+    };
+    
+    this.mainAudio.onloadeddata = () => {
+      console.log(`Initial audio loaded from R2: ${r2AudioSrc}`);
+      this.mainAudio.onloadeddata = null;
+    };
+    
+    this.mainAudio.onerror = handleInitialAudioError;
   }
 
   waitForAudioReady() {
