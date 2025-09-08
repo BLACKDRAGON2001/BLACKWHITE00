@@ -21,7 +21,7 @@ document.getElementById("title2").addEventListener("click", function() {
   // Existing logout logic
   document.getElementById("DisguisePage").style.display = "none";
   document.getElementById("LoginPage").style.display = "block";
-  localStorage.removeTime("LoginTime");
+  localStorage.removeItem("LoginTime");
   document.body.style.backgroundColor = "white";
   clearInputFields();
   refreshPage();
@@ -1161,6 +1161,11 @@ class MusicPlayer {
   
   // Add this new method for precise index-based scrolling
   scrollToSongByIndex(targetIndex) {
+    // Only auto-scroll if NOT in shuffle mode (i.e., in normal mode)
+    if (this.isShuffleMode) {
+      return; // Exit early - no scrolling in shuffle mode
+    }
+    
     const startIndex = this.currentPage * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     
