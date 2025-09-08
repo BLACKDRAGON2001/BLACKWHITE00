@@ -89,11 +89,12 @@ class MusicPlayer {
     // Player state
     this.musicIndex = 1;
     this.isMusicPaused = true;
-    this.isShuffleMode = false;
-    this.originalOrder = [...allMusic];
+    this.musicSource = suffix === '2' ? ReducedMusic : allMusic;
+    this.originalOrder = [...this.musicSource];
     this.shuffledOrder = [];
     this.isMuted = false;
     this.isInitializing = true;
+
 
     this.r2Available = true;
 
@@ -297,7 +298,7 @@ class MusicPlayer {
     if (storedMusicIndex) {
       const parsedIndex = parseInt(storedMusicIndex, 10);
       // Ensure the index is valid
-      if (parsedIndex >= 1 && parsedIndex <= this.originalOrder.length) {
+      if (parsedIndex >= 1 && parsedIndex <= this.musicSource.length) {
         this.musicIndex = parsedIndex;
       } else {
         this.musicIndex = 1; // Reset to first song if invalid
@@ -734,7 +735,7 @@ class MusicPlayer {
   }
 
   changeMusic(direction) {
-    const currentArray = this.isShuffleMode ? this.shuffledOrder : this.originalOrder;
+    const currentArray = this.isShuffleMode ? this.shuffledOrder : this.musicSource;
     const arrayLength = currentArray.length;
     
     // Calculate new index with proper wrapping
@@ -773,7 +774,7 @@ class MusicPlayer {
     }
   }
 
-  handleRepeat() {
+  /*handleRepeat() {
     switch (this.repeatBtn.textContent) {
       case "repeat":
         this.repeatBtn.textContent = "repeat_one";
@@ -788,6 +789,43 @@ class MusicPlayer {
         
         this.isShuffleMode = true;
         this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
+        this.musicIndex = 1;
+        this.loadMusic(this.musicIndex);
+        this.playMusic();
+        break;
+      case "shuffle":
+        this.repeatBtn.textContent = "repeat";
+        this.repeatBtn.title = "Playlist looped";
+        this.isShuffleMode = false;
+        
+        // Return to the song that was playing before shuffle
+        this.musicIndex = this.preShuffleIndex;
+        
+        this.loadMusic(this.musicIndex);
+        this.playMusic();
+        break;
+    }
+  }*/
+  handleRepeat() {
+    switch (this.repeatBtn.textContent) {
+      case "repeat":
+        this.repeatBtn.textContent = "repeat_one";
+        this.repeatBtn.title = "Song looped";
+        break;
+      case "repeat_one":
+        this.repeatBtn.textContent = "shuffle";
+        this.repeatBtn.title = "Playback shuffled";
+        
+        // Store current song index before shuffling
+        this.preShuffleIndex = this.musicIndex;
+        
+        this.isShuffleMode = true;
+        // Use Fisher-Yates shuffle algorithm
+        this.shuffledOrder = [...this.musicSource];
+        for (let i = this.shuffledOrder.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this.shuffledOrder[i], this.shuffledOrder[j]] = [this.shuffledOrder[j], this.shuffledOrder[i]];
+        }
         this.musicIndex = 1;
         this.loadMusic(this.musicIndex);
         this.playMusic();
@@ -820,7 +858,7 @@ class MusicPlayer {
       this.playMusic();
     } else {
       // Normal mode - go to next song
-      this.musicIndex = this.musicIndex >= this.originalOrder.length ? 1 : this.musicIndex + 1;
+      this.musicIndex = this.musicIndex >= this.musicSource.length ? 1 : this.musicIndex + 1;
       this.loadMusic(this.musicIndex);
       this.playMusic();
     }
@@ -859,14 +897,14 @@ class MusicPlayer {
     const startIndex = (this.currentPage + 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     
-    // Check if there are more items to load from original order
-    if (startIndex >= this.originalOrder.length) return;
+    // Check if there are more items to load from music source
+    if (startIndex >= this.musicSource.length) return;
     
     this.isLoading = true;
     this.currentPage++;
     
-    // Get the next batch of items from original order
-    const nextItems = this.originalOrder.slice(startIndex, endIndex);
+    // Get the next batch of items from music source
+    const nextItems = this.musicSource.slice(startIndex, endIndex);
     
     // Add the new items to the existing list
     this.appendMusicItems(nextItems, startIndex);
@@ -877,16 +915,16 @@ class MusicPlayer {
   resetPagination() {
     this.currentPage = 0;
     this.ulTag.innerHTML = "";
-    this.populateMusicList(this.originalOrder);
+    this.populateMusicList(this.musicSource);
   }
-
+  
   populateMusicList(musicArray) {
-    this.currentMusicArray = this.originalOrder;
+    this.currentMusicArray = this.musicSource;
     this.currentPage = 0;
     this.ulTag.innerHTML = "";
     
-    // Load initial batch from original order
-    const initialItems = this.originalOrder.slice(0, this.itemsPerPage);
+    // Load initial batch from music source
+    const initialItems = this.musicSource.slice(0, this.itemsPerPage);
     this.appendMusicItems(initialItems, 0);
   }
 
@@ -932,7 +970,7 @@ class MusicPlayer {
         // Set the music index based on current mode
         if (this.isShuffleMode) {
           // Find the index of this song in the shuffled order
-          const clickedMusic = this.originalOrder[actualIndex];
+          const clickedMusic = this.musicSource[actualIndex];
           const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
           this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
         } else {
@@ -940,19 +978,19 @@ class MusicPlayer {
         }
         this.loadMusic(this.musicIndex);
         this.playMusic();
-        this.resetVideoSize(); // Add this to reset video state
+        this.resetVideoSize();
       });
     });
     
     this.updatePlayingSong();
   }
 
-  updatePlayingSong() {
+  /*updatePlayingSong() {
     const allLiTags = this.ulTag.querySelectorAll("li");
   
     const currentMusic = this.isShuffleMode
       ? this.shuffledOrder[this.musicIndex - 1]
-      : this.originalOrder[this.musicIndex - 1];
+      : this.musicSource[this.musicIndex - 1];
   
     allLiTags.forEach(liTag => {
       const audioTag = liTag.querySelector(".audio-duration");
@@ -969,7 +1007,67 @@ class MusicPlayer {
         ? "Playing"
         : audioTag.getAttribute("t-duration");
     });
-  }  
+  }*/
+  updatePlayingSong() {
+    const allLiTags = this.ulTag.querySelectorAll("li");
+  
+    const currentMusic = this.isShuffleMode
+      ? this.shuffledOrder[this.musicIndex - 1]
+      : this.musicSource[this.musicIndex - 1];
+  
+    // Calculate the actual index in the original music source
+    const actualMusicIndex = this.isShuffleMode 
+      ? this.musicSource.findIndex(song => song.src === currentMusic.src)
+      : this.musicIndex - 1;
+  
+    allLiTags.forEach(liTag => {
+      const audioTag = liTag.querySelector(".audio-duration");
+      const id = audioTag.id;
+  
+      const isPlaying = id === currentMusic.src;
+  
+      if (!audioTag.hasAttribute("t-duration")) {
+        audioTag.setAttribute("t-duration", audioTag.textContent);
+      }
+  
+      liTag.classList.toggle("playing", isPlaying);
+      audioTag.textContent = isPlaying
+        ? "Playing"
+        : audioTag.getAttribute("t-duration");
+    });
+  
+    // Smart scrolling based on index calculation
+    this.scrollToSongByIndex(actualMusicIndex);
+  }
+  
+  // Add this new method for precise index-based scrolling
+  scrollToSongByIndex(targetIndex) {
+    const startIndex = this.currentPage * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    
+    // Check if target song is in currently loaded range
+    if (targetIndex >= startIndex && targetIndex < endIndex) {
+      // Song is already loaded, scroll to it
+      const relativeIndex = targetIndex - startIndex;
+      const targetElement = this.ulTag.children[relativeIndex];
+      
+      if (targetElement) {
+        requestAnimationFrame(() => {
+          const containerHeight = this.ulTag.clientHeight;
+          const elementTop = targetElement.offsetTop;
+          const elementHeight = targetElement.offsetHeight;
+          const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
+          
+          this.ulTag.scrollTo({
+            top: Math.max(0, scrollPosition),
+            behavior: 'smooth'
+          });
+        });
+      }
+    }
+    // If song is not in current range, we simply don't scroll
+    // This avoids performance issues and unwanted loading
+  }
 
   toggleDarkMode() {
     const isDarkMode = this.wrapper.classList.toggle("dark-mode");
