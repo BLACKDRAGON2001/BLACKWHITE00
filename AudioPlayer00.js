@@ -94,7 +94,7 @@ document.getElementById("title").addEventListener("click", function() {
       this.header = this.wrapper.querySelector(".row");
       this.ulTag = this.wrapper.querySelector("ul");
       this.repeatBtn = this.wrapper.querySelector(`#repeat-plist${suffix}`);
-      this.seeAllMusicBtn = this.wrapper.querySelector('.seeAllMusic');
+      //this.seeAllMusicBtn = this.wrapper.querySelector('.seeAllMusic');
       this.currentTimeElement = this.wrapper.querySelector(".current-time");
       this.maxDurationElement = this.wrapper.querySelector(".max-duration");
       
@@ -109,13 +109,9 @@ document.getElementById("title").addEventListener("click", function() {
       this.isShuffleMode = false;
       
       // Set initial music array based on player type - NEW FEATURE FROM OP2
-      if (this.suffix === '2') {
-        this.originalOrder = [...(window.ReducedMusic || [])];
-        this.usingReducedMusic = true;
-      } else {
-        this.originalOrder = [...(window.allMusic || [])];
-        this.usingReducedMusic = false;
-      }
+      this.originalOrder = this.suffix === '2' ? 
+        [...(window.ReducedMusic || [])] : 
+        [...(window.allMusic || [])];
       
       this.shuffledOrder = [];
       this.isMuted = false;
@@ -130,6 +126,10 @@ document.getElementById("title").addEventListener("click", function() {
       this.itemsPerPage = 15;
       this.isLoading = false;
       this.currentMusicArray = this.originalOrder;
+
+      this.audioEventCleanup = [];
+      this.videoEventCleanup = [];
+      this.maxDOMItems = 1000; // Prevent unbounded growth
   
       this.controlsToggledManually = false;
   
@@ -196,20 +196,6 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     initialize() {
-      // Check if we have a stored preference for which music array to use - Player 2 only
-      if (this.suffix === '2') {
-        // Always start Player 2 with ReducedMusic array
-        this.originalOrder = [...(window.ReducedMusic || [])];
-        this.usingReducedMusic = true;
-        this.setStorageValue(`usingReducedMusic${this.suffix}`, true);
-        
-        // Set button state
-        setTimeout(() => {
-          if (this.seeAllMusicBtn) {
-            this.seeAllMusicBtn.textContent = "star";
-          }
-        }, 100);
-      }
     
       this.setupEventListeners();
       this.loadPersistedState();
@@ -331,49 +317,66 @@ document.getElementById("title").addEventListener("click", function() {
       if (seeVideoBtn) {
         seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
       }
-    
-      // ReducedMusic/AllMusic switching for Player 2
-      if (this.suffix === '2' && this.seeAllMusicBtn) {
-        this.seeAllMusicBtn.style.pointerEvents = 'auto';
-        this.seeAllMusicBtn.style.cursor = 'pointer';
-        this.seeAllMusicBtn.textContent = "star";
-        this.seeAllMusicBtn.addEventListener("click", () => this.switchToAllMusic());
-      }
     }
   
     // Auto-scroll functionality - NEW FEATURE FROM OP2
     scrollToCurrentSong() {
-      if (this.hasUserScrolled || !this.musicList?.classList.contains("show")) {
+      // Don't auto-scroll if user has manually scrolled or in shuffle mode or list is closed
+      if (this.isShuffleMode || this.hasUserScrolled || !this.musicList?.classList.contains("show")) {
         return;
       }
       
-      // Single visibility check - removed redundant checks
       if (!this.ulTag?.offsetParent) {
         return;
       }
       
-      let currentSong = this.isShuffleMode ? 
-        this.shuffledOrder[this.musicIndex - 1] : 
-        this.originalOrder[this.musicIndex - 1];
-      
+      let currentSong = this.originalOrder[this.musicIndex - 1];
       if (!currentSong) return;
       
-      const songIndexInOriginal = this.originalOrder.findIndex(song => song.src === currentSong.src);
-      if (songIndexInOriginal === -1) return;
-      
+      const songIndexInOriginal = this.musicIndex - 1; // We're already using original order index
       const currentlyLoadedCount = (this.currentPage + 1) * this.itemsPerPage;
       
       if (songIndexInOriginal >= currentlyLoadedCount) {
-        // Simplified loading - removed recursive approach
-        if (!this.isLoading && this.currentPage * this.itemsPerPage < this.originalOrder.length) {
+        // Need to load more items first
+        if (!this.isLoading) {
           this.loadMoreItems();
-          // Single retry after loading
           setTimeout(() => {
             this.attemptScrollToSong(currentSong.src);
-          }, 200);
+          }, 300);
         }
       } else {
         this.attemptScrollToSong(currentSong.src);
+      }
+    }
+
+    scrollToSongByIndex(targetIndex) {
+      // Only auto-scroll if NOT in shuffle mode and music list is open
+      if (this.isShuffleMode || !this.ulTag || !this.musicList?.classList.contains("show")) {
+        return;
+      }
+      
+      const startIndex = this.currentPage * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      
+      // Check if target song is in currently loaded range
+      if (targetIndex >= startIndex && targetIndex < endIndex) {
+        // Song is already loaded, scroll to it
+        const relativeIndex = targetIndex - startIndex;
+        const targetElement = this.ulTag.children[relativeIndex];
+        
+        if (targetElement) {
+          requestAnimationFrame(() => {
+            const containerHeight = this.ulTag.clientHeight;
+            const elementTop = targetElement.offsetTop;
+            const elementHeight = targetElement.offsetHeight;
+            const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
+            
+            this.ulTag.scrollTo({
+              top: Math.max(0, scrollPosition),
+              behavior: 'smooth'
+            });
+          });
+        }
       }
     }
   
@@ -429,216 +432,6 @@ document.getElementById("title").addEventListener("click", function() {
           } catch (error) {
             console.warn('Scroll failed:', error);
           }
-        }
-      }
-    }
-  
-    // ReducedMusic/AllMusic switching functionality - NEW FEATURE FROM OP2
-    async switchToAllMusic() {
-      // Only for player 2
-      if (this.suffix !== '2') return;
-      
-      // Check if music list is currently open
-      const isMusicListOpen = this.musicList?.classList.contains("show");
-      
-      // Get the current song details BEFORE switching arrays
-      const currentSong = this.isShuffleMode ? 
-        this.shuffledOrder[this.musicIndex - 1] : 
-        this.originalOrder[this.musicIndex - 1];
-          
-      const wasPlaying = !this.isMusicPaused;
-      const wasShuffleMode = this.isShuffleMode;
-      
-      // IMPORTANT: Pause the audio first to prevent errors during transition
-      if (this.mainAudio && !this.mainAudio.paused) {
-        this.mainAudio.pause();
-      }
-      
-      // Toggle between arrays
-      if (this.usingReducedMusic) {
-        // Switching FROM ReducedMusic TO allMusic
-        this.originalOrder = [...(window.allMusic || [])];
-        this.usingReducedMusic = false;
-        
-        if (this.seeAllMusicBtn) {
-          this.seeAllMusicBtn.textContent = "star";
-        }
-      } else {
-        // Switching FROM allMusic TO ReducedMusic
-        this.originalOrder = [...(window.ReducedMusic || [])];
-        this.usingReducedMusic = true;
-        
-        if (this.seeAllMusicBtn) {
-          this.seeAllMusicBtn.textContent = "star";
-        }
-      }
-      
-      // Store the preference
-      this.setStorageValue(`usingReducedMusic${this.suffix}`, this.usingReducedMusic);
-      
-      this.currentMusicArray = this.originalOrder;
-      
-      // Find the same song in the new array
-      const newIndex = this.originalOrder.findIndex(song => 
-        song.src === currentSong.src && 
-        song.name === currentSong.name && 
-        song.artist === currentSong.artist
-      );
-      
-      // Handle the transition based on whether the song exists in the new array
-      if (newIndex >= 0) {
-        // Song found in new array - smooth transition
-        this.musicIndex = newIndex + 1;
-        
-        // If we were in shuffle mode, recreate the shuffle with the new array
-        if (wasShuffleMode) {
-          this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
-          
-          // Find the song's new position in the shuffled order
-          const shuffledIndex = this.shuffledOrder.findIndex(song => 
-            song.src === currentSong.src && 
-            song.name === currentSong.name && 
-            song.artist === currentSong.artist
-          );
-          
-          if (shuffledIndex >= 0) {
-            this.musicIndex = shuffledIndex + 1;
-          }
-        }
-        
-        // Load the same song in the new array context
-        this.loadMusic(this.musicIndex);
-        
-        // Restore playing state if it was playing before
-        if (wasPlaying) {
-          // Use a timeout to ensure the audio source is fully loaded
-          setTimeout(async () => {
-            try {
-              await this.waitForAudioReady();
-              await this.playMusic();
-            } catch (error) {
-              console.warn('Failed to resume playback after array switch:', error);
-              this.pauseMusic();
-            }
-          }, 300);
-        } else {
-          // Ensure paused state is maintained
-          this.pauseMusic();
-        }
-      } else {
-        // Song not found in new array - find the closest song
-        let closestIndex = 0;
-        
-        if (this.usingReducedMusic) {
-          // Switching to ReducedMusic - find closest song by artist or similar characteristics
-          
-          // Try to find a song by the same artist first
-          const sameArtistIndex = this.originalOrder.findIndex(song => 
-            song.artist.toLowerCase() === currentSong.artist.toLowerCase()
-          );
-          
-          if (sameArtistIndex >= 0) {
-            closestIndex = sameArtistIndex;
-          } else {
-            // If no same artist, try to find similar genre or style
-            // Look for songs with similar words in the title
-            const currentSongWords = currentSong.name.toLowerCase().split(' ');
-            let bestMatch = -1;
-            let bestMatchScore = 0;
-            
-            this.originalOrder.forEach((song, index) => {
-              const songWords = song.name.toLowerCase().split(' ');
-              let matchScore = 0;
-              
-              // Calculate similarity score based on common words
-              currentSongWords.forEach(word => {
-                if (word.length > 3 && songWords.some(songWord => songWord.includes(word) || word.includes(songWord))) {
-                  matchScore++;
-                }
-              });
-              
-              // Also check artist similarity
-              const currentArtistWords = currentSong.artist.toLowerCase().split(' ');
-              const artistWords = song.artist.toLowerCase().split(' ');
-              currentArtistWords.forEach(word => {
-                if (word.length > 2 && artistWords.some(artistWord => artistWord.includes(word) || word.includes(artistWord))) {
-                  matchScore += 0.5;
-                }
-              });
-              
-              if (matchScore > bestMatchScore) {
-                bestMatchScore = matchScore;
-                bestMatch = index;
-              }
-            });
-            
-            if (bestMatch >= 0 && bestMatchScore > 0) {
-              closestIndex = bestMatch;
-            } else {
-              // Fall back to middle of the array for a more varied selection
-              closestIndex = Math.floor(this.originalOrder.length / 2);
-            }
-          }
-        } else {
-          // Switching to allMusic - use first song as before
-          closestIndex = 0;
-        }
-        
-        // Set to closest song
-        this.musicIndex = closestIndex + 1;
-        
-        // Recreate shuffle if needed
-        if (wasShuffleMode) {
-          this.shuffledOrder = [...this.originalOrder].sort(() => Math.random() - 0.5);
-          // Find the closest song's position in shuffled order
-          const shuffledIndex = this.shuffledOrder.findIndex(song => 
-            song.src === this.originalOrder[closestIndex].src
-          );
-          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
-        }
-        
-        // Load the closest song
-        this.loadMusic(this.musicIndex);
-        
-        // Autoplay the closest song after a short delay to ensure it's loaded
-        setTimeout(async () => {
-          try {
-            await this.waitForAudioReady();
-            await this.playMusic();
-          } catch (error) {
-            console.warn('Failed to autoplay closest song after array switch:', error);
-            this.pauseMusic();
-          }
-        }, 400);
-      }
-      
-      // Update the stored music index to match the new array
-      this.setStorageValue(`musicIndex${this.suffix}`, this.musicIndex);
-      
-      // Reset pagination and reload list
-      this.resetPagination();
-      
-      // Update playing song status
-      setTimeout(() => {
-        this.updatePlayingSong();
-      }, 400);
-      
-      // Auto-scroll to current song if music list was open
-      if (isMusicListOpen) {
-        this.hasUserScrolled = false; // Reset scroll state
-        if (this.scrollTimeout) {
-          clearTimeout(this.scrollTimeout);
-        }
-        
-        // Multiple scroll attempts with increasing delays to ensure it works
-        setTimeout(() => {
-          this.scrollToCurrentSong();
-        }, 400);
-      } else {
-        // Reset scroll state even if list is closed
-        this.hasUserScrolled = false;
-        if (this.scrollTimeout) {
-          clearTimeout(this.scrollTimeout);
         }
       }
     }
@@ -726,6 +519,7 @@ document.getElementById("title").addEventListener("click", function() {
     }
       
     loadMusic(index) {
+      this.cleanupAudioEvents();
       const music = this.isShuffleMode ?
         this.shuffledOrder[index - 1] :
         this.originalOrder[index - 1];
@@ -959,7 +753,33 @@ document.getElementById("title").addEventListener("click", function() {
       };
     
       tryNextSource();
-    }   
+    }
+
+    cleanupAudioEvents() {
+      this.audioEventCleanup.forEach(({ element, event, handler }) => {
+        element.removeEventListener(event, handler);
+      });
+      this.audioEventCleanup = [];
+    }
+    
+    cleanupVideoEvents() {
+      this.videoEventCleanup.forEach(({ element, event, handler }) => {
+        element.removeEventListener(event, handler);
+      });
+      this.videoEventCleanup = [];
+    }
+    
+    // Cleanup method for when player is destroyed
+    destroy() {
+      this.cleanupAudioEvents();
+      this.cleanupVideoEvents();
+      
+      // Remove any created style elements
+      const styleElement = document.getElementById(`dark-mode-style${this.suffix}`);
+      if (styleElement) {
+        styleElement.remove();
+      }
+    }
   
     createImageElement(src, type) {
       const img = document.createElement('img');
@@ -1589,15 +1409,26 @@ document.getElementById("title").addEventListener("click", function() {
       const wasClosed = !this.musicList?.classList.contains("show");
       this.musicList.classList.toggle("show");
       
-      // Auto-scroll when music list is opened - NEW FEATURE FROM OP2
+      // Apply proper styling when opening
+      const isDarkMode = this.wrapper.classList.contains("dark-mode");
       if (wasClosed && this.musicList?.classList.contains("show")) {
-        // FORCE reset manual scroll flag
+        // Reset scroll state
         this.hasUserScrolled = false;
         if (this.scrollTimeout) {
           clearTimeout(this.scrollTimeout);
         }
         
-        // Multiple scroll attempts
+        // Apply colors to existing items
+        if (isDarkMode) {
+          this.listcolourblack();
+        } else {
+          this.listcolourwhite();
+        }
+        
+        // Update playing song state
+        this.updatePlayingSong();
+        
+        // Auto-scroll after a delay
         setTimeout(() => {
           this.scrollToCurrentSong();
         }, 200);
@@ -1614,26 +1445,26 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     handleScroll() {
-      const isDarkMode = this.wrapper.classList.contains("dark-mode");
       if (this.isLoading) return;
       
       const scrollTop = this.ulTag.scrollTop;
       const scrollHeight = this.ulTag.scrollHeight;
       const clientHeight = this.ulTag.clientHeight;
       
-      // MOBILE OPTIMIZATION: Increased threshold for mobile touch scrolling
-      if (scrollTop + clientHeight >= scrollHeight - 20) { // Changed from -10
-        if (isDarkMode) {
-          this.loadMoreItems();
-          this.listcolourblack();
-        } else {
-          this.loadMoreItems();
-        }
+      // Load more when near bottom (with larger threshold for mobile)
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        this.loadMoreItems();
       }
     }
   
     loadMoreItems() {
       if (this.isLoading) return;
+      
+      const currentItemCount = this.ulTag.children.length;
+      if (currentItemCount >= this.maxDOMItems) {
+        console.log('Maximum DOM items reached');
+        return;
+      }
       
       const startIndex = (this.currentPage + 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
@@ -1650,6 +1481,14 @@ document.getElementById("title").addEventListener("click", function() {
       // Add the new items to the existing list
       this.appendMusicItems(nextItems, startIndex);
       
+      // Apply proper styling to new items
+      const isDarkMode = this.wrapper.classList.contains("dark-mode");
+      if (isDarkMode) {
+        this.listcolourblack();
+      } else {
+        this.listcolourwhite();
+      }
+      
       this.isLoading = false;
     }
   
@@ -1664,29 +1503,19 @@ document.getElementById("title").addEventListener("click", function() {
       this.currentPage = 0;
       this.ulTag.innerHTML = "";
       
-      // MOBILE OPTIMIZATION: Load fewer items initially on mobile
-      const isMobile = window.innerWidth <= 768;
-      const initialLoadCount = isMobile ? 10 : 15; // Reduced for mobile
+      // Load initial batch of items
+      const initialItems = this.originalOrder.slice(0, this.itemsPerPage);
+      this.appendMusicItems(initialItems, 0);
       
-      const currentSongIndex = this.findCurrentSongIndex();
-      const startIndex = Math.max(0, currentSongIndex - Math.floor(initialLoadCount / 2));
-      const endIndex = Math.min(startIndex + initialLoadCount, this.originalOrder.length);
-      
-      const actualStartIndex = Math.max(0, endIndex - initialLoadCount);
-      
-      const itemsToLoad = this.originalOrder.slice(actualStartIndex, endIndex);
-      this.appendMusicItems(itemsToLoad, actualStartIndex);
-      
-      this.currentPage = Math.floor(actualStartIndex / this.itemsPerPage);
-      
-      // MOBILE OPTIMIZATION: Delay preloading on mobile
-      if (!isMobile) {
-        this.preloadCriticalSongs();
+      // Set up proper dark/light mode colors for newly loaded items
+      const isDarkMode = this.wrapper.classList.contains("dark-mode");
+      if (isDarkMode) {
+        this.listcolourblack();
       } else {
-        setTimeout(() => {
-          this.preloadCriticalSongs();
-        }, 500);
+        this.listcolourwhite();
       }
+      
+      this.preloadCriticalSongs();
     }
 
     findCurrentSongIndex() {
@@ -1911,6 +1740,8 @@ document.getElementById("title").addEventListener("click", function() {
     }
   
     appendMusicItems(musicItems, startIndex) {
+      const fragment = document.createDocumentFragment(); // Use fragment for better performance
+      
       musicItems.forEach((music, i) => {
         const actualIndex = startIndex + i;
         const liTag = document.createElement("li");
@@ -1925,7 +1756,6 @@ document.getElementById("title").addEventListener("click", function() {
           <audio class="${music.src}" src="${this.audioBucketUrl}${music.src}.mp3"></audio>
         `;
     
-        this.ulTag.appendChild(liTag);
         const liAudioTag = liTag.querySelector(`.${music.src}`);
         
         // Add fallback for list audio elements
@@ -1933,11 +1763,14 @@ document.getElementById("title").addEventListener("click", function() {
           console.warn(`List audio failed from R2, trying local: ${this.audioFolder}${music.src}.mp3`);
           liAudioTag.src = `${this.audioFolder}${music.src}.mp3`;
           
-          // Add upload folder fallback for list audio
           liAudioTag.onerror = () => {
             console.warn(`List audio failed from local, trying upload: Upload/${music.src}.mp3`);
             liAudioTag.src = `Upload/${music.src}.mp3`;
             this.r2Available = false;
+            
+            liAudioTag.onerror = () => {
+              console.error(`All audio sources failed for list item: ${music.src}`);
+            };
           };
         };
         
@@ -1954,23 +1787,32 @@ document.getElementById("title").addEventListener("click", function() {
             // Find the index of this song in the shuffled order
             const clickedMusic = this.originalOrder[actualIndex];
             const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
-            this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+            if (shuffledIndex >= 0) {
+              this.musicIndex = shuffledIndex + 1;
+            } else {
+              // If not found in shuffle, add it and play
+              this.shuffledOrder.push(clickedMusic);
+              this.musicIndex = this.shuffledOrder.length;
+            }
           } else {
             this.musicIndex = actualIndex + 1;
           }
           this.loadMusic(this.musicIndex);
           this.playMusic();
-          this.resetVideoSize(); // Add this to reset video state
+          this.resetVideoSize();
         });
+    
+        fragment.appendChild(liTag);
       });
       
+      this.ulTag.appendChild(fragment); // Append all at once for better performance
       this.updatePlayingSong();
     }
   
     updatePlayingSong() {
       const allLiTags = this.ulTag?.querySelectorAll("li");
       if (!allLiTags || allLiTags.length === 0) return;
-  
+    
       // Get current music based on mode
       let currentMusic;
       if (this.isShuffleMode && this.shuffledOrder.length > 0) {
@@ -1978,18 +1820,18 @@ document.getElementById("title").addEventListener("click", function() {
       } else if (this.originalOrder.length > 0) {
         currentMusic = this.originalOrder[this.musicIndex - 1];
       }
-  
-      if (!currentMusic) {
-        return;
-      }
-  
-      // First pass: Clear all playing states and restore durations
+    
+      if (!currentMusic) return;
+    
+      // Clear all playing states first
       allLiTags.forEach(liTag => {
         const audioTag = liTag.querySelector(".audio-duration");
         if (!audioTag) return;
         
         // Store original duration if not stored yet
-        if (!audioTag.hasAttribute("t-duration") && audioTag.textContent !== "Playing" && audioTag.textContent !== "3:40") {
+        if (!audioTag.hasAttribute("t-duration") && 
+            audioTag.textContent !== "Playing" && 
+            audioTag.textContent !== "3:40") {
           audioTag.setAttribute("t-duration", audioTag.textContent);
         }
         
@@ -1999,25 +1841,19 @@ document.getElementById("title").addEventListener("click", function() {
         // Restore duration if showing "Playing"
         if (audioTag.textContent === "Playing") {
           const originalDuration = audioTag.getAttribute("t-duration");
-          if (originalDuration) {
-            audioTag.textContent = originalDuration;
-          } else {
-            audioTag.textContent = "3:40"; // fallback
-          }
+          audioTag.textContent = originalDuration || "3:40";
         }
       });
-  
-      // Second pass: Find and mark the current song
+    
+      // Find and mark the current song
       let foundCurrentSong = false;
       allLiTags.forEach(liTag => {
         const audioTag = liTag.querySelector(".audio-duration");
         if (!audioTag) return;
-  
+    
         // Check if this matches the current song
         if (audioTag.id === currentMusic.src) {
           foundCurrentSong = true;
-          
-          // Mark as currently selected
           liTag.classList.add("playing");
           
           // Show "Playing" only if music is actually playing
@@ -2032,23 +1868,26 @@ document.getElementById("title").addEventListener("click", function() {
           }
         }
       });
-  
-      // If song not found, try to load it
+    
+      // If current song not found in loaded items, try to load more
       if (!foundCurrentSong) {
-        
-        // Find song position in original order
         const songIndexInOriginal = this.originalOrder.findIndex(song => song.src === currentMusic.src);
-        
         if (songIndexInOriginal >= 0) {
           const currentlyLoadedCount = (this.currentPage + 1) * this.itemsPerPage;
-          
-          if (songIndexInOriginal >= currentlyLoadedCount) {
-            // Load more items to reach the current song
+          if (songIndexInOriginal >= currentlyLoadedCount && !this.isLoading) {
+            // Load more items to include the current song
             this.loadItemsUntilSongForPlaying(songIndexInOriginal, currentMusic.src);
           }
-        } else {
-          console.warn('Current song not found in original order:', currentMusic.src);
         }
+      }
+    
+      // Handle auto-scroll
+      const actualMusicIndex = this.isShuffleMode 
+        ? this.originalOrder.findIndex(song => song.src === currentMusic.src)
+        : this.musicIndex - 1;
+    
+      if (actualMusicIndex >= 0) {
+        this.scrollToSongByIndex(actualMusicIndex);
       }
     }
   

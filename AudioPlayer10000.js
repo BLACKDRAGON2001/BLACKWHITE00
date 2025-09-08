@@ -79,7 +79,7 @@ document.getElementById("title").addEventListener("click", function() {
       // Pagination state
       this.currentPage = 0;
       this.itemsPerPage = 25;
-      this.maxDOMItems = 200; // Prevent unbounded growth
+      this.maxDOMItems = 1000; // Prevent unbounded growth
       this.isLoading = false;
       this.currentMusicArray = this.originalOrder;
   

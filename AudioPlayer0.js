@@ -775,6 +775,7 @@ class MusicPlayer {
       this.isMusicPaused = true;
       localStorage.setItem(`isMusicPaused${this.suffix}`, true);
     }
+    this.updatePlayingSong();
   }
   
   // Update the existing pauseMusic method to handle video unmuting in override mode:
