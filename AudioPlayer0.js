@@ -1155,43 +1155,6 @@ class MusicPlayer {
         ? "Playing"
         : audioTag.getAttribute("t-duration");
     });
-  
-    // Smart scrolling based on index calculation
-    this.scrollToSongByIndex(actualMusicIndex);
-  }
-  
-  // Add this new method for precise index-based scrolling
-  scrollToSongByIndex(targetIndex) {
-    // Only auto-scroll if NOT in shuffle mode (i.e., in normal mode)
-    if (this.isShuffleMode) {
-      return; // Exit early - no scrolling in shuffle mode
-    }
-    
-    const startIndex = this.currentPage * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    
-    // Check if target song is in currently loaded range
-    if (targetIndex >= startIndex && targetIndex < endIndex) {
-      // Song is already loaded, scroll to it
-      const relativeIndex = targetIndex - startIndex;
-      const targetElement = this.ulTag.children[relativeIndex];
-      
-      if (targetElement) {
-        requestAnimationFrame(() => {
-          const containerHeight = this.ulTag.clientHeight;
-          const elementTop = targetElement.offsetTop;
-          const elementHeight = targetElement.offsetHeight;
-          const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
-          
-          this.ulTag.scrollTo({
-            top: Math.max(0, scrollPosition),
-            behavior: 'smooth'
-          });
-        });
-      }
-    }
-    // If song is not in current range, we simply don't scroll
-    // This avoids performance issues and unwanted loading
   }
 
   toggleDarkMode() {
