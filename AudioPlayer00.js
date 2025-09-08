@@ -138,6 +138,8 @@ class MusicPlayer {
     }
     
     this.initialize();
+    this.hasUserInteracted = false;
+    this.setupUserInteractionDetection();
   }
 
   debounce(func, wait) {
@@ -195,6 +197,23 @@ class MusicPlayer {
         this.borderBox.style.display = "none";
       }
     });
+  }
+
+  setupUserInteractionDetection() {
+    const isMobile = this.detectMobile();
+    
+    if (isMobile) {
+      const detectInteraction = () => {
+        this.hasUserInteracted = true;
+        document.removeEventListener('touchstart', detectInteraction);
+        document.removeEventListener('click', detectInteraction);
+      };
+      
+      document.addEventListener('touchstart', detectInteraction, { once: true, passive: true });
+      document.addEventListener('click', detectInteraction, { once: true });
+    } else {
+      this.hasUserInteracted = true;
+    }
   }
 
   detectPerformanceMode() {
@@ -487,55 +506,55 @@ class MusicPlayer {
     }
   }
 
+    // Add this method to detect mobile
+  detectMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  // Replace setAudioSourceWithFallback method:
   setAudioSourceWithFallback(src) {
+    const isMobile = this.detectMobile();
+    const timeout = isMobile ? 8000 : 5000; // Longer timeout for mobile
+    
     const r2AudioSrc = `${this.audioBucketUrl}${src}.mp3`;
     const localAudioSrc = `${this.audioFolder}${src}.mp3`;
-    const uploadAudioSrc = `Upload/${src}.mp3`; // New upload folder fallback
+    const uploadAudioSrc = `Upload/${src}.mp3`;
     
-    // Clear any previous event listeners
     this.mainAudio.onerror = null;
     this.mainAudio.onloadeddata = null;
     
-    // Try R2 first
-    this.mainAudio.src = r2AudioSrc;
+    let loadTimeout;
     
-    // Set up error handling for audio with proper loading wait
-    const handleAudioError = () => {
-      console.warn(`Audio failed to load from R2: ${r2AudioSrc}, trying local: ${localAudioSrc}`);
-      this.mainAudio.src = localAudioSrc;
-      
-      // Wait for local to load or fail
-      this.mainAudio.onloadeddata = () => {
-        console.log(`Audio loaded successfully from local: ${localAudioSrc}`);
-        this.mainAudio.onloadeddata = null;
-      };
-      
-      // Add upload folder fallback
-      this.mainAudio.onerror = () => {
-        console.warn(`Audio failed to load from local: ${localAudioSrc}, trying upload: ${uploadAudioSrc}`);
-        this.mainAudio.src = uploadAudioSrc;
-        this.r2Available = false;
+    const trySource = (source, fallbackSources) => {
+      return new Promise((resolve, reject) => {
+        this.mainAudio.src = source;
         
-        // Wait for upload to load
+        // Set loading timeout
+        loadTimeout = setTimeout(() => {
+          console.warn(`Audio loading timeout for: ${source}`);
+          reject(new Error('Loading timeout'));
+        }, timeout);
+        
         this.mainAudio.onloadeddata = () => {
-          console.log(`Audio loaded successfully from upload: ${uploadAudioSrc}`);
-          this.mainAudio.onloadeddata = null;
+          clearTimeout(loadTimeout);
+          console.log(`Audio loaded successfully: ${source}`);
+          resolve();
         };
         
         this.mainAudio.onerror = () => {
-          console.error(`All audio sources failed for: ${src}`);
-          this.mainAudio.onerror = null;
+          clearTimeout(loadTimeout);
+          reject(new Error(`Failed to load: ${source}`));
         };
-      };
+      });
     };
     
-    // Wait for R2 to load or fail
-    this.mainAudio.onloadeddata = () => {
-      console.log(`Audio loaded successfully from R2: ${r2AudioSrc}`);
-      this.mainAudio.onloadeddata = null;
-    };
-    
-    this.mainAudio.onerror = handleAudioError;
+    // Try sources in sequence
+    trySource(r2AudioSrc)
+      .catch(() => trySource(localAudioSrc))
+      .catch(() => trySource(uploadAudioSrc))
+      .catch(() => {
+        console.error(`All audio sources failed for: ${src}`);
+      });
   }
 
   setInitialAudioSource(src) {
@@ -712,44 +731,46 @@ class MusicPlayer {
 
   createImageElement(src, type) {
     const img = document.createElement('img');
+    const isMobile = this.detectMobile();
     
-    // Try R2 bucket first
-    const r2ImageSrc = `${this.imageBucketUrl}${src}.${type}`;
+    // Smaller images for mobile to reduce bandwidth
+    const imageSuffix = isMobile ? '_mobile' : '';
+    
+    const r2ImageSrc = `${this.imageBucketUrl}${src}${imageSuffix}.${type}`;
     const localImageSrc = `${this.imageFolder}${src}.${type}`;
-    const uploadImageSrc = `Upload/${src}.${type}`; // New upload folder fallback
+    const uploadImageSrc = `Upload/${src}.${type}`;
     
-    img.src = r2ImageSrc;
     img.alt = this.musicName.textContent;
     
-    // Add error handling for image loading
+    // Set loading timeout for mobile
+    let loadTimeout;
+    if (isMobile) {
+      loadTimeout = setTimeout(() => {
+        console.warn(`Image loading timeout, using fallback`);
+        img.src = localImageSrc;
+      }, 6000);
+    }
+    
+    img.onload = () => {
+      if (loadTimeout) clearTimeout(loadTimeout);
+    };
+    
     img.onerror = () => {
-      console.warn(`Failed to load image from R2 bucket: ${r2ImageSrc}, trying local: ${localImageSrc}`);
+      if (loadTimeout) clearTimeout(loadTimeout);
+      console.warn(`Failed to load image: ${img.src}`);
       
-      // For disguise player (Player 2), try local first, then upload, then create white fallback
-      if (this.suffix === '2') {
+      // Try local, then upload, then white fallback for mobile
+      if (img.src === r2ImageSrc) {
         img.src = localImageSrc;
-        img.onerror = () => {
-          console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
-          img.src = uploadImageSrc;
-          img.onerror = () => {
-            console.warn(`Failed to load upload image: ${uploadImageSrc}, using white fallback`);
-            this.createWhiteFallback(img);
-          };
-        };
-      } else {
-        // For regular player, try local folder then upload folder
-        img.src = localImageSrc;
-        img.onerror = () => {
-          console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
-          img.src = uploadImageSrc;
-          img.onerror = () => {
-            console.warn(`Failed to load upload image: ${uploadImageSrc}`);
-          };
-        };
+      } else if (img.src === localImageSrc) {
+        img.src = uploadImageSrc;
+      } else if (this.suffix === '2') {
+        this.createWhiteFallback(img);
       }
       this.r2Available = false;
     };
     
+    img.src = r2ImageSrc;
     return img;
   }
 
@@ -780,25 +801,31 @@ class MusicPlayer {
   }
 
   async playMusic() {
+    const isMobile = this.detectMobile();
+    
     try {
-      // Remove the waitForAudioReady call that might be causing delays
-      // Just try to play directly
+      // On mobile, ensure user interaction before playing
+      if (isMobile && !this.hasUserInteracted) {
+        console.log("Mobile detected - waiting for user interaction");
+        return;
+      }
+      
+      // Wait for audio to be ready with timeout
+      await this.waitForAudioReady(3000);
       
       const playPromise = this.mainAudio.play();
       
       if (playPromise !== undefined) {
         await playPromise;
         
-        // Only update UI state after successful play
         this.wrapper.classList.add("paused");
         this.playPauseBtn.querySelector("i").textContent = "pause";
         this.isMusicPaused = false;
-        localStorage.setItem(`isMusicPaused${this.suffix}`, false);
         
-        if (this.videoOverride) {
+        if (this.videoOverride && !isMobile) {
           this.videoAd.muted = true;
           this.showVideoOverride();
-        } else {
+        } else if (!isMobile) {
           this.toggleVideoDisplay(false);
         }
         
@@ -809,21 +836,48 @@ class MusicPlayer {
         }
       }
     } catch (error) {
-      console.warn("Failed to play audio - user interaction may be required:", error);
+      console.warn("Failed to play audio:", error);
       
-      // Reset play button state if play fails
       this.wrapper.classList.remove("paused");
       this.playPauseBtn.querySelector("i").textContent = "play_arrow";
       this.isMusicPaused = true;
-      localStorage.setItem(`isMusicPaused${this.suffix}`, true);
       
-      // Show a user-friendly message for mobile users
-      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        // You could show a toast or notification here
-        console.log("Tap the play button to start music");
+      // Show user-friendly message for mobile
+      if (isMobile) {
+        this.showMobilePlayMessage();
       }
     }
     this.updatePlayingSong();
+  }
+  
+  // Add this helper method:
+  waitForAudioReady(timeout = 3000) {
+    return new Promise((resolve) => {
+      if (this.mainAudio.readyState >= 2) {
+        resolve();
+        return;
+      }
+      
+      let timeoutId = setTimeout(() => {
+        console.warn("Audio ready timeout");
+        resolve();
+      }, timeout);
+      
+      const handleReady = () => {
+        clearTimeout(timeoutId);
+        this.mainAudio.removeEventListener('canplay', handleReady);
+        this.mainAudio.removeEventListener('loadeddata', handleReady);
+        resolve();
+      };
+      
+      this.mainAudio.addEventListener('canplay', handleReady);
+      this.mainAudio.addEventListener('loadeddata', handleReady);
+    });
+  }
+  
+  showMobilePlayMessage() {
+    // You can implement a user-friendly notification here
+    console.log("Tap the play button to start music on mobile");
   }
   
   // Update the existing pauseMusic method to handle video unmuting in override mode:
