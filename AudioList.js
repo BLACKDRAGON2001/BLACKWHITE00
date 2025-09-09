@@ -239,175 +239,175 @@ let allMusic = [
 
     {
         name: "Funk Criminal",
-        artist: "Jmilton",
+        artist: "Icedmane",
         src: "FunkCriminal",
         coverType: "Images"
     },
 
     {
         name: "Montagem Bueno",
-        artist: "Jmilton",
+        artist: "WhxteSxde",
         src: "MontagemBueno",
         coverType: "Images"
     },
 
     {
         name: "Montagem Bibi Game",
-        artist: "Jmilton",
+        artist: "LXNGVX",
         src: "MontagemBibiGame",
         coverType: "Images"
     },
 
     {
         name: "Montagem Fortuna",
-        artist: "Jmilton",
+        artist: "Glichery",
         src: "MontagemFortuna",
         coverType: "Images"
     },
 
     {
         name: "Maestro",
-        artist: "Jmilton",
+        artist: "Cjbeards",
         src: "Maestro",
         coverType: "Images"
     },
 
     {
         name: "Breath",
-        artist: "Jmilton",
+        artist: "N1VALL",
         src: "Breath",
         coverType: "Images"
     },
 
     {
         name: "Mande Mande",
-        artist: "Jmilton",
+        artist: "CHASHKAKEFIRA",
         src: "MandeMande",
         coverType: "Images"
     },
 
     {
         name: "Momento",
-        artist: "Jmilton",
+        artist: "N1VALL",
         src: "Momento",
         coverType: "Images"
     },
 
     {
         name: "Del Amor",
-        artist: "Jmilton",
+        artist: "SEKIMANE",
         src: "DelAmor",
         coverType: "Images"
     },
 
     {
         name: "Baila Contigo",
-        artist: "Jmilton",
+        artist: "MVTRIIIX",
         src: "BailaContigo",
         coverType: "Images"
     },
 
     {
         name: "Slay Rock",
-        artist: "Jmilton",
+        artist: "Eternxlkz",
         src: "SlayRock",
         coverType: "Images"
     },
 
     {
         name: "Montagem Amarte",
-        artist: "Jmilton",
+        artist: "Vlxdimir",
         src: "MontagemAmarte",
         coverType: "Images"
     },
 
     {
         name: "Baila Loca",
-        artist: "Jmilton",
+        artist: "Yb Wasg'ood",
         src: "BailaLoca",
         coverType: "Images"
     },
 
     {
         name: "Chronosphere Two",
-        artist: "Jmilton",
+        artist: "Sxdboy",
         src: "ChronosphereTwo",
         coverType: "Images"
     },
 
     {
         name: "Canta La",
-        artist: "Jmilton",
+        artist: "TRXSHBXY",
         src: "CantaLa",
         coverType: "Images"
     },
 
     {
         name: "Funk Love Again",
-        artist: "Jmilton",
+        artist: "SCRXXCH",
         src: "FunkLoveAgain",
         coverType: "Images"
     },
 
     {
         name: "Nevoa",
-        artist: "Jmilton",
+        artist: "Zhanbxqq",
         src: "Nevoa",
         coverType: "Images"
     },
 
     {
         name: "Pasos De Fuego",
-        artist: "Jmilton",
+        artist: "Flame Runner",
         src: "PasosDeFuego",
         coverType: "Images"
     },
 
     {
         name: "Violento",
-        artist: "Jmilton",
+        artist: "Kobe Mane",
         src: "Violento",
         coverType: "Images"
     },
 
     {
         name: "To Aqui",
-        artist: "Jmilton",
+        artist: "Punic",
         src: "ToAqui",
         coverType: "Images"
     },
 
     {
         name: "Safado No Bailao",
-        artist: "Jmilton",
+        artist: "DJ FKU",
         src: "SafadoNoBailao",
         coverType: "Images"
     },
 
     {
         name: "Con La Luz",
-        artist: "Jmilton",
+        artist: "Luc Wall",
         src: "ConLaLuz",
         coverType: "Images"
     },
 
     {
         name: "Sin Control",
-        artist: "Jmilton",
+        artist: "ICEDMANE",
         src: "SinControl",
         coverType: "Images"
     },
 
     {
         name: "Impacta",
-        artist: "Jmilton",
+        artist: "Marian And Sean",
         src: "Impacta",
         coverType: "Images"
     },
 
     {
         name: "Dale Dale",
-        artist: "Jmilton",
+        artist: "SHIPU",
         src: "DaleDale",
         coverType: "Images"
     },
@@ -1830,6 +1830,13 @@ let allMusic = [
         name: "The Shadows",
         artist: "Chris Grey",
         src: "TheShadows",
+        coverType: "Images"
+    },
+
+    {
+        name: "Ride",
+        artist: "Chris Grey",
+        src: "Ride",
         coverType: "Images"
     },
 
