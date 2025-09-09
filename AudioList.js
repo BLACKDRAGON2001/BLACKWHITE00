@@ -238,6 +238,181 @@ let allMusic = [
     },
 
     {
+        name: "Funk Criminal",
+        artist: "Jmilton",
+        src: "FunkCriminal",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Bueno",
+        artist: "Jmilton",
+        src: "MontagemBueno",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Bibi Game",
+        artist: "Jmilton",
+        src: "MontagemBibiGame",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Fortuna",
+        artist: "Jmilton",
+        src: "MontagemFortuna",
+        coverType: "Images"
+    },
+
+    {
+        name: "Maestro",
+        artist: "Jmilton",
+        src: "Maestro",
+        coverType: "Images"
+    },
+
+    {
+        name: "Breath",
+        artist: "Jmilton",
+        src: "Breath",
+        coverType: "Images"
+    },
+
+    {
+        name: "Mande Mande",
+        artist: "Jmilton",
+        src: "MandeMande",
+        coverType: "Images"
+    },
+
+    {
+        name: "Momento",
+        artist: "Jmilton",
+        src: "Momento",
+        coverType: "Images"
+    },
+
+    {
+        name: "Del Amor",
+        artist: "Jmilton",
+        src: "DelAmor",
+        coverType: "Images"
+    },
+
+    {
+        name: "Baila Contigo",
+        artist: "Jmilton",
+        src: "BailaContigo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Slay Rock",
+        artist: "Jmilton",
+        src: "SlayRock",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Amarte",
+        artist: "Jmilton",
+        src: "MontagemAmarte",
+        coverType: "Images"
+    },
+
+    {
+        name: "Baila Loca",
+        artist: "Jmilton",
+        src: "BailaLoca",
+        coverType: "Images"
+    },
+
+    {
+        name: "Chronosphere Two",
+        artist: "Jmilton",
+        src: "ChronosphereTwo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Canta La",
+        artist: "Jmilton",
+        src: "CantaLa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Funk Love Again",
+        artist: "Jmilton",
+        src: "FunkLoveAgain",
+        coverType: "Images"
+    },
+
+    {
+        name: "Nevoa",
+        artist: "Jmilton",
+        src: "Nevoa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pasos De Fuego",
+        artist: "Jmilton",
+        src: "PasosDeFuego",
+        coverType: "Images"
+    },
+
+    {
+        name: "Violento",
+        artist: "Jmilton",
+        src: "Violento",
+        coverType: "Images"
+    },
+
+    {
+        name: "To Aqui",
+        artist: "Jmilton",
+        src: "ToAqui",
+        coverType: "Images"
+    },
+
+    {
+        name: "Safado No Bailao",
+        artist: "Jmilton",
+        src: "SafadoNoBailao",
+        coverType: "Images"
+    },
+
+    {
+        name: "Con La Luz",
+        artist: "Jmilton",
+        src: "ConLaLuz",
+        coverType: "Images"
+    },
+
+    {
+        name: "Sin Control",
+        artist: "Jmilton",
+        src: "SinControl",
+        coverType: "Images"
+    },
+
+    {
+        name: "Impacta",
+        artist: "Jmilton",
+        src: "Impacta",
+        coverType: "Images"
+    },
+
+    {
+        name: "Dale Dale",
+        artist: "Jmilton",
+        src: "DaleDale",
+        coverType: "Images"
+    },
+
+    {
         name: "Nada Nada",
         artist: "Jmilton",
         src: "NadaNada",
@@ -850,6 +1025,13 @@ let allMusic = [
         name: "Treat You Better",
         artist: "Shawn Mendes",
         src: "TreatYouBetter",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Power Of Excalibur",
+        artist: "Daniel Pemberton",
+        src: "ThePowerOfExcalibur",
         coverType: "Images"
     },
 
@@ -2859,6 +3041,13 @@ let allMusic = [
         name: "We Still Fuck",
         artist: "Ayesha Erotica",
         src: "WeStillFuck",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hands Up",
+        artist: "Ayesha Erotica",
+        src: "HandsUp2",
         coverType: "Images"
     },
 
