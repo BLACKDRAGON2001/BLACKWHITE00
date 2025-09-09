@@ -1036,7 +1036,7 @@ class MusicPlayer {
   }
 
   
-  createMusicListItem(music, actualIndex) {
+  /*createMusicListItem(music, actualIndex) {
     const liTag = document.createElement("li");
     liTag.setAttribute("li-index", actualIndex + 1);
 
@@ -1128,7 +1128,49 @@ class MusicPlayer {
     });
 
     return liTag;
-  }
+  }*/
+
+  createMusicListItem(music, actualIndex) {
+    const liTag = document.createElement("li");
+    liTag.setAttribute("li-index", actualIndex + 1);
+  
+    // Use cached duration if available, otherwise show placeholder
+    const cachedDuration = this.getDurationCache(music.src);
+    const displayDuration = cachedDuration || "0:00";
+  
+    liTag.innerHTML = `
+      <div class="row">
+        <span>${music.name}</span>
+        <p>${music.artist}</p>
+      </div>
+      <span id="${music.src}" class="audio-duration">${displayDuration}</span>
+    `;
+  
+    // Apply dark mode styles immediately if in dark mode
+    const isDarkMode = this.wrapper.classList.contains("dark-mode");
+    liTag.style.color = isDarkMode ? 'white' : 'black';
+    liTag.style.borderBottom = isDarkMode ? '3px solid white' : '3px solid black';
+  
+    // Handle clicking a list item
+    liTag.addEventListener("click", () => {
+      try {
+        if (this.isShuffleMode) {
+          const clickedMusic = this.musicSource[actualIndex];
+          const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
+          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+        } else {
+          this.musicIndex = actualIndex + 1;
+        }
+        this.loadMusic(this.musicIndex);
+        this.playMusic();
+        this.resetVideoSize();
+      } catch (error) {
+        this.throttledLog('click_error', `Click handler error: ${error.message}`, music.src);
+      }
+    });
+  
+    return liTag;
+  }  
 
   getDurationCache(src) {
     if (!this.durationCache) this.durationCache = {};
