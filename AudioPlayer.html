@@ -32,74 +32,14 @@
     <div class="login-message">
         <p id="MessageBox"></p>
     </div>
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <p>AUTHENTICATING...</p>
+    </div>
     <div class="input-submit">
         <button class="submit-btn" id="signinBtn">SIGN IN</button>
     </div>
   </div>
-
-  <!--
-
-  <div id="AccountsPage" style="display:none;">
-    <div class="accounts-header">
-      <header id="accounts-title">ACCOUNTS</header>
-    </div>
-    <div class="account-box">
-      <button class="accountBtn" data-account="account1">
-        <img class="accountImg" src="SystemImages/Lightbringer.jpg">
-      </button>
-      <div>
-        <h1 class="AccountName">LIGHTBRINGER</h1>
-        <p class="AccountHolder">SIGN-IN AS CASTOR</p>
-      </div>
-    </div>
-    <div class="account-box">
-      <button class="accountBtn" data-account="account2">
-        <img class="accountImg" src="SystemImages/Crimsonvampire.jpg">
-      </button>
-      <div>
-        <h1 class="AccountName">CRIMSON VAMPIRE</h1>
-        <p class="AccountHolder">SIGN-IN AS DRACULA</p>
-      </div>
-    </div>
-    <div class="account-box">
-      <button class="accountBtn" data-account="account3">
-        <img class="accountImg" src="SystemImages/Morningstar.jpg">
-      </button>
-      <div>
-        <h1 class="AccountName">MORNINGSTAR</h1>
-        <p class="AccountHolder">SIGN-IN AS SPARTACUS</p>
-      </div>
-    </div>
-    <div class="account-box">
-      <button class="accountBtn" data-account="account4">
-        <img class="accountImg" src="SystemImages/Valentinean.jpg">
-      </button>
-      <div>
-        <h1 class="AccountName">VALENTINEAN</h1>
-        <p class="AccountHolder">SIGN-IN AS ALYSSA</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="AccountLoginPage" class="login-box white-bg" style="display: none; background: white;">
-    <div class="login-header">
-        <header id="accountsLogin-title">SIGN-IN</header>
-    </div>
-    <div class="input-box">
-        <input id="accountUsername" type="text" class="input-field" placeholder="ENTER ACCOUNT USERNAME" autocomplete="off">
-    </div>
-    <div class="input-box">
-        <input id="accountPassword" type="password" class="input-field" placeholder="ENTER ACCOUNT PASSWORD" autocomplete="off">
-    </div>
-    <div class="login-message">
-        <p id="MessageBox2"></p>
-    </div>
-    <div class="input-submit">
-        <button class="submit-btn" id="accountSigninBtn">SIGN IN</button>
-    </div>
-  </div>
--->
-
 
   <div id="HomePage" class="home-box" style="display: none;">
     <div class="wrapper" id="wrapper">
@@ -218,9 +158,443 @@
     </div>
   </div>
 
+  <!-- Secure Authentication System -->
+  <script>
+    // API Configuration - Updated for Render deployment
+    const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
+    
+    // State management
+    let currentUser = null;
+    let accessToken = null;
+    let refreshToken = null;
+    let loginAttempts = 0;
+    const maxAttempts = 3;
+
+    // API Helper functions
+    const SecureAPI = {
+        async request(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+                },
+                ...options
+            };
+
+            if (config.body && typeof config.body === 'object') {
+                config.body = JSON.stringify(config.body);
+            }
+
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'REQUEST FAILED');
+                }
+
+                return data;
+            } catch (error) {
+                // Handle network errors
+                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                    throw new Error('CANNOT CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.');
+                }
+                throw error;
+            }
+        },
+
+        async login(username, password) {
+            return this.request('/api/auth/login', {
+                method: 'POST',
+                body: { username, password }
+            });
+        },
+
+        async logout() {
+            return this.request('/api/auth/logout', {
+                method: 'POST'
+            });
+        },
+
+        async getUserProfile() {
+            return this.request('/api/user/profile');
+        },
+
+        async refreshAccessToken() {
+            return this.request('/api/auth/refresh', {
+                method: 'POST',
+                body: { refreshToken }
+            });
+        },
+
+        // Test backend connection
+        async testConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Backend connection successful:', data);
+                    return true;
+                }
+            } catch (error) {
+                console.error('Backend connection test failed:', error);
+            }
+            return false;
+        }
+    };
+
+    // UI Helper functions
+    function showMessage(text, isSuccess = false) {
+        const messageBox = document.getElementById("MessageBox");
+        if (messageBox) {
+            messageBox.textContent = text.toUpperCase();
+            messageBox.style.color = "#000000"; // Always black
+            messageBox.style.display = "block";
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageBox.style.display = "none";
+            }, 5000);
+        }
+    }
+
+    function showLoading(show = true) {
+        const loadingEl = document.getElementById("loadingIndicator");
+        const signInBtn = document.getElementById("signinBtn");
+        const messageBox = document.getElementById("MessageBox");
+        
+        if (show) {
+            // Hide the separate loading indicator
+            if (loadingEl) {
+                loadingEl.style.display = "none";
+            }
+            
+            // Show loading message in the same message box as other messages
+            if (messageBox) {
+                messageBox.textContent = "AUTHENTICATING CREDENTIALS...";
+                messageBox.style.color = "#000000"; // Same black color as other messages
+                messageBox.style.display = "block";
+            }
+            
+            // Update button
+            if (signInBtn) {
+                signInBtn.disabled = true;
+                signInBtn.textContent = "SIGNING IN...";
+                signInBtn.style.opacity = "0.7";
+            }
+        } else {
+            // Hide loading indicator
+            if (loadingEl) {
+                loadingEl.style.display = "none";
+            }
+            
+            // Reset button
+            if (signInBtn) {
+                signInBtn.disabled = false;
+                signInBtn.textContent = "SIGN IN";
+                signInBtn.style.opacity = "1";
+            }
+            
+            // Don't clear the message box here - let other functions handle success/error messages
+        }
+    }
+
+    function clearInputFields() {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const messageBox = document.getElementById("MessageBox");
+        
+        if (username) username.value = "";
+        if (password) password.value = "";
+        if (messageBox) {
+            messageBox.textContent = "";
+            messageBox.style.display = "none";
+        }
+    }
+
+    // Token management
+    function saveTokens(tokens) {
+        accessToken = tokens.accessToken;
+        refreshToken = tokens.refreshToken;
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('refreshToken', refreshToken);
+    }
+
+    function loadTokens() {
+        accessToken = sessionStorage.getItem('accessToken');
+        refreshToken = sessionStorage.getItem('refreshToken');
+    }
+
+    function clearTokens() {
+        accessToken = null;
+        refreshToken = null;
+        currentUser = null;
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
+    }
+
+    // Auto-refresh token
+    async function refreshTokenIfNeeded() {
+        if (!refreshToken) return false;
+
+        try {
+            const response = await SecureAPI.refreshAccessToken();
+            if (response.success) {
+                accessToken = response.data.accessToken;
+                sessionStorage.setItem('accessToken', accessToken);
+                return true;
+            }
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            handleLogout();
+        }
+        return false;
+    }
+
+    // Authentication functions
+    async function handleSecureLogin() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+            showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
+            return;
+        }
+
+        showLoading(true);
+
+        try {
+            const response = await SecureAPI.login(username, password);
+            
+            if (response.success) {
+                currentUser = response.data.user;
+                saveTokens({
+                    accessToken: response.data.accessToken,
+                    refreshToken: response.data.refreshToken
+                });
+
+                clearInputFields();
+                loginAttempts = 0; // Reset attempts on successful login
+                
+                // Navigate based on user role using existing functions
+                if (currentUser.role === 'home') {
+                    showHomePage();
+                } else if (currentUser.role === 'disguise') {
+                    showDisguisePage();
+                }
+                
+                showMessage("LOGIN SUCCESSFUL", true);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            loginAttempts++;
+            
+            let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
+            
+            // Add attempt counter
+            if (loginAttempts < maxAttempts) {
+                const remaining = maxAttempts - loginAttempts;
+                errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
+            } else {
+                errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
+                // Disable login for 15 minutes (like the backend)
+                setTimeout(() => {
+                    loginAttempts = 0;
+                    showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
+                }, 15 * 60 * 1000);
+            }
+            
+            showMessage(errorMessage);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    async function handleLogout() {
+        try {
+            if (accessToken) {
+                await SecureAPI.logout();
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            clearTokens();
+            clearInputFields();
+            showLoginPage();
+            showMessage("LOGGED OUT SUCCESSFULLY", true);
+        }
+    }
+
+    // Page navigation functions (integrating with your existing system)
+    function showLoginPage() {
+        document.getElementById("LoginPage").style.display = "block";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "none";
+        document.body.style.backgroundColor = "white";
+    }
+
+    function showHomePage() {
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("HomePage").style.display = "block";
+        document.getElementById("DisguisePage").style.display = "none";
+        document.body.style.backgroundColor = "black";
+        
+        // Store login time for session management
+        sessionStorage.setItem("HomeLoginTime", new Date().getTime());
+        sessionStorage.removeItem("DisguiseLoginTime");
+    }
+
+    function showDisguisePage() {
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "block";
+        document.body.style.backgroundColor = "black";
+        
+        // Store login time for session management
+        sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
+        sessionStorage.removeItem("HomeLoginTime");
+    }
+
+    // Check authentication status on page load
+    async function checkAuthStatus() {
+        loadTokens();
+        
+        if (!accessToken) {
+            showLoginPage();
+            return;
+        }
+
+        try {
+            const userResponse = await SecureAPI.getUserProfile();
+            if (userResponse.success) {
+                currentUser = userResponse.data;
+                
+                // Navigate to appropriate page based on role
+                if (currentUser.role === 'home') {
+                    showHomePage();
+                } else if (currentUser.role === 'disguise') {
+                    showDisguisePage();
+                }
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            
+            // Try to refresh token
+            const refreshed = await refreshTokenIfNeeded();
+            if (!refreshed) {
+                clearTokens();
+                showLoginPage();
+                showMessage('SESSION EXPIRED. PLEASE LOG IN AGAIN.');
+            }
+        }
+    }
+
+    // Test backend connection on load
+    async function initializeApp() {
+        console.log('Connecting to backend at:', API_BASE_URL);
+        
+        const isConnected = await SecureAPI.testConnection();
+        if (!isConnected) {
+            showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+        } else {
+            console.log('Backend connection successful');
+        }
+        
+        // Proceed with authentication check
+        checkAuthStatus();
+    }
+
+    // Auto-refresh token every 45 minutes (before expiration)
+    setInterval(async () => {
+        if (accessToken && refreshToken) {
+            await refreshTokenIfNeeded();
+        }
+    }, 45 * 60 * 1000);
+
+    // Enhanced event listeners for secure authentication
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeApp();
+        
+        // Secure login button event
+        const signinBtn = document.getElementById("signinBtn");
+        if (signinBtn) {
+            signinBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                if (loginAttempts < maxAttempts) {
+                    handleSecureLogin();
+                } else {
+                    showMessage("PLEASE WAIT BEFORE ATTEMPTING TO LOGIN AGAIN.");
+                }
+            });
+        }
+
+        // Enhanced logout for title clicks (your existing functionality)
+        const title = document.getElementById("title");
+        if (title) {
+            title.addEventListener("click", function() {
+                handleLogout();
+            });
+        }
+
+        const title2 = document.getElementById("title2");
+        if (title2) {
+            title2.addEventListener("click", function() {
+                handleLogout();
+            });
+        }
+
+        // Enter key support
+        const usernameField = document.getElementById("username");
+        const passwordField = document.getElementById("password");
+        
+        if (usernameField) {
+            usernameField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    passwordField.focus();
+                }
+            });
+        }
+        
+        if (passwordField) {
+            passwordField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    if (loginAttempts < maxAttempts) {
+                        handleSecureLogin();
+                    }
+                }
+            });
+        }
+
+        // Network status monitoring
+        window.addEventListener('online', () => {
+            console.log('Connection restored');
+            showMessage('CONNECTION RESTORED', true);
+        });
+
+        window.addEventListener('offline', () => {
+            showMessage('NETWORK CONNECTION LOST. PLEASE CHECK YOUR INTERNET CONNECTION.');
+        });
+    });
+
+    // Legacy compatibility - Override existing functions if they exist
+    window.handleSecureLogin = handleSecureLogin;
+    window.handleLogout = handleLogout;
+    
+    // Expose functions for backward compatibility with your existing JS files
+    window.changeText = function(isSuccessful) {
+        showMessage(isSuccessful ? "LOGIN SUCCESSFUL" : "LOGIN UNSUCCESSFUL", isSuccessful);
+    };
+    
+    window.clearInputFields = clearInputFields;
+    window.checkLoginStatus = checkAuthStatus;
+  </script>
+
+  <!-- Your existing scripts -->
   <script src="AudioList.js"></script>
   <script src="AudioPlayer00.js"></script>
-  <script src="AudioLogin.js"></script>
+  <!-- Note: AudioLogin.js is now replaced by the secure authentication above -->
+  <!-- <script src="AudioLogin.js"></script> -->
   <script src="ServiceWorker.js"></script>
   <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
 </body>
