@@ -48,17 +48,17 @@ class MusicPlayer {
     this.imageFolder = suffix === '2' ? 'MainAssets/ImagesDisguise/' : 'MainAssets/Images/';
     this.videoFolder = suffix === '2' ? 'VideosDisguise/' : 'MainAssets/Videos/';
     this.audioFolder = 'MainAssets/Audios/';
-    this.audioBucketUrl = 'https://pub-c755c6dec2fa41a5a9f9a659408e2150.r2.dev/';
+    this.audioBucketUrl = 'https://r2-asset-proxy.mcvities755.workers.dev/account2/audios/';
     this.videoBucketUrls = [
-      'https://pub-fb9b941e940b4b44a61b7973d5ba28c3.r2.dev/',
-      'https://pub-2e4c11f1d1e049e5a893e7a1681ebf7e.r2.dev/',
-      'https://pub-15e524466e7449c997fe1434a0717e91.r2.dev/'
+      'https://r2-asset-proxy.mcvities755.workers.dev/account1/videos1/',      // Account 1 - videos1
+      'https://r2-asset-proxy.mcvities755.workers.dev/account2/videos2/',     // Account 2 - videos2  
+      'https://r2-asset-proxy.mcvities755.workers.dev/account3/videos3/'      // Account 3 - videos3
     ];
 
     // Configure R2 bucket URLs for images
     this.imageBucketUrl = suffix === '2' 
-    ? 'https://pub-35bf609bb46e4f27a992efb322030db4.r2.dev/' // Replace with your disguise images bucket URL
-    : 'https://pub-99d8e809a4554c358c8d5e75932939cd.r2.dev/';    // Replace with your main images bucket URL
+      ? 'https://r2-asset-proxy.mcvities755.workers.dev/account3/images-disguise/' // Disguise images
+      : 'https://r2-asset-proxy.mcvities755.workers.dev/account3/images/'; // Main images
 
     // Element selectors
     this.wrapper = document.querySelector(`#wrapper${suffix}`);
