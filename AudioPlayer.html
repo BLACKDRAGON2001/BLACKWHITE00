@@ -388,24 +388,33 @@
             }
         } catch (error) {
             console.error('Login error:', error);
-            loginAttempts++;
             
             let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
             
-            // Add attempt counter
-            if (loginAttempts < maxAttempts) {
-                const remaining = maxAttempts - loginAttempts;
-                errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
+            // Check if the error response contains attempts remaining info from server
+            if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
+                // Server has blocked the user - show the server's message
+                showMessage(errorMessage);
+                // Set local attempts to max to prevent further attempts
+                loginAttempts = maxAttempts;
             } else {
-                errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
-                // Disable login for 15 minutes (like the backend)
-                setTimeout(() => {
-                    loginAttempts = 0;
-                    showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
-                }, 15 * 60 * 1000);
+                // Regular login failure - increment local counter
+                loginAttempts++;
+                
+                if (loginAttempts < maxAttempts) {
+                    const remaining = maxAttempts - loginAttempts;
+                    errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
+                } else {
+                    errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
+                    // Reset attempts after 15 minutes
+                    setTimeout(() => {
+                        loginAttempts = 0;
+                        showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
+                    }, 15 * 60 * 1000);
+                }
+                
+                showMessage(errorMessage);
             }
-            
-            showMessage(errorMessage);
         } finally {
             showLoading(false);
         }
@@ -521,11 +530,7 @@
         if (signinBtn) {
             signinBtn.addEventListener("click", function(e) {
                 e.preventDefault();
-                if (loginAttempts < maxAttempts) {
-                    handleSecureLogin();
-                } else {
-                    showMessage("PLEASE WAIT BEFORE ATTEMPTING TO LOGIN AGAIN.");
-                }
+                handleSecureLogin(); // Remove the client-side blocking here
             });
         }
 
@@ -559,9 +564,7 @@
         if (passwordField) {
             passwordField.addEventListener("keypress", function(event) {
                 if (event.key === "Enter") {
-                    if (loginAttempts < maxAttempts) {
-                        handleSecureLogin();
-                    }
+                    handleSecureLogin(); // Remove the client-side blocking here too
                 }
             });
         }
