@@ -67,8 +67,68 @@
       });
     });
   </script>
+
+  <!-- Prevent login page flicker by checking auth immediately -->
+  <script>
+    // Quick auth check to prevent flicker
+    (function() {
+      const hasTokens = sessionStorage.getItem('accessToken') && sessionStorage.getItem('refreshToken');
+      const timestamp = sessionStorage.getItem('tokenTimestamp');
+      
+      // Check if tokens exist and aren't too old (24 hours)
+      const isTokenValid = hasTokens && timestamp && (Date.now() - parseInt(timestamp) <= 24 * 60 * 60 * 1000);
+      
+      if (isTokenValid) {
+        // Hide login page immediately if we have valid tokens
+        document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-home-display', 'block');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        document.documentElement.style.setProperty('--initial-bg-color', 'black');
+      } else {
+        // Show login page if no valid tokens
+        document.documentElement.style.setProperty('--initial-login-display', 'block');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        document.documentElement.style.setProperty('--initial-bg-color', 'white');
+      }
+    })();
+  </script>
+
+  <style>
+    /* Use CSS variables to prevent flicker */
+    :root {
+      --initial-login-display: block;
+      --initial-home-display: none;
+      --initial-disguise-display: none;
+      --initial-bg-color: white;
+    }
+    
+    body {
+      background-color: var(--initial-bg-color) !important;
+      transition: background-color 0.3s ease;
+    }
+    
+    #LoginPage {
+      display: var(--initial-login-display) !important;
+    }
+    
+    #HomePage {
+      display: var(--initial-home-display) !important;
+    }
+    
+    #DisguisePage {
+      display: var(--initial-disguise-display) !important;
+    }
+
+    /* Hidden loading overlay - not used */
+    .auth-loading {
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <!-- Hidden loading overlay - not used -->
+  <div id="authLoading" class="auth-loading" style="display: none;"></div>
 
   <div id="LoginPage" class="login-box">
     <div class="login-header">
@@ -92,7 +152,7 @@
     </div>
   </div>
 
-  <div id="HomePage" class="home-box" style="display: none;">
+  <div id="HomePage" class="home-box">
     <div class="wrapper" id="wrapper">
       <div class="top-bar">
         <button id="modeToggle" class="DarkMode">
@@ -154,7 +214,7 @@
     </div>
   </div>
 
-  <div id="DisguisePage" class="home-box" style="display: none;">
+  <div id="DisguisePage" class="home-box">
     <div class="wrapper" id="wrapper2">
       <div class="top-bar">
         <button id="modeToggle2" class="DarkMode">
@@ -483,6 +543,12 @@
         sessionStorage.removeItem('tokenTimestamp');
     }
 
+    // Show loading overlay during auth checks - disabled
+    function showAuthLoading(show = true) {
+        // Disabled - no overlay shown
+        return;
+    }
+
     // Enhanced authentication functions
     async function handleSecureLogin() {
         const username = document.getElementById("username").value.trim();
@@ -563,7 +629,7 @@
         }
     }
 
-    // Enhanced page navigation
+    // Enhanced page navigation with smooth transitions
     function showLoginPage() {
         document.getElementById("LoginPage").style.display = "block";
         document.getElementById("HomePage").style.display = "none";
@@ -591,13 +657,17 @@
         sessionStorage.removeItem("HomeLoginTime");
     }
 
-    // Enhanced authentication check
+    // Enhanced authentication check with immediate feedback
     async function checkAuthStatus() {
         if (!loadTokens()) {
-            showLoginPage();
+            // Only show login if we weren't already showing it from the initial CSS
+            if (document.documentElement.style.getPropertyValue('--initial-login-display') !== 'block') {
+                showLoginPage();
+            }
             return;
         }
 
+        // If we have tokens, proceed silently
         try {
             const userResponse = await SecureAPI.getUserProfile();
             if (userResponse.success) {
@@ -654,25 +724,31 @@
         }
     }
 
-    // Enhanced app initialization
+    // Enhanced app initialization with immediate UI feedback
     async function initializeApp() {
         console.log('Connecting to backend at:', API_BASE_URL);
         
-        // Show connection status
-        showMessage('CONNECTING TO SERVER...', true);
+        // Don't show connection messages if we already have valid tokens
+        const hasValidTokens = loadTokens();
+        
+        if (!hasValidTokens) {
+            showMessage('CONNECTING TO SERVER...', true);
+        }
         
         const isConnected = await SecureAPI.testConnection();
         if (!isConnected) {
-            showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+            if (!hasValidTokens) {
+                showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+            }
         } else {
             console.log('Backend connection successful');
-            showMessage('SERVER CONNECTION ESTABLISHED', true);
-            
-            // Small delay to show success message
-            setTimeout(() => {
-                checkAuthStatus();
-            }, 1000);
+            if (!hasValidTokens) {
+                showMessage('SERVER CONNECTION ESTABLISHED', true);
+            }
         }
+        
+        // Always check auth status regardless of connection
+        await checkAuthStatus();
     }
 
     // Auto-refresh token every 45 minutes
@@ -684,10 +760,8 @@
 
     // Enhanced event listeners
     document.addEventListener('DOMContentLoaded', function() {
-        // Defer initialization to not block rendering
-        requestAnimationFrame(() => {
-            initializeApp();
-        });
+        // Initialize immediately
+        initializeApp();
         
         // Optimized event listeners
         const signinBtn = document.getElementById("signinBtn");
