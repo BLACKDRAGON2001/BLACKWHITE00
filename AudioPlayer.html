@@ -759,34 +759,10 @@
     window.checkLoginStatus = checkAuthStatus;
   </script>
 
-  <!-- Deferred script loading for better performance -->
-  <script>
-    // Load non-critical scripts after page load
-    window.addEventListener('load', () => {
-      const scripts = [
-        'AudioList.js',
-        'AudioPlayer00.js',
-        'ServiceWorker.js'
-      ];
-      
-      scripts.forEach((src, index) => {
-        setTimeout(() => {
-          const script = document.createElement('script');
-          script.src = src;
-          script.async = true;
-          document.head.appendChild(script);
-        }, index * 100); // Stagger loading
-      });
-      
-      // Load FontAwesome last
-      setTimeout(() => {
-        const faScript = document.createElement('script');
-        faScript.src = 'https://kit.fontawesome.com/3c627968c9.js';
-        faScript.crossOrigin = 'anonymous';
-        faScript.async = true;
-        document.head.appendChild(faScript);
-      }, 500);
-    });
-  </script>
+  <!-- Your existing scripts in original order -->
+  <script src="AudioList.js"></script>
+  <script src="AudioPlayer00.js"></script>
+  <script src="ServiceWorker.js"></script>
+  <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
 </body>
 </html>
