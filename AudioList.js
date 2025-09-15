@@ -2527,6 +2527,118 @@ let allMusic = [
     },
 
     {
+        name: "Anal Sex",
+        artist: "Only Fire",
+        src: "AnalSex",
+        coverType: "Images"
+    },
+
+    {
+        name: "Asmr",
+        artist: "Only Fire",
+        src: "Asmr",
+        coverType: "Images"
+    },
+
+    {
+        name: "Double Penetration",
+        artist: "Only Fire",
+        src: "DoublePenetration",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cameltoe Shop",
+        artist: "Only Fire",
+        src: "CameltoeShop",
+        coverType: "Images"
+    },
+
+    {
+        name: "Coronavirus",
+        artist: "Only Fire",
+        src: "Coronavirus",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hard 2.0",
+        artist: "Only Fire And River Moon",
+        src: "HardTwoPointO",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hunny",
+        artist: "Only Fire",
+        src: "Hunny",
+        coverType: "Images"
+    },
+
+    {
+        name: "Idk",
+        artist: "Only Fire",
+        src: "Idk",
+        coverType: "Images"
+    },
+
+    {
+        name: "In N Out",
+        artist: "Only Fire",
+        src: "InNOut",
+        coverType: "Images"
+    },
+
+    {
+        name: "Period",
+        artist: "Only Fire",
+        src: "Period",
+        coverType: "Images"
+    },
+
+    {
+        name: "Puta",
+        artist: "Only Fire",
+        src: "Puta",
+        coverType: "Images"
+    },
+
+    {
+        name: "Rain On Me",
+        artist: "Only Fire",
+        src: "RainOnMe",
+        coverType: "Images"
+    },
+
+    {
+        name: "Seven Rings",
+        artist: "Only Fire",
+        src: "SevenRings2",
+        coverType: "Images"
+    },
+
+    {
+        name: "Sex Demon",
+        artist: "Only Fire",
+        src: "SexDemon",
+        coverType: "Images"
+    },
+
+    {
+        name: "Sore Throat",
+        artist: "Only Fire",
+        src: "SoreThroat",
+        coverType: "Images"
+    },
+
+    {
+        name: "Wir Suchen Dich",
+        artist: "Only Fire And HEISSS Berlin",
+        src: "WirSuchenDich",
+        coverType: "Images"
+    },
+
+    {
         name: "Handjob",
         artist: "Ayesha Erotica And Baku",
         src: "Handjob",

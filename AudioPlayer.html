@@ -4,18 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#000000">
+  
+  <!-- DNS Prefetch for external resources -->
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  <link rel="dns-prefetch" href="//kit.fontawesome.com">
+  <link rel="dns-prefetch" href="//audioplayerbackend.onrender.com">
+  
+  <!-- Preconnect to critical domains -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://audioplayerbackend.onrender.com" crossorigin>
+  
+  <!-- Critical CSS should be inlined or loaded first -->
+  <link rel="preload" href="AudioPlayer.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="AudioPlayer.css"></noscript>
+  
+  <link rel="preload" href="AudioLogin.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="AudioLogin.css"></noscript>
+  
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"></noscript>
+  
+  <!-- FontAwesome - defer loading -->
+  <link rel="preload" href="Assets/css/all.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="Assets/css/all.css"></noscript>
+  
   <title>BLACKWHITE</title>
-  <link rel="stylesheet" href="AudioPlayer.css">
-  <link rel="stylesheet" href="AudioLogin.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="Assets/css/all.css">
+  
+  <!-- Favicon resources -->
   <link rel="apple-touch-icon" sizes="180x180" href="SystemImages/favicon_io/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="SystemImages/favicon_io/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="SystemImages/favicon_io/favicon-16x16.png">
   <link rel="manifest" href="SystemImages/favicon_io/site.webmanifest">
+  
+  <!-- Prefetch critical images that will be used -->
+  <script>
+    // Dynamic prefetching based on user role/common assets
+    window.prefetchAssets = function() {
+      // Common system images
+      const criticalImages = [
+        'SystemImages/favicon_io/apple-touch-icon.png',
+        'SystemImages/favicon_io/favicon-32x32.png',
+        'SystemImages/favicon_io/favicon-16x16.png'
+      ];
+      
+      // Prefetch critical images
+      criticalImages.forEach(src => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = src;
+        link.as = 'image';
+        document.head.appendChild(link);
+      });
+    };
+    
+    // Prefetch assets after page loads
+    window.addEventListener('load', () => {
+      requestIdleCallback(() => {
+        window.prefetchAssets();
+      });
+    });
+  </script>
 </head>
 <body>
 
@@ -62,7 +113,7 @@
           <!-- This area will dynamically include either an img or video elements -->
         </div>
         <div id="video-border-box" class="video-border-box"></div>
-        <video id="video" class="overlay-video" src="" playsinline muted loop></video>
+        <video id="video" class="overlay-video" src="" playsinline muted loop preload="metadata"></video>
       </div>
       <div class="song-details">
         <p class="name"></p>
@@ -71,7 +122,7 @@
       <div class="control-box">
         <div class="progress-area">
           <div class="progress-bar">
-            <audio id="main-audio" src=""></audio>
+            <audio id="main-audio" src="" preload="metadata"></audio>
           </div>
           <div class="song-timer">
             <span class="current-time">0:00</span>
@@ -117,7 +168,7 @@
           <!-- This area will dynamically include either an img or video elements -->
         </div>
         <div id="video-border-box2" class="video-border-box" style="display: none;"></div>
-        <video id="video2" class="overlay-video" style="border: none; display: none;" src="" autoplay playsinline muted loop></video>
+        <video id="video2" class="overlay-video" style="border: none; display: none;" src="" autoplay playsinline muted loop preload="metadata"></video>
       </div>
       <div class="song-details">
         <p class="name"></p>
@@ -126,7 +177,7 @@
       <div class="control-box">
         <div class="progress-area">
           <div class="progress-bar">
-            <audio id="main-audio2" src=""></audio>
+            <audio id="main-audio2" src="" preload="metadata"></audio>
           </div>
           <div class="song-timer">
             <span class="current-time">0:00</span>
@@ -158,10 +209,88 @@
     </div>
   </div>
 
-  <!-- Secure Authentication System -->
+  <!-- Enhanced Secure Authentication System -->
   <script>
     // API Configuration - Updated for Render deployment
     const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
+    
+    // Enhanced prefetching and caching
+    class AssetManager {
+        constructor() {
+            this.prefetchedAssets = new Set();
+            this.imageCache = new Map();
+        }
+
+        async prefetchImage(src) {
+            if (this.prefetchedAssets.has(src)) return;
+            
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    this.imageCache.set(src, img);
+                    this.prefetchedAssets.add(src);
+                    resolve(img);
+                };
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        async prefetchAudio(src) {
+            if (this.prefetchedAssets.has(src)) return;
+            
+            return new Promise((resolve, reject) => {
+                const audio = new Audio();
+                audio.preload = 'metadata';
+                audio.oncanplaythrough = () => {
+                    this.prefetchedAssets.add(src);
+                    resolve(audio);
+                };
+                audio.onerror = reject;
+                audio.src = src;
+            });
+        }
+
+        async prefetchVideo(src) {
+            if (this.prefetchedAssets.has(src)) return;
+            
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.src = src;
+            this.prefetchedAssets.add(src);
+            return video;
+        }
+
+        // Prefetch based on playlist data
+        async prefetchPlaylistAssets(playlist) {
+            const prefetchPromises = [];
+            
+            playlist.forEach((track, index) => {
+                // Prefetch next 3 tracks
+                if (index < 3) {
+                    if (track.image) {
+                        prefetchPromises.push(this.prefetchImage(track.image));
+                    }
+                    if (track.video) {
+                        prefetchPromises.push(this.prefetchVideo(track.video));
+                    }
+                    if (track.audio) {
+                        prefetchPromises.push(this.prefetchAudio(track.audio));
+                    }
+                }
+            });
+
+            try {
+                await Promise.allSettled(prefetchPromises);
+                console.log('Prefetched', prefetchPromises.length, 'assets');
+            } catch (error) {
+                console.warn('Some assets failed to prefetch:', error);
+            }
+        }
+    }
+
+    // Initialize asset manager
+    const assetManager = new AssetManager();
     
     // State management
     let currentUser = null;
@@ -170,7 +299,7 @@
     let loginAttempts = 0;
     const maxAttempts = 3;
 
-    // API Helper functions
+    // Enhanced API Helper functions with better error handling
     const SecureAPI = {
         async request(endpoint, options = {}) {
             const url = `${API_BASE_URL}${endpoint}`;
@@ -179,6 +308,7 @@
                     'Content-Type': 'application/json',
                     ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
                 },
+                timeout: 10000, // 10 second timeout
                 ...options
             };
 
@@ -187,7 +317,16 @@
             }
 
             try {
-                const response = await fetch(url, config);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+                
+                const response = await fetch(url, {
+                    ...config,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -196,7 +335,9 @@
 
                 return data;
             } catch (error) {
-                // Handle network errors
+                if (error.name === 'AbortError') {
+                    throw new Error('REQUEST TIMED OUT. PLEASE CHECK YOUR CONNECTION.');
+                }
                 if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
                     throw new Error('CANNOT CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.');
                 }
@@ -228,33 +369,40 @@
             });
         },
 
-        // Test backend connection
-        async testConnection() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/health`);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Backend connection successful:', data);
-                    return true;
+        // Test backend connection with retry
+        async testConnection(retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/health`, { timeout: 5000 });
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Backend connection successful:', data);
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn(`Backend connection attempt ${i + 1} failed:`, error);
+                    if (i < retries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+                    }
                 }
-            } catch (error) {
-                console.error('Backend connection test failed:', error);
             }
             return false;
         }
     };
 
-    // UI Helper functions
+    // UI Helper functions with better performance
     function showMessage(text, isSuccess = false) {
         const messageBox = document.getElementById("MessageBox");
         if (messageBox) {
             messageBox.textContent = text.toUpperCase();
-            messageBox.style.color = "#000000"; // Always black
+            messageBox.style.color = "#000000";
             messageBox.style.display = "block";
             
             // Auto-hide after 5 seconds
             setTimeout(() => {
-                messageBox.style.display = "none";
+                if (messageBox.textContent === text.toUpperCase()) {
+                    messageBox.style.display = "none";
+                }
             }, 5000);
         }
     }
@@ -265,38 +413,27 @@
         const messageBox = document.getElementById("MessageBox");
         
         if (show) {
-            // Hide the separate loading indicator
-            if (loadingEl) {
-                loadingEl.style.display = "none";
-            }
+            if (loadingEl) loadingEl.style.display = "none";
             
-            // Show loading message in the same message box as other messages
             if (messageBox) {
                 messageBox.textContent = "AUTHENTICATING CREDENTIALS...";
-                messageBox.style.color = "#000000"; // Same black color as other messages
+                messageBox.style.color = "#000000";
                 messageBox.style.display = "block";
             }
             
-            // Update button
             if (signInBtn) {
                 signInBtn.disabled = true;
                 signInBtn.textContent = "SIGNING IN...";
                 signInBtn.style.opacity = "0.7";
             }
         } else {
-            // Hide loading indicator
-            if (loadingEl) {
-                loadingEl.style.display = "none";
-            }
+            if (loadingEl) loadingEl.style.display = "none";
             
-            // Reset button
             if (signInBtn) {
                 signInBtn.disabled = false;
                 signInBtn.textContent = "SIGN IN";
                 signInBtn.style.opacity = "1";
             }
-            
-            // Don't clear the message box here - let other functions handle success/error messages
         }
     }
 
@@ -313,17 +450,28 @@
         }
     }
 
-    // Token management
+    // Token management with better security
     function saveTokens(tokens) {
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
+        // Use sessionStorage for better security (clears on tab close)
         sessionStorage.setItem('accessToken', accessToken);
         sessionStorage.setItem('refreshToken', refreshToken);
+        sessionStorage.setItem('tokenTimestamp', Date.now().toString());
     }
 
     function loadTokens() {
         accessToken = sessionStorage.getItem('accessToken');
         refreshToken = sessionStorage.getItem('refreshToken');
+        const timestamp = sessionStorage.getItem('tokenTimestamp');
+        
+        // Check if tokens are too old (24 hours)
+        if (timestamp && Date.now() - parseInt(timestamp) > 24 * 60 * 60 * 1000) {
+            clearTokens();
+            return false;
+        }
+        
+        return !!(accessToken && refreshToken);
     }
 
     function clearTokens() {
@@ -332,33 +480,21 @@
         currentUser = null;
         sessionStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('tokenTimestamp');
     }
 
-    // Auto-refresh token
-    async function refreshTokenIfNeeded() {
-        if (!refreshToken) return false;
-
-        try {
-            const response = await SecureAPI.refreshAccessToken();
-            if (response.success) {
-                accessToken = response.data.accessToken;
-                sessionStorage.setItem('accessToken', accessToken);
-                return true;
-            }
-        } catch (error) {
-            console.error('Token refresh failed:', error);
-            handleLogout();
-        }
-        return false;
-    }
-
-    // Authentication functions
+    // Enhanced authentication functions
     async function handleSecureLogin() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
 
         if (!username || !password) {
             showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
+            return;
+        }
+
+        if (loginAttempts >= maxAttempts) {
+            showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
             return;
         }
 
@@ -375,13 +511,25 @@
                 });
 
                 clearInputFields();
-                loginAttempts = 0; // Reset attempts on successful login
+                loginAttempts = 0;
                 
-                // Navigate based on user role using existing functions
+                // Navigate and prefetch assets based on user role
                 if (currentUser.role === 'home') {
                     showHomePage();
+                    // Prefetch home page assets
+                    requestIdleCallback(() => {
+                        if (window.allMusic) {
+                            assetManager.prefetchPlaylistAssets(window.allMusic);
+                        }
+                    });
                 } else if (currentUser.role === 'disguise') {
                     showDisguisePage();
+                    // Prefetch disguise page assets
+                    requestIdleCallback(() => {
+                        if (window.allMusicDisguise) {
+                            assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
+                        }
+                    });
                 }
                 
                 showMessage("LOGIN SUCCESSFUL", true);
@@ -391,14 +539,10 @@
             
             let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
             
-            // Check if the error response contains attempts remaining info from server
             if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
-                // Server has blocked the user - show the server's message
                 showMessage(errorMessage);
-                // Set local attempts to max to prevent further attempts
                 loginAttempts = maxAttempts;
             } else {
-                // Regular login failure - increment local counter
                 loginAttempts++;
                 
                 if (loginAttempts < maxAttempts) {
@@ -406,7 +550,6 @@
                     errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
                 } else {
                     errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
-                    // Reset attempts after 15 minutes
                     setTimeout(() => {
                         loginAttempts = 0;
                         showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
@@ -418,6 +561,82 @@
         } finally {
             showLoading(false);
         }
+    }
+
+    // Enhanced page navigation
+    function showLoginPage() {
+        document.getElementById("LoginPage").style.display = "block";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "none";
+        document.body.style.backgroundColor = "white";
+    }
+
+    function showHomePage() {
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("HomePage").style.display = "block";
+        document.getElementById("DisguisePage").style.display = "none";
+        document.body.style.backgroundColor = "black";
+        
+        sessionStorage.setItem("HomeLoginTime", new Date().getTime());
+        sessionStorage.removeItem("DisguiseLoginTime");
+    }
+
+    function showDisguisePage() {
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "block";
+        document.body.style.backgroundColor = "black";
+        
+        sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
+        sessionStorage.removeItem("HomeLoginTime");
+    }
+
+    // Enhanced authentication check
+    async function checkAuthStatus() {
+        if (!loadTokens()) {
+            showLoginPage();
+            return;
+        }
+
+        try {
+            const userResponse = await SecureAPI.getUserProfile();
+            if (userResponse.success) {
+                currentUser = userResponse.data;
+                
+                if (currentUser.role === 'home') {
+                    showHomePage();
+                } else if (currentUser.role === 'disguise') {
+                    showDisguisePage();
+                }
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            
+            const refreshed = await refreshTokenIfNeeded();
+            if (!refreshed) {
+                clearTokens();
+                showLoginPage();
+                showMessage('SESSION EXPIRED. PLEASE LOG IN AGAIN.');
+            }
+        }
+    }
+
+    async function refreshTokenIfNeeded() {
+        if (!refreshToken) return false;
+
+        try {
+            const response = await SecureAPI.refreshAccessToken();
+            if (response.success) {
+                accessToken = response.data.accessToken;
+                sessionStorage.setItem('accessToken', accessToken);
+                sessionStorage.setItem('tokenTimestamp', Date.now().toString());
+                return true;
+            }
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            handleLogout();
+        }
+        return false;
     }
 
     async function handleLogout() {
@@ -435,128 +654,66 @@
         }
     }
 
-    // Page navigation functions (integrating with your existing system)
-    function showLoginPage() {
-        document.getElementById("LoginPage").style.display = "block";
-        document.getElementById("HomePage").style.display = "none";
-        document.getElementById("DisguisePage").style.display = "none";
-        document.body.style.backgroundColor = "white";
-    }
-
-    function showHomePage() {
-        document.getElementById("LoginPage").style.display = "none";
-        document.getElementById("HomePage").style.display = "block";
-        document.getElementById("DisguisePage").style.display = "none";
-        document.body.style.backgroundColor = "black";
-        
-        // Store login time for session management
-        sessionStorage.setItem("HomeLoginTime", new Date().getTime());
-        sessionStorage.removeItem("DisguiseLoginTime");
-    }
-
-    function showDisguisePage() {
-        document.getElementById("LoginPage").style.display = "none";
-        document.getElementById("HomePage").style.display = "none";
-        document.getElementById("DisguisePage").style.display = "block";
-        document.body.style.backgroundColor = "black";
-        
-        // Store login time for session management
-        sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
-        sessionStorage.removeItem("HomeLoginTime");
-    }
-
-    // Check authentication status on page load
-    async function checkAuthStatus() {
-        loadTokens();
-        
-        if (!accessToken) {
-            showLoginPage();
-            return;
-        }
-
-        try {
-            const userResponse = await SecureAPI.getUserProfile();
-            if (userResponse.success) {
-                currentUser = userResponse.data;
-                
-                // Navigate to appropriate page based on role
-                if (currentUser.role === 'home') {
-                    showHomePage();
-                } else if (currentUser.role === 'disguise') {
-                    showDisguisePage();
-                }
-            }
-        } catch (error) {
-            console.error('Auth check failed:', error);
-            
-            // Try to refresh token
-            const refreshed = await refreshTokenIfNeeded();
-            if (!refreshed) {
-                clearTokens();
-                showLoginPage();
-                showMessage('SESSION EXPIRED. PLEASE LOG IN AGAIN.');
-            }
-        }
-    }
-
-    // Test backend connection on load
+    // Enhanced app initialization
     async function initializeApp() {
         console.log('Connecting to backend at:', API_BASE_URL);
+        
+        // Show connection status
+        showMessage('CONNECTING TO SERVER...', true);
         
         const isConnected = await SecureAPI.testConnection();
         if (!isConnected) {
             showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
         } else {
             console.log('Backend connection successful');
+            showMessage('SERVER CONNECTION ESTABLISHED', true);
+            
+            // Small delay to show success message
+            setTimeout(() => {
+                checkAuthStatus();
+            }, 1000);
         }
-        
-        // Proceed with authentication check
-        checkAuthStatus();
     }
 
-    // Auto-refresh token every 45 minutes (before expiration)
+    // Auto-refresh token every 45 minutes
     setInterval(async () => {
         if (accessToken && refreshToken) {
             await refreshTokenIfNeeded();
         }
     }, 45 * 60 * 1000);
 
-    // Enhanced event listeners for secure authentication
+    // Enhanced event listeners
     document.addEventListener('DOMContentLoaded', function() {
-        initializeApp();
+        // Defer initialization to not block rendering
+        requestAnimationFrame(() => {
+            initializeApp();
+        });
         
-        // Secure login button event
+        // Optimized event listeners
         const signinBtn = document.getElementById("signinBtn");
         if (signinBtn) {
             signinBtn.addEventListener("click", function(e) {
                 e.preventDefault();
-                handleSecureLogin(); // Remove the client-side blocking here
+                handleSecureLogin();
             });
         }
 
-        // Enhanced logout for title clicks (your existing functionality)
-        const title = document.getElementById("title");
-        if (title) {
-            title.addEventListener("click", function() {
-                handleLogout();
-            });
-        }
+        // Title logout functionality
+        ["title", "title2"].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener("click", handleLogout);
+            }
+        });
 
-        const title2 = document.getElementById("title2");
-        if (title2) {
-            title2.addEventListener("click", function() {
-                handleLogout();
-            });
-        }
-
-        // Enter key support
+        // Enhanced keyboard support
         const usernameField = document.getElementById("username");
         const passwordField = document.getElementById("password");
         
         if (usernameField) {
             usernameField.addEventListener("keypress", function(event) {
                 if (event.key === "Enter") {
-                    passwordField.focus();
+                    passwordField?.focus();
                 }
             });
         }
@@ -564,27 +721,36 @@
         if (passwordField) {
             passwordField.addEventListener("keypress", function(event) {
                 if (event.key === "Enter") {
-                    handleSecureLogin(); // Remove the client-side blocking here too
+                    handleSecureLogin();
                 }
             });
         }
 
         // Network status monitoring
+        let wasOffline = false;
+        
         window.addEventListener('online', () => {
             console.log('Connection restored');
             showMessage('CONNECTION RESTORED', true);
+            if (wasOffline) {
+                // Re-check auth status when coming back online
+                checkAuthStatus();
+                wasOffline = false;
+            }
         });
 
         window.addEventListener('offline', () => {
+            wasOffline = true;
             showMessage('NETWORK CONNECTION LOST. PLEASE CHECK YOUR INTERNET CONNECTION.');
         });
     });
 
-    // Legacy compatibility - Override existing functions if they exist
+    // Expose functions globally for compatibility
     window.handleSecureLogin = handleSecureLogin;
     window.handleLogout = handleLogout;
+    window.assetManager = assetManager;
     
-    // Expose functions for backward compatibility with your existing JS files
+    // Legacy compatibility functions
     window.changeText = function(isSuccessful) {
         showMessage(isSuccessful ? "LOGIN SUCCESSFUL" : "LOGIN UNSUCCESSFUL", isSuccessful);
     };
@@ -593,12 +759,34 @@
     window.checkLoginStatus = checkAuthStatus;
   </script>
 
-  <!-- Your existing scripts -->
-  <script src="AudioList.js"></script>
-  <script src="AudioPlayer00.js"></script>
-  <!-- Note: AudioLogin.js is now replaced by the secure authentication above -->
-  <!-- <script src="AudioLogin.js"></script> -->
-  <script src="ServiceWorker.js"></script>
-  <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
+  <!-- Deferred script loading for better performance -->
+  <script>
+    // Load non-critical scripts after page load
+    window.addEventListener('load', () => {
+      const scripts = [
+        'AudioList.js',
+        'AudioPlayer00.js',
+        'ServiceWorker.js'
+      ];
+      
+      scripts.forEach((src, index) => {
+        setTimeout(() => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.async = true;
+          document.head.appendChild(script);
+        }, index * 100); // Stagger loading
+      });
+      
+      // Load FontAwesome last
+      setTimeout(() => {
+        const faScript = document.createElement('script');
+        faScript.src = 'https://kit.fontawesome.com/3c627968c9.js';
+        faScript.crossOrigin = 'anonymous';
+        faScript.async = true;
+        document.head.appendChild(faScript);
+      }, 500);
+    });
+  </script>
 </body>
 </html>
