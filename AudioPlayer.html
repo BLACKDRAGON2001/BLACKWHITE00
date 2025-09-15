@@ -16,14 +16,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://audioplayerbackend.onrender.com" crossorigin>
   
-  <!-- Critical CSS should be inlined or loaded first -->
-  <link rel="preload" href="AudioPlayer.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="AudioPlayer.css"></noscript>
+  <!-- Critical CSS loaded synchronously to prevent FOUC -->
+  <link rel="stylesheet" href="AudioPlayer.css">
+  <link rel="stylesheet" href="AudioLogin.css">
   
-  <link rel="preload" href="AudioLogin.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="AudioLogin.css"></noscript>
-  
-  <!-- Preload critical fonts -->
+  <!-- Non-critical CSS can still be preloaded -->
   <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"></noscript>
   
@@ -83,29 +80,63 @@
         document.documentElement.style.setProperty('--initial-login-display', 'none');
         document.documentElement.style.setProperty('--initial-home-display', 'block');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
-        document.documentElement.style.setProperty('--initial-bg-color', 'black');
       } else {
-        // Show login page if no valid tokens
+        // Show login page if no valid tokens - ensure white background
         document.documentElement.style.setProperty('--initial-login-display', 'block');
         document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
-        document.documentElement.style.setProperty('--initial-bg-color', 'white');
+        document.body.style.backgroundColor = "white";
+        document.body.classList.add("login-active");
       }
     })();
   </script>
 
   <style>
+    /* Critical styles inlined to prevent FOUC (Flash of Unstyled Content) */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: white;
+    }
+    
+    /* Hide all content initially to prevent unstyled flash */
+    .login-box, .home-box {
+      opacity: 0;
+    }
+    
+    /* Show content when styles are loaded */
+    .styles-loaded .login-box,
+    .styles-loaded .home-box {
+      opacity: 1;
+    }
+    
     /* Use CSS variables to prevent flicker */
     :root {
       --initial-login-display: block;
       --initial-home-display: none;
       --initial-disguise-display: none;
-      --initial-bg-color: white;
     }
     
+    /* Default to white background for login page */
     body {
-      background-color: var(--initial-bg-color) !important;
-      transition: background-color 0.3s ease;
+      background-color: white;
+    }
+    
+    /* Login page should always have white background */
+    body:has(#LoginPage[style*="display: block"]) {
+      background-color: white !important;
+    }
+    
+    /* When login page is visible via CSS variables, ensure white background */
+    body:has(#LoginPage[style*="--initial-login-display: block"]),
+    body:has(#LoginPage) {
+      background-color: white;
+    }
+    
+    /* Fallback for browsers that don't support :has() */
+    .login-active {
+      background-color: white !important;
     }
     
     #LoginPage {
@@ -119,16 +150,44 @@
     #DisguisePage {
       display: var(--initial-disguise-display) !important;
     }
+    
+    /* Force white background when login page is showing */
+    #LoginPage:not([style*="display: none"]) ~ * {
+      /* This targets elements after login page when it's visible */
+    }
+    
+    /* Ensure login page visibility forces white background */
+    body:has(#LoginPage:not([style*="display: none"])) {
+      background-color: white !important;
+    }
 
-    /* Hidden loading overlay - not used */
-    .auth-loading {
-      display: none;
+    /* Override when JavaScript updates display */
+    #LoginPage[style*="display: block"] {
+      display: block !important;
+    }
+    
+    #HomePage[style*="display: block"] {
+      display: block !important;
+    }
+    
+    #DisguisePage[style*="display: block"] {
+      display: block !important;
+    }
+    
+    #LoginPage[style*="display: none"] {
+      display: none !important;
+    }
+    
+    #HomePage[style*="display: none"] {
+      display: none !important;
+    }
+    
+    #DisguisePage[style*="display: none"] {
+      display: none !important;
     }
   </style>
 </head>
 <body>
-  <!-- Hidden loading overlay - not used -->
-  <div id="authLoading" class="auth-loading" style="display: none;"></div>
 
   <div id="LoginPage" class="login-box">
     <div class="login-header">
@@ -271,7 +330,7 @@
 
   <!-- Enhanced Secure Authentication System -->
   <script>
-    // API Configuration - Updated for Render deployment
+    // API Configuration
     const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
     
     // Enhanced prefetching and caching
@@ -359,7 +418,7 @@
     let loginAttempts = 0;
     const maxAttempts = 3;
 
-    // Enhanced API Helper functions with better error handling
+    // Enhanced API Helper functions
     const SecureAPI = {
         async request(endpoint, options = {}) {
             const url = `${API_BASE_URL}${endpoint}`;
@@ -368,7 +427,7 @@
                     'Content-Type': 'application/json',
                     ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
                 },
-                timeout: 10000, // 10 second timeout
+                timeout: 10000,
                 ...options
             };
 
@@ -442,7 +501,7 @@
                 } catch (error) {
                     console.warn(`Backend connection attempt ${i + 1} failed:`, error);
                     if (i < retries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+                        await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
             }
@@ -450,7 +509,7 @@
         }
     };
 
-    // UI Helper functions with better performance
+    // UI Helper functions
     function showMessage(text, isSuccess = false) {
         const messageBox = document.getElementById("MessageBox");
         if (messageBox) {
@@ -510,11 +569,10 @@
         }
     }
 
-    // Token management with better security
+    // Token management
     function saveTokens(tokens) {
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
-        // Use sessionStorage for better security (clears on tab close)
         sessionStorage.setItem('accessToken', accessToken);
         sessionStorage.setItem('refreshToken', refreshToken);
         sessionStorage.setItem('tokenTimestamp', Date.now().toString());
@@ -543,13 +601,7 @@
         sessionStorage.removeItem('tokenTimestamp');
     }
 
-    // Show loading overlay during auth checks - disabled
-    function showAuthLoading(show = true) {
-        // Disabled - no overlay shown
-        return;
-    }
-
-    // Enhanced authentication functions
+    // Authentication functions
     async function handleSecureLogin() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
@@ -579,24 +631,17 @@
                 clearInputFields();
                 loginAttempts = 0;
                 
-                // Navigate and prefetch assets based on user role
-                if (currentUser.role === 'home') {
-                    showHomePage();
-                    // Prefetch home page assets
-                    requestIdleCallback(() => {
-                        if (window.allMusic) {
-                            assetManager.prefetchPlaylistAssets(window.allMusic);
-                        }
-                    });
-                } else if (currentUser.role === 'disguise') {
-                    showDisguisePage();
-                    // Prefetch disguise page assets
-                    requestIdleCallback(() => {
-                        if (window.allMusicDisguise) {
-                            assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
-                        }
-                    });
-                }
+                // Always go to homepage after successful login
+                showHomePage();
+                
+                // Prefetch assets based on user role
+                requestIdleCallback(() => {
+                    if (currentUser.role === 'home' && window.allMusic) {
+                        assetManager.prefetchPlaylistAssets(window.allMusic);
+                    } else if (currentUser.role === 'disguise' && window.allMusicDisguise) {
+                        assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
+                    }
+                });
                 
                 showMessage("LOGIN SUCCESSFUL", true);
             }
@@ -629,19 +674,35 @@
         }
     }
 
-    // Enhanced page navigation with smooth transitions
+    // Page navigation functions
     function showLoginPage() {
         document.getElementById("LoginPage").style.display = "block";
         document.getElementById("HomePage").style.display = "none";
         document.getElementById("DisguisePage").style.display = "none";
+        
+        // Ensure white background for login page
         document.body.style.backgroundColor = "white";
+        document.body.classList.add("login-active");
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'block');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
     }
 
     function showHomePage() {
         document.getElementById("LoginPage").style.display = "none";
         document.getElementById("HomePage").style.display = "block";
         document.getElementById("DisguisePage").style.display = "none";
+        
+        // Remove login background override and set background to black
+        document.body.classList.remove("login-active");
         document.body.style.backgroundColor = "black";
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-home-display', 'block');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
         
         sessionStorage.setItem("HomeLoginTime", new Date().getTime());
         sessionStorage.removeItem("DisguiseLoginTime");
@@ -651,13 +712,21 @@
         document.getElementById("LoginPage").style.display = "none";
         document.getElementById("HomePage").style.display = "none";
         document.getElementById("DisguisePage").style.display = "block";
+        
+        // Remove login background override and set background to black
+        document.body.classList.remove("login-active");
         document.body.style.backgroundColor = "black";
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'block');
         
         sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
         sessionStorage.removeItem("HomeLoginTime");
     }
 
-    // Enhanced authentication check with immediate feedback
+    // Authentication status check
     async function checkAuthStatus() {
         if (!loadTokens()) {
             // Only show login if we weren't already showing it from the initial CSS
@@ -667,7 +736,6 @@
             return;
         }
 
-        // If we have tokens, proceed silently
         try {
             const userResponse = await SecureAPI.getUserProfile();
             if (userResponse.success) {
@@ -724,7 +792,7 @@
         }
     }
 
-    // Enhanced app initialization with immediate UI feedback
+    // App initialization
     async function initializeApp() {
         console.log('Connecting to backend at:', API_BASE_URL);
         
@@ -758,12 +826,15 @@
         }
     }, 45 * 60 * 1000);
 
-    // Enhanced event listeners
+    // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
+        // Add styles-loaded class to prevent FOUC
+        document.body.classList.add('styles-loaded');
+        
         // Initialize immediately
         initializeApp();
         
-        // Optimized event listeners
+        // Sign in button
         const signinBtn = document.getElementById("signinBtn");
         if (signinBtn) {
             signinBtn.addEventListener("click", function(e) {
@@ -776,11 +847,24 @@
         ["title", "title2"].forEach(id => {
             const element = document.getElementById(id);
             if (element) {
-                element.addEventListener("click", handleLogout);
+                element.addEventListener("click", function() {
+                    // Add visual feedback
+                    this.style.opacity = "0.7";
+                    setTimeout(() => {
+                        this.style.opacity = "1";
+                    }, 150);
+                    
+                    // Perform logout
+                    handleLogout();
+                });
+                
+                // Add hover effect to indicate it's clickable
+                element.style.cursor = "pointer";
+                element.title = "Click to logout";
             }
         });
 
-        // Enhanced keyboard support
+        // Keyboard support
         const usernameField = document.getElementById("username");
         const passwordField = document.getElementById("password");
         
@@ -807,7 +891,6 @@
             console.log('Connection restored');
             showMessage('CONNECTION RESTORED', true);
             if (wasOffline) {
-                // Re-check auth status when coming back online
                 checkAuthStatus();
                 wasOffline = false;
             }
