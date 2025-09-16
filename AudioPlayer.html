@@ -412,12 +412,100 @@
     // Initialize asset manager
     const assetManager = new AssetManager();
     
+    // Enhanced login attempt management with user-specific tracking
+    class LoginAttemptManager {
+        constructor() {
+            this.maxAttempts = 3;
+            this.lockoutDuration = 15 * 60 * 1000; // 15 minutes
+        }
+
+        getStorageKey(username) {
+            return `loginAttempts_${username}`;
+        }
+
+        getAttemptData(username) {
+            const key = this.getStorageKey(username);
+            const data = sessionStorage.getItem(key);
+            if (!data) return null;
+            
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+        }
+
+        setAttemptData(username, data) {
+            const key = this.getStorageKey(username);
+            sessionStorage.setItem(key, JSON.stringify(data));
+        }
+
+        clearAttempts(username) {
+            const key = this.getStorageKey(username);
+            sessionStorage.removeItem(key);
+        }
+
+        canAttemptLogin(username) {
+            const data = this.getAttemptData(username);
+            if (!data) return { allowed: true, remaining: this.maxAttempts };
+
+            // Check if lockout period has expired
+            if (data.lockedUntil && Date.now() > data.lockedUntil) {
+                this.clearAttempts(username);
+                return { allowed: true, remaining: this.maxAttempts };
+            }
+
+            const remaining = Math.max(0, this.maxAttempts - data.count);
+            const isLocked = data.lockedUntil && Date.now() < data.lockedUntil;
+
+            return {
+                allowed: !isLocked && remaining > 0,
+                remaining: remaining,
+                lockedUntil: data.lockedUntil,
+                isLocked: isLocked
+            };
+        }
+
+        recordFailedAttempt(username) {
+            const data = this.getAttemptData(username) || { count: 0, lastAttempt: null };
+            
+            data.count++;
+            data.lastAttempt = Date.now();
+
+            // Lock account after max attempts
+            if (data.count >= this.maxAttempts) {
+                data.lockedUntil = Date.now() + this.lockoutDuration;
+            }
+
+            this.setAttemptData(username, data);
+            return this.canAttemptLogin(username);
+        }
+
+        recordSuccessfulLogin(username) {
+            this.clearAttempts(username);
+        }
+
+        // Clear all attempt data (useful for debugging or admin reset)
+        clearAllAttempts() {
+            const keys = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith('loginAttempts_')) {
+                    keys.push(key);
+                }
+            }
+            keys.forEach(key => sessionStorage.removeItem(key));
+        }
+    }
+
+    // Initialize the login attempt manager
+    const loginManager = new LoginAttemptManager();
+    
     // State management
     let currentUser = null;
     let accessToken = null;
     let refreshToken = null;
-    let loginAttempts = 0;
-    const maxAttempts = 3;
     let sessionCheckInterval = null;
     let serverConnectionEstablished = false;
 
@@ -676,91 +764,117 @@
         }
     }
 
-    // Authentication functions
+    // Updated handleSecureLogin function with proper attempt management
     async function handleSecureLogin() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value;
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
 
-      if (!username || !password) {
-          showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
-          return;
-      }
+        if (!username || !password) {
+            showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
+            return;
+        }
 
-      if (loginAttempts >= maxAttempts) {
-          showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
-          return;
-      }
+        // Check login attempts for this specific username
+        const attemptStatus = loginManager.canAttemptLogin(username);
+        
+        if (!attemptStatus.allowed) {
+            if (attemptStatus.isLocked) {
+                const timeRemaining = Math.ceil((attemptStatus.lockedUntil - Date.now()) / (60 * 1000));
+                showMessage(`ACCOUNT LOCKED FOR ${timeRemaining} MORE MINUTES. PLEASE TRY AGAIN LATER.`);
+            } else {
+                showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
+            }
+            return;
+        }
 
-      // NEW: Check if server connection is established
-      if (!serverConnectionEstablished) {
-          showMessage("ESTABLISHING CONNECTION... PLEASE WAIT A MOMENT");
-          
-          // Try to establish connection
-          const isConnected = await SecureAPI.testConnection();
-          if (!isConnected) {
-              showMessage("UNABLE TO CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.");
-              return;
-          }
-          serverConnectionEstablished = true;
-      }
+        // Check if server connection is established
+        if (!serverConnectionEstablished) {
+            showMessage("ESTABLISHING CONNECTION... PLEASE WAIT A MOMENT");
+            
+            const isConnected = await SecureAPI.testConnection();
+            if (!isConnected) {
+                showMessage("UNABLE TO CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.");
+                return;
+            }
+            serverConnectionEstablished = true;
+        }
 
-      showLoading(true);
+        showLoading(true);
 
-      try {
-          const response = await SecureAPI.login(username, password);
-          
-          if (response.success) {
-              currentUser = response.data.user;
-              saveTokens({
-                  accessToken: response.data.accessToken,
-                  refreshToken: response.data.refreshToken
-              });
+        try {
+            const response = await SecureAPI.login(username, password);
+            
+            if (response.success) {
+                currentUser = response.data.user;
+                saveTokens({
+                    accessToken: response.data.accessToken,
+                    refreshToken: response.data.refreshToken
+                });
 
-              clearInputFields();
-              loginAttempts = 0;
-              
-              // Always go to homepage after successful login
-              showHomePage();
-              
-              // Prefetch assets based on user role
-              requestIdleCallback(() => {
-                  if (currentUser.role === 'home' && window.allMusic) {
-                      assetManager.prefetchPlaylistAssets(window.allMusic);
-                  } else if (currentUser.role === 'disguise' && window.allMusicDisguise) {
-                      assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
-                  }
-              });
-              
-              showMessage("LOGIN SUCCESSFUL", true);
-          }
-      } catch (error) {
-          console.error('Login error:', error);
-          
-          let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
-          
-          if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
-              showMessage(errorMessage);
-              loginAttempts = maxAttempts;
-          } else {
-              loginAttempts++;
-              
-              if (loginAttempts < maxAttempts) {
-                  const remaining = maxAttempts - loginAttempts;
-                  errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
-              } else {
-                  errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
-                  setTimeout(() => {
-                      loginAttempts = 0;
-                      showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
-                  }, 15 * 60 * 1000);
-              }
-              
-              showMessage(errorMessage);
-          }
-      } finally {
-          showLoading(false);
-      }
-  }
+                clearInputFields();
+                
+                // Record successful login and clear attempts
+                loginManager.recordSuccessfulLogin(username);
+                
+                // Navigate based on user role
+                if (currentUser.role === 'home') {
+                    showHomePage();
+                    
+                    requestIdleCallback(() => {
+                        if (window.allMusic) {
+                            assetManager.prefetchPlaylistAssets(window.allMusic);
+                        }
+                    });
+                } else if (currentUser.role === 'disguise') {
+                    showDisguisePage();
+                    
+                    requestIdleCallback(() => {
+                        if (window.allMusicDisguise) {
+                            assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
+                        }
+                    });
+                } else {
+                    console.warn('Unknown user role:', currentUser.role);
+                    showHomePage();
+                }
+                
+                showMessage("LOGIN SUCCESSFUL", true);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            
+            // Record failed attempt
+            const newAttemptStatus = loginManager.recordFailedAttempt(username);
+            
+            let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
+            
+            if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
+                showMessage(errorMessage);
+            } else {
+                if (newAttemptStatus.remaining > 0) {
+                    errorMessage += ` [${newAttemptStatus.remaining}] ATTEMPTS REMAINING`;
+                } else if (newAttemptStatus.isLocked) {
+                    const timeRemaining = Math.ceil((newAttemptStatus.lockedUntil - Date.now()) / (60 * 1000));
+                    errorMessage = `MAXIMUM LOGIN ATTEMPTS REACHED. ACCOUNT LOCKED FOR ${timeRemaining} MINUTES.`;
+                }
+                
+                showMessage(errorMessage);
+            }
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Add a function to clear login attempts (useful for testing)
+    function resetLoginAttempts(username = null) {
+        if (username) {
+            loginManager.clearAttempts(username);
+            showMessage(`LOGIN ATTEMPTS RESET FOR ${username.toUpperCase()}`, true);
+        } else {
+            loginManager.clearAllAttempts();
+            showMessage("ALL LOGIN ATTEMPTS RESET", true);
+        }
+    }
 
     // Page navigation functions with session monitoring
     function showLoginPage() {
@@ -926,32 +1040,32 @@
 
     // App initialization
     async function initializeApp() {
-      console.log('Connecting to backend at:', API_BASE_URL);
-      
-      // Don't show connection messages if we already have valid tokens
-      const hasValidTokens = loadTokens();
-      
-      if (!hasValidTokens) {
-          showMessage('CONNECTING TO SERVER...', true);
-      }
-      
-      const isConnected = await SecureAPI.testConnection();
-      if (!isConnected) {
-          if (!hasValidTokens) {
-              showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
-          }
-          serverConnectionEstablished = false; // NEW: Mark as not connected
-      } else {
-          console.log('Backend connection successful');
-          serverConnectionEstablished = true; // NEW: Mark as connected
-          if (!hasValidTokens) {
-              showMessage('SERVER CONNECTION ESTABLISHED', true);
-          }
-      }
-      
-      // Always check auth status regardless of connection
-      await checkAuthStatus();
-  }
+        console.log('Connecting to backend at:', API_BASE_URL);
+        
+        // Don't show connection messages if we already have valid tokens
+        const hasValidTokens = loadTokens();
+        
+        if (!hasValidTokens) {
+            showMessage('CONNECTING TO SERVER...', true);
+        }
+        
+        const isConnected = await SecureAPI.testConnection();
+        if (!isConnected) {
+            if (!hasValidTokens) {
+                showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+            }
+            serverConnectionEstablished = false;
+        } else {
+            console.log('Backend connection successful');
+            serverConnectionEstablished = true;
+            if (!hasValidTokens) {
+                showMessage('SERVER CONNECTION ESTABLISHED', true);
+            }
+        }
+        
+        // Always check auth status regardless of connection
+        await checkAuthStatus();
+    }
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
@@ -1028,6 +1142,14 @@
             });
         }
 
+        // Add keyboard shortcut to reset attempts (for testing - Ctrl+Shift+R)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                resetLoginAttempts();
+            }
+        });
+
         // Network status monitoring
         let wasOffline = false;
         
@@ -1050,6 +1172,8 @@
     window.handleSecureLogin = handleSecureLogin;
     window.handleLogout = handleLogout;
     window.assetManager = assetManager;
+    window.resetLoginAttempts = resetLoginAttempts;
+    window.loginManager = loginManager;
     
     // Legacy compatibility functions
     window.changeText = function(isSuccessful) {
@@ -1057,7 +1181,6 @@
     };
     
     window.clearInputFields = clearInputFields;
-    window.checkLoginStatus = checkAuthStatus;
   </script>
 
   <!-- Your existing scripts in original order -->
