@@ -71,9 +71,10 @@
     (function() {
       const hasTokens = sessionStorage.getItem('accessToken') && sessionStorage.getItem('refreshToken');
       const timestamp = sessionStorage.getItem('tokenTimestamp');
+      const expiration = sessionStorage.getItem('tokenExpiration');
       
-      // Check if tokens exist and aren't too old (24 hours)
-      const isTokenValid = hasTokens && timestamp && (Date.now() - parseInt(timestamp) <= 24 * 60 * 60 * 1000);
+      // Check if tokens exist and aren't expired
+      const isTokenValid = hasTokens && expiration && (Date.now() < parseInt(expiration));
       
       if (isTokenValid) {
         // Hide login page immediately if we have valid tokens
@@ -328,7 +329,7 @@
     </div>
   </div>
 
-  <!-- Enhanced Secure Authentication System -->
+  <!-- Enhanced Secure Authentication System with Fixed Session Management -->
   <script>
     // API Configuration
     const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
@@ -417,6 +418,8 @@
     let refreshToken = null;
     let loginAttempts = 0;
     const maxAttempts = 3;
+    let sessionCheckInterval = null;
+    let serverConnectionEstablished = false;
 
     // Enhanced API Helper functions
     const SecureAPI = {
@@ -569,22 +572,34 @@
         }
     }
 
-    // Token management
+    // Enhanced token management with proper expiration
     function saveTokens(tokens) {
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
+        const expirationTime = Date.now() + (23 * 60 * 60 * 1000); // 23 hours from now
+        
         sessionStorage.setItem('accessToken', accessToken);
         sessionStorage.setItem('refreshToken', refreshToken);
         sessionStorage.setItem('tokenTimestamp', Date.now().toString());
+        sessionStorage.setItem('tokenExpiration', expirationTime.toString());
     }
 
     function loadTokens() {
         accessToken = sessionStorage.getItem('accessToken');
         refreshToken = sessionStorage.getItem('refreshToken');
         const timestamp = sessionStorage.getItem('tokenTimestamp');
+        const expiration = sessionStorage.getItem('tokenExpiration');
         
-        // Check if tokens are too old (24 hours)
+        // Check if tokens are expired
+        if (expiration && Date.now() > parseInt(expiration)) {
+            console.log('Tokens expired, clearing session');
+            clearTokens();
+            return false;
+        }
+        
+        // Check if tokens are too old (fallback check)
         if (timestamp && Date.now() - parseInt(timestamp) > 24 * 60 * 60 * 1000) {
+            console.log('Tokens too old, clearing session');
             clearTokens();
             return false;
         }
@@ -592,89 +607,162 @@
         return !!(accessToken && refreshToken);
     }
 
+    // Stop all media when session ends
+    function stopAllMedia() {
+        // Stop all audio elements
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.src = '';
+        });
+        
+        // Stop all video elements
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+            video.src = '';
+        });
+    }
+
     function clearTokens() {
         accessToken = null;
         refreshToken = null;
         currentUser = null;
+        
+        // Clear all session data
         sessionStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
         sessionStorage.removeItem('tokenTimestamp');
+        sessionStorage.removeItem('tokenExpiration');
+        sessionStorage.removeItem('HomeLoginTime');
+        sessionStorage.removeItem('DisguiseLoginTime');
+        
+        // Stop any ongoing audio/video
+        stopAllMedia();
+    }
+
+    // Session monitoring functions
+    function startSessionMonitoring() {
+        // Clear any existing interval
+        if (sessionCheckInterval) {
+            clearInterval(sessionCheckInterval);
+        }
+        
+        sessionCheckInterval = setInterval(() => {
+            if (accessToken) {
+                const expiration = sessionStorage.getItem('tokenExpiration');
+                const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
+                
+                // If less than 1 hour remaining, try to refresh
+                if (timeUntilExpiry < (60 * 60 * 1000) && timeUntilExpiry > 0) {
+                    console.log('Token expiring soon, refreshing...');
+                    refreshTokenIfNeeded();
+                }
+                // If expired, end session
+                else if (timeUntilExpiry <= 0) {
+                    console.log('Session expired during monitoring');
+                    handleLogout(true);
+                }
+            }
+        }, 5 * 60 * 1000); // Check every 5 minutes
+    }
+
+    function stopSessionMonitoring() {
+        if (sessionCheckInterval) {
+            clearInterval(sessionCheckInterval);
+            sessionCheckInterval = null;
+        }
     }
 
     // Authentication functions
     async function handleSecureLogin() {
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value;
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
 
-        if (!username || !password) {
-            showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
-            return;
-        }
+      if (!username || !password) {
+          showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
+          return;
+      }
 
-        if (loginAttempts >= maxAttempts) {
-            showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
-            return;
-        }
+      if (loginAttempts >= maxAttempts) {
+          showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
+          return;
+      }
 
-        showLoading(true);
+      // NEW: Check if server connection is established
+      if (!serverConnectionEstablished) {
+          showMessage("ESTABLISHING CONNECTION... PLEASE WAIT A MOMENT");
+          
+          // Try to establish connection
+          const isConnected = await SecureAPI.testConnection();
+          if (!isConnected) {
+              showMessage("UNABLE TO CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.");
+              return;
+          }
+          serverConnectionEstablished = true;
+      }
 
-        try {
-            const response = await SecureAPI.login(username, password);
-            
-            if (response.success) {
-                currentUser = response.data.user;
-                saveTokens({
-                    accessToken: response.data.accessToken,
-                    refreshToken: response.data.refreshToken
-                });
+      showLoading(true);
 
-                clearInputFields();
-                loginAttempts = 0;
-                
-                // Always go to homepage after successful login
-                showHomePage();
-                
-                // Prefetch assets based on user role
-                requestIdleCallback(() => {
-                    if (currentUser.role === 'home' && window.allMusic) {
-                        assetManager.prefetchPlaylistAssets(window.allMusic);
-                    } else if (currentUser.role === 'disguise' && window.allMusicDisguise) {
-                        assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
-                    }
-                });
-                
-                showMessage("LOGIN SUCCESSFUL", true);
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            
-            let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
-            
-            if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
-                showMessage(errorMessage);
-                loginAttempts = maxAttempts;
-            } else {
-                loginAttempts++;
-                
-                if (loginAttempts < maxAttempts) {
-                    const remaining = maxAttempts - loginAttempts;
-                    errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
-                } else {
-                    errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
-                    setTimeout(() => {
-                        loginAttempts = 0;
-                        showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
-                    }, 15 * 60 * 1000);
-                }
-                
-                showMessage(errorMessage);
-            }
-        } finally {
-            showLoading(false);
-        }
-    }
+      try {
+          const response = await SecureAPI.login(username, password);
+          
+          if (response.success) {
+              currentUser = response.data.user;
+              saveTokens({
+                  accessToken: response.data.accessToken,
+                  refreshToken: response.data.refreshToken
+              });
 
-    // Page navigation functions
+              clearInputFields();
+              loginAttempts = 0;
+              
+              // Always go to homepage after successful login
+              showHomePage();
+              
+              // Prefetch assets based on user role
+              requestIdleCallback(() => {
+                  if (currentUser.role === 'home' && window.allMusic) {
+                      assetManager.prefetchPlaylistAssets(window.allMusic);
+                  } else if (currentUser.role === 'disguise' && window.allMusicDisguise) {
+                      assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
+                  }
+              });
+              
+              showMessage("LOGIN SUCCESSFUL", true);
+          }
+      } catch (error) {
+          console.error('Login error:', error);
+          
+          let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
+          
+          if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
+              showMessage(errorMessage);
+              loginAttempts = maxAttempts;
+          } else {
+              loginAttempts++;
+              
+              if (loginAttempts < maxAttempts) {
+                  const remaining = maxAttempts - loginAttempts;
+                  errorMessage += ` [${remaining}] ATTEMPTS REMAINING`;
+              } else {
+                  errorMessage = "MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.";
+                  setTimeout(() => {
+                      loginAttempts = 0;
+                      showMessage("YOU CAN TRY LOGGING IN AGAIN NOW.", true);
+                  }, 15 * 60 * 1000);
+              }
+              
+              showMessage(errorMessage);
+          }
+      } finally {
+          showLoading(false);
+      }
+  }
+
+    // Page navigation functions with session monitoring
     function showLoginPage() {
         document.getElementById("LoginPage").style.display = "block";
         document.getElementById("HomePage").style.display = "none";
@@ -688,6 +776,9 @@
         document.documentElement.style.setProperty('--initial-login-display', 'block');
         document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        
+        // Stop monitoring when showing login page
+        stopSessionMonitoring();
     }
 
     function showHomePage() {
@@ -706,6 +797,9 @@
         
         sessionStorage.setItem("HomeLoginTime", new Date().getTime());
         sessionStorage.removeItem("DisguiseLoginTime");
+        
+        // Start monitoring when logged in
+        startSessionMonitoring();
     }
 
     function showDisguisePage() {
@@ -724,15 +818,16 @@
         
         sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
         sessionStorage.removeItem("HomeLoginTime");
+        
+        // Start monitoring when logged in
+        startSessionMonitoring();
     }
 
-    // Authentication status check
+    // Enhanced auth status check with better session validation
     async function checkAuthStatus() {
         if (!loadTokens()) {
-            // Only show login if we weren't already showing it from the initial CSS
-            if (document.documentElement.style.getPropertyValue('--initial-login-display') !== 'block') {
-                showLoginPage();
-            }
+            console.log('No valid tokens found, showing login');
+            showLoginPage();
             return;
         }
 
@@ -740,6 +835,10 @@
             const userResponse = await SecureAPI.getUserProfile();
             if (userResponse.success) {
                 currentUser = userResponse.data;
+                
+                // Update token expiration on successful API call
+                const newExpiration = Date.now() + (23 * 60 * 60 * 1000);
+                sessionStorage.setItem('tokenExpiration', newExpiration.toString());
                 
                 if (currentUser.role === 'home') {
                     showHomePage();
@@ -750,81 +849,109 @@
         } catch (error) {
             console.error('Auth check failed:', error);
             
+            // Try to refresh token once
             const refreshed = await refreshTokenIfNeeded();
             if (!refreshed) {
-                clearTokens();
-                showLoginPage();
-                showMessage('SESSION EXPIRED. PLEASE LOG IN AGAIN.');
+                console.log('Token refresh failed, ending session');
+                handleLogout(true);
             }
         }
     }
 
+    // Enhanced token refresh with proper error handling
     async function refreshTokenIfNeeded() {
-        if (!refreshToken) return false;
+        if (!refreshToken) {
+            console.log('No refresh token available');
+            return false;
+        }
 
         try {
+            console.log('Attempting to refresh access token...');
             const response = await SecureAPI.refreshAccessToken();
+            
             if (response.success) {
                 accessToken = response.data.accessToken;
+                const newExpiration = Date.now() + (23 * 60 * 60 * 1000);
+                
                 sessionStorage.setItem('accessToken', accessToken);
                 sessionStorage.setItem('tokenTimestamp', Date.now().toString());
+                sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+                
+                console.log('Token refreshed successfully');
                 return true;
             }
         } catch (error) {
             console.error('Token refresh failed:', error);
-            handleLogout();
+            handleLogout(false);
         }
         return false;
     }
 
-    async function handleLogout() {
+    // Enhanced logout function with better cleanup
+    async function handleLogout(showMessageFlag = true) {
+        console.log('Logging out user...');
+        
         try {
             if (accessToken) {
                 await SecureAPI.logout();
             }
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('Logout API error:', error);
         } finally {
             clearTokens();
             clearInputFields();
             showLoginPage();
-            showMessage("LOGGED OUT SUCCESSFULLY", true);
+            
+            if (showMessageFlag) {
+                showMessage("SESSION ENDED - PLEASE LOG IN AGAIN", true);
+            }
         }
+    }
+
+    // Token refresh scheduler
+    function startTokenRefreshScheduler() {
+        // Refresh token every 45 minutes if we have valid tokens
+        setInterval(async () => {
+            if (accessToken && refreshToken) {
+                const expiration = sessionStorage.getItem('tokenExpiration');
+                const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
+                
+                // Only refresh if we have more than 30 minutes left
+                if (timeUntilExpiry > (30 * 60 * 1000)) {
+                    await refreshTokenIfNeeded();
+                }
+            }
+        }, 45 * 60 * 1000);
     }
 
     // App initialization
     async function initializeApp() {
-        console.log('Connecting to backend at:', API_BASE_URL);
-        
-        // Don't show connection messages if we already have valid tokens
-        const hasValidTokens = loadTokens();
-        
-        if (!hasValidTokens) {
-            showMessage('CONNECTING TO SERVER...', true);
-        }
-        
-        const isConnected = await SecureAPI.testConnection();
-        if (!isConnected) {
-            if (!hasValidTokens) {
-                showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
-            }
-        } else {
-            console.log('Backend connection successful');
-            if (!hasValidTokens) {
-                showMessage('SERVER CONNECTION ESTABLISHED', true);
-            }
-        }
-        
-        // Always check auth status regardless of connection
-        await checkAuthStatus();
-    }
-
-    // Auto-refresh token every 45 minutes
-    setInterval(async () => {
-        if (accessToken && refreshToken) {
-            await refreshTokenIfNeeded();
-        }
-    }, 45 * 60 * 1000);
+      console.log('Connecting to backend at:', API_BASE_URL);
+      
+      // Don't show connection messages if we already have valid tokens
+      const hasValidTokens = loadTokens();
+      
+      if (!hasValidTokens) {
+          showMessage('CONNECTING TO SERVER...', true);
+      }
+      
+      const isConnected = await SecureAPI.testConnection();
+      if (!isConnected) {
+          if (!hasValidTokens) {
+              showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+          }
+          serverConnectionEstablished = false; // NEW: Mark as not connected
+      } else {
+          console.log('Backend connection successful');
+          serverConnectionEstablished = true; // NEW: Mark as connected
+          if (!hasValidTokens) {
+              showMessage('SERVER CONNECTION ESTABLISHED', true);
+          }
+      }
+      
+      // Always check auth status regardless of connection
+      await checkAuthStatus();
+  }
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
@@ -833,6 +960,23 @@
         
         // Initialize immediately
         initializeApp();
+        
+        // Start session monitoring and token refresh scheduler
+        startSessionMonitoring();
+        startTokenRefreshScheduler();
+        
+        // Handle page visibility changes (user switches tabs/apps)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && accessToken) {
+                // Page became visible, check if session is still valid
+                checkAuthStatus();
+            }
+        });
+        
+        // Handle page unload - cleanup
+        window.addEventListener('beforeunload', function() {
+            stopSessionMonitoring();
+        });
         
         // Sign in button
         const signinBtn = document.getElementById("signinBtn");
