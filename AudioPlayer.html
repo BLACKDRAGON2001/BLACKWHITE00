@@ -70,7 +70,6 @@
     // Quick auth check to prevent flicker
     (function() {
       const hasTokens = sessionStorage.getItem('accessToken') && sessionStorage.getItem('refreshToken');
-      const timestamp = sessionStorage.getItem('tokenTimestamp');
       const expiration = sessionStorage.getItem('tokenExpiration');
       
       // Check if tokens exist and aren't expired
@@ -329,11 +328,29 @@
     </div>
   </div>
 
-  <!-- Enhanced Secure Authentication System with Fixed Session Management -->
+  <!-- Rolling Session Authentication System -->
   <script>
     // API Configuration
     const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
     
+    // Rolling Session Configuration
+    const SESSION_CONFIG = {
+        // Base token duration (4 hours)
+        BASE_TOKEN_DURATION: 4 * 60 * 60 * 1000,
+        // Maximum session duration (24 hours)
+        MAX_SESSION_DURATION: 24 * 60 * 60 * 1000,
+        // Activity extension (30 minutes added per activity)
+        ACTIVITY_EXTENSION: 30 * 60 * 1000,
+        // Minimum time between extensions (5 minutes)
+        EXTENSION_COOLDOWN: 5 * 60 * 1000,
+        // Token refresh threshold (refresh when 30 minutes remaining)
+        REFRESH_THRESHOLD: 30 * 60 * 1000,
+        // Activity check interval (1 minute)
+        ACTIVITY_CHECK_INTERVAL: 1 * 60 * 1000,
+        // Inactivity timeout (2 hours of inactivity = logout)
+        INACTIVITY_TIMEOUT: 2 * 60 * 60 * 1000
+    };
+
     // Enhanced prefetching and caching
     class AssetManager {
         constructor() {
@@ -381,12 +398,10 @@
             return video;
         }
 
-        // Prefetch based on playlist data
         async prefetchPlaylistAssets(playlist) {
             const prefetchPromises = [];
             
             playlist.forEach((track, index) => {
-                // Prefetch next 3 tracks
                 if (index < 3) {
                     if (track.image) {
                         prefetchPromises.push(this.prefetchImage(track.image));
@@ -411,8 +426,195 @@
 
     // Initialize asset manager
     const assetManager = new AssetManager();
+
+    // Rolling Session Manager
+    class RollingSessionManager {
+        constructor() {
+            this.sessionStartTime = null;
+            this.lastActivityTime = null;
+            this.lastExtensionTime = null;
+            this.activityCheckInterval = null;
+            this.activities = ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'];
+            this.activityThrottle = null;
+        }
+
+        startSession() {
+            const now = Date.now();
+            this.sessionStartTime = now;
+            this.lastActivityTime = now;
+            this.lastExtensionTime = now;
+            
+            sessionStorage.setItem('sessionStartTime', now.toString());
+            sessionStorage.setItem('lastActivityTime', now.toString());
+            sessionStorage.setItem('lastExtensionTime', now.toString());
+            
+            this.startActivityMonitoring();
+            console.log('Rolling session started');
+        }
+
+        endSession() {
+            this.sessionStartTime = null;
+            this.lastActivityTime = null;
+            this.lastExtensionTime = null;
+            
+            sessionStorage.removeItem('sessionStartTime');
+            sessionStorage.removeItem('lastActivityTime');
+            sessionStorage.removeItem('lastExtensionTime');
+            
+            this.stopActivityMonitoring();
+            console.log('Rolling session ended');
+        }
+
+        loadSessionData() {
+            this.sessionStartTime = parseInt(sessionStorage.getItem('sessionStartTime')) || null;
+            this.lastActivityTime = parseInt(sessionStorage.getItem('lastActivityTime')) || null;
+            this.lastExtensionTime = parseInt(sessionStorage.getItem('lastExtensionTime')) || null;
+        }
+
+        recordActivity() {
+            const now = Date.now();
+            this.lastActivityTime = now;
+            sessionStorage.setItem('lastActivityTime', now.toString());
+            
+            // Check if we should extend the session
+            this.checkForSessionExtension();
+        }
+
+        checkForSessionExtension() {
+            const now = Date.now();
+            
+            // Don't extend if we haven't passed the cooldown period
+            if (this.lastExtensionTime && (now - this.lastExtensionTime) < SESSION_CONFIG.EXTENSION_COOLDOWN) {
+                return false;
+            }
+            
+            // Don't extend if we're at maximum session duration
+            if (this.sessionStartTime && (now - this.sessionStartTime) >= SESSION_CONFIG.MAX_SESSION_DURATION) {
+                console.log('Maximum session duration reached, no extension allowed');
+                return false;
+            }
+            
+            // Extend the session
+            return this.extendSession();
+        }
+
+        extendSession() {
+            const now = Date.now();
+            const currentExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
+            
+            // Calculate new expiration time
+            let newExpiration = Math.max(currentExpiration, now) + SESSION_CONFIG.ACTIVITY_EXTENSION;
+            
+            // Ensure we don't exceed maximum session duration
+            const maxAllowedExpiration = this.sessionStartTime + SESSION_CONFIG.MAX_SESSION_DURATION;
+            newExpiration = Math.min(newExpiration, maxAllowedExpiration);
+            
+            // Update token expiration
+            sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+            this.lastExtensionTime = now;
+            sessionStorage.setItem('lastExtensionTime', now.toString());
+            
+            const extensionMinutes = Math.round((newExpiration - now) / (60 * 1000));
+            console.log(`Session extended by activity. New expiration in ${extensionMinutes} minutes`);
+            
+            return true;
+        }
+
+        isSessionActive() {
+            const now = Date.now();
+            
+            // Check if session has been started
+            if (!this.sessionStartTime || !this.lastActivityTime) {
+                return false;
+            }
+            
+            // Check for inactivity timeout
+            if ((now - this.lastActivityTime) > SESSION_CONFIG.INACTIVITY_TIMEOUT) {
+                console.log('Session ended due to inactivity');
+                return false;
+            }
+            
+            // Check maximum session duration
+            if ((now - this.sessionStartTime) > SESSION_CONFIG.MAX_SESSION_DURATION) {
+                console.log('Session ended due to maximum duration reached');
+                return false;
+            }
+            
+            return true;
+        }
+
+        getSessionInfo() {
+            if (!this.sessionStartTime) return null;
+            
+            const now = Date.now();
+            const sessionDuration = now - this.sessionStartTime;
+            const inactivityDuration = now - this.lastActivityTime;
+            const tokenExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
+            const timeUntilExpiry = tokenExpiration - now;
+            
+            return {
+                sessionDuration,
+                inactivityDuration,
+                timeUntilExpiry,
+                isActive: this.isSessionActive(),
+                canExtend: (now - this.sessionStartTime) < SESSION_CONFIG.MAX_SESSION_DURATION
+            };
+        }
+
+        startActivityMonitoring() {
+            // Remove any existing listeners
+            this.stopActivityMonitoring();
+            
+            // Throttled activity handler
+            const throttledActivityHandler = () => {
+                if (this.activityThrottle) return;
+                
+                this.activityThrottle = setTimeout(() => {
+                    this.recordActivity();
+                    this.activityThrottle = null;
+                }, 1000); // Throttle activity recording to once per second
+            };
+            
+            // Add activity listeners
+            this.activities.forEach(activity => {
+                document.addEventListener(activity, throttledActivityHandler, { passive: true });
+            });
+            
+            // Start periodic activity check
+            this.activityCheckInterval = setInterval(() => {
+                if (!this.isSessionActive()) {
+                    console.log('Session inactive, logging out');
+                    handleLogout(true, 'Session ended due to inactivity');
+                }
+            }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL);
+            
+            this.activityHandler = throttledActivityHandler;
+        }
+
+        stopActivityMonitoring() {
+            if (this.activityHandler) {
+                this.activities.forEach(activity => {
+                    document.removeEventListener(activity, this.activityHandler);
+                });
+                this.activityHandler = null;
+            }
+            
+            if (this.activityCheckInterval) {
+                clearInterval(this.activityCheckInterval);
+                this.activityCheckInterval = null;
+            }
+            
+            if (this.activityThrottle) {
+                clearTimeout(this.activityThrottle);
+                this.activityThrottle = null;
+            }
+        }
+    }
+
+    // Initialize rolling session manager
+    const sessionManager = new RollingSessionManager();
     
-    // Enhanced login attempt management with user-specific tracking
+    // Enhanced login attempt management
     class LoginAttemptManager {
         constructor() {
             this.maxAttempts = 3;
@@ -450,7 +652,6 @@
             const data = this.getAttemptData(username);
             if (!data) return { allowed: true, remaining: this.maxAttempts };
 
-            // Check if lockout period has expired
             if (data.lockedUntil && Date.now() > data.lockedUntil) {
                 this.clearAttempts(username);
                 return { allowed: true, remaining: this.maxAttempts };
@@ -473,7 +674,6 @@
             data.count++;
             data.lastAttempt = Date.now();
 
-            // Lock account after max attempts
             if (data.count >= this.maxAttempts) {
                 data.lockedUntil = Date.now() + this.lockoutDuration;
             }
@@ -485,24 +685,12 @@
         recordSuccessfulLogin(username) {
             this.clearAttempts(username);
         }
-
-        // Clear all attempt data (useful for debugging or admin reset)
-        clearAllAttempts() {
-            const keys = [];
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i);
-                if (key && key.startsWith('loginAttempts_')) {
-                    keys.push(key);
-                }
-            }
-            keys.forEach(key => sessionStorage.removeItem(key));
-        }
     }
 
     // Initialize the login attempt manager
     const loginManager = new LoginAttemptManager();
     
-    // State management
+    // State management - unified token handling with rolling sessions
     let currentUser = null;
     let accessToken = null;
     let refreshToken = null;
@@ -518,7 +706,7 @@
                     'Content-Type': 'application/json',
                     ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
                 },
-                timeout: 10000,
+                timeout: 15000,
                 ...options
             };
 
@@ -579,7 +767,6 @@
             });
         },
 
-        // Test backend connection with retry
         async testConnection(retries = 3) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -608,7 +795,6 @@
             messageBox.style.color = "#000000";
             messageBox.style.display = "block";
             
-            // Auto-hide after 5 seconds
             setTimeout(() => {
                 if (messageBox.textContent === text.toUpperCase()) {
                     messageBox.style.display = "none";
@@ -660,11 +846,13 @@
         }
     }
 
-    // Enhanced token management with proper expiration
+    // Enhanced token management with rolling session support
     function saveTokens(tokens) {
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
-        const expirationTime = Date.now() + (23 * 60 * 60 * 1000); // 23 hours from now
+        
+        // Initial token expiration (4 hours base duration)
+        const expirationTime = Date.now() + SESSION_CONFIG.BASE_TOKEN_DURATION;
         
         sessionStorage.setItem('accessToken', accessToken);
         sessionStorage.setItem('refreshToken', refreshToken);
@@ -675,19 +863,21 @@
     function loadTokens() {
         accessToken = sessionStorage.getItem('accessToken');
         refreshToken = sessionStorage.getItem('refreshToken');
-        const timestamp = sessionStorage.getItem('tokenTimestamp');
         const expiration = sessionStorage.getItem('tokenExpiration');
         
-        // Check if tokens are expired
-        if (expiration && Date.now() > parseInt(expiration)) {
-            console.log('Tokens expired, clearing session');
+        // Load session data
+        sessionManager.loadSessionData();
+        
+        // Check if session is still active
+        if (!sessionManager.isSessionActive()) {
+            console.log('Session inactive, clearing tokens');
             clearTokens();
             return false;
         }
         
-        // Check if tokens are too old (fallback check)
-        if (timestamp && Date.now() - parseInt(timestamp) > 24 * 60 * 60 * 1000) {
-            console.log('Tokens too old, clearing session');
+        // Check if tokens are expired
+        if (expiration && Date.now() > parseInt(expiration)) {
+            console.log('Tokens expired, clearing session');
             clearTokens();
             return false;
         }
@@ -697,7 +887,6 @@
 
     // Stop all media when session ends
     function stopAllMedia() {
-        // Stop all audio elements
         const audioElements = document.querySelectorAll('audio');
         audioElements.forEach(audio => {
             audio.pause();
@@ -705,7 +894,6 @@
             audio.src = '';
         });
         
-        // Stop all video elements
         const videoElements = document.querySelectorAll('video');
         videoElements.forEach(video => {
             video.pause();
@@ -727,11 +915,14 @@
         sessionStorage.removeItem('HomeLoginTime');
         sessionStorage.removeItem('DisguiseLoginTime');
         
+        // End rolling session
+        sessionManager.endSession();
+        
         // Stop any ongoing audio/video
         stopAllMedia();
     }
 
-    // Session monitoring functions
+    // Enhanced session monitoring with rolling session support
     function startSessionMonitoring() {
         // Clear any existing interval
         if (sessionCheckInterval) {
@@ -742,19 +933,34 @@
             if (accessToken) {
                 const expiration = sessionStorage.getItem('tokenExpiration');
                 const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
+                const sessionInfo = sessionManager.getSessionInfo();
                 
-                // If less than 1 hour remaining, try to refresh
-                if (timeUntilExpiry < (60 * 60 * 1000) && timeUntilExpiry > 0) {
+                // Check if session is still active
+                if (!sessionInfo || !sessionInfo.isActive) {
+                    console.log('Session inactive during monitoring');
+                    handleLogout(true, 'Session ended');
+                    return;
+                }
+                
+                // Try to refresh if approaching expiration
+                if (timeUntilExpiry < SESSION_CONFIG.REFRESH_THRESHOLD && timeUntilExpiry > 0) {
                     console.log('Token expiring soon, refreshing...');
                     refreshTokenIfNeeded();
                 }
                 // If expired, end session
                 else if (timeUntilExpiry <= 0) {
-                    console.log('Session expired during monitoring');
-                    handleLogout(true);
+                    console.log('Token expired during monitoring');
+                    handleLogout(true, 'Session expired');
+                }
+                
+                // Log session info periodically (every 10 checks)
+                if (Math.random() < 0.1) {
+                    const sessionDurationHours = Math.round(sessionInfo.sessionDuration / (60 * 60 * 1000) * 10) / 10;
+                    const inactivityMinutes = Math.round(sessionInfo.inactivityDuration / (60 * 1000));
+                    console.log(`Session active: ${sessionDurationHours}h, inactive for: ${inactivityMinutes}m`);
                 }
             }
-        }, 5 * 60 * 1000); // Check every 5 minutes
+        }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL); // Check every minute
     }
 
     function stopSessionMonitoring() {
@@ -764,7 +970,7 @@
         }
     }
 
-    // Updated handleSecureLogin function with proper attempt management
+    // Updated handleSecureLogin function with rolling session initialization
     async function handleSecureLogin() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
@@ -774,12 +980,12 @@
             return;
         }
 
-        // Check login attempts for this specific username
-        const attemptStatus = loginManager.canAttemptLogin(username);
+        // Client-side attempt check
+        const clientAttemptStatus = loginManager.canAttemptLogin(username);
         
-        if (!attemptStatus.allowed) {
-            if (attemptStatus.isLocked) {
-                const timeRemaining = Math.ceil((attemptStatus.lockedUntil - Date.now()) / (60 * 1000));
+        if (!clientAttemptStatus.allowed) {
+            if (clientAttemptStatus.isLocked) {
+                const timeRemaining = Math.ceil((clientAttemptStatus.lockedUntil - Date.now()) / (60 * 1000));
                 showMessage(`ACCOUNT LOCKED FOR ${timeRemaining} MORE MINUTES. PLEASE TRY AGAIN LATER.`);
             } else {
                 showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
@@ -787,7 +993,7 @@
             return;
         }
 
-        // Check if server connection is established
+        // Check server connection
         if (!serverConnectionEstablished) {
             showMessage("ESTABLISHING CONNECTION... PLEASE WAIT A MOMENT");
             
@@ -816,6 +1022,9 @@
                 // Record successful login and clear attempts
                 loginManager.recordSuccessfulLogin(username);
                 
+                // Start rolling session
+                sessionManager.startSession();
+                
                 // Navigate based on user role
                 if (currentUser.role === 'home') {
                     showHomePage();
@@ -838,7 +1047,7 @@
                     showHomePage();
                 }
                 
-                showMessage("LOGIN SUCCESSFUL", true);
+                showMessage("LOGIN SUCCESSFUL - SESSION WILL EXTEND WITH ACTIVITY", true);
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -865,18 +1074,7 @@
         }
     }
 
-    // Add a function to clear login attempts (useful for testing)
-    function resetLoginAttempts(username = null) {
-        if (username) {
-            loginManager.clearAttempts(username);
-            showMessage(`LOGIN ATTEMPTS RESET FOR ${username.toUpperCase()}`, true);
-        } else {
-            loginManager.clearAllAttempts();
-            showMessage("ALL LOGIN ATTEMPTS RESET", true);
-        }
-    }
-
-    // Page navigation functions with session monitoring
+    // Page navigation functions with rolling session monitoring
     function showLoginPage() {
         document.getElementById("LoginPage").style.display = "block";
         document.getElementById("HomePage").style.display = "none";
@@ -937,7 +1135,7 @@
         startSessionMonitoring();
     }
 
-    // Enhanced auth status check with better session validation
+    // Enhanced auth status check with rolling session validation
     async function checkAuthStatus() {
         if (!loadTokens()) {
             console.log('No valid tokens found, showing login');
@@ -950,9 +1148,8 @@
             if (userResponse.success) {
                 currentUser = userResponse.data;
                 
-                // Update token expiration on successful API call
-                const newExpiration = Date.now() + (23 * 60 * 60 * 1000);
-                sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+                // Extend session on successful API call
+                sessionManager.recordActivity();
                 
                 if (currentUser.role === 'home') {
                     showHomePage();
@@ -967,15 +1164,21 @@
             const refreshed = await refreshTokenIfNeeded();
             if (!refreshed) {
                 console.log('Token refresh failed, ending session');
-                handleLogout(true);
+                handleLogout(true, 'Authentication failed');
             }
         }
     }
 
-    // Enhanced token refresh with proper error handling
+    // Enhanced token refresh with rolling session support
     async function refreshTokenIfNeeded() {
         if (!refreshToken) {
             console.log('No refresh token available');
+            return false;
+        }
+
+        // Check if session is still active before refreshing
+        if (!sessionManager.isSessionActive()) {
+            console.log('Session inactive, cannot refresh token');
             return false;
         }
 
@@ -985,25 +1188,31 @@
             
             if (response.success) {
                 accessToken = response.data.accessToken;
-                const newExpiration = Date.now() + (23 * 60 * 60 * 1000);
+                
+                // Extend session with new token
+                const now = Date.now();
+                const newExpiration = now + SESSION_CONFIG.BASE_TOKEN_DURATION;
                 
                 sessionStorage.setItem('accessToken', accessToken);
-                sessionStorage.setItem('tokenTimestamp', Date.now().toString());
+                sessionStorage.setItem('tokenTimestamp', now.toString());
                 sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+                
+                // Record activity to potentially extend session further
+                sessionManager.recordActivity();
                 
                 console.log('Token refreshed successfully');
                 return true;
             }
         } catch (error) {
             console.error('Token refresh failed:', error);
-            handleLogout(false);
+            handleLogout(false, 'Token refresh failed');
         }
         return false;
     }
 
-    // Enhanced logout function with better cleanup
-    async function handleLogout(showMessageFlag = true) {
-        console.log('Logging out user...');
+    // Enhanced logout function with rolling session cleanup
+    async function handleLogout(showMessageFlag = true, reason = 'Manual logout') {
+        console.log(`Logging out user... Reason: ${reason}`);
         
         try {
             if (accessToken) {
@@ -1017,30 +1226,35 @@
             showLoginPage();
             
             if (showMessageFlag) {
-                showMessage("SESSION ENDED - PLEASE LOG IN AGAIN", true);
+                const message = reason === 'Manual logout' 
+                    ? "LOGGED OUT SUCCESSFULLY" 
+                    : `SESSION ENDED - ${reason.toUpperCase()} - PLEASE LOG IN AGAIN`;
+                showMessage(message, reason === 'Manual logout');
             }
         }
     }
 
-    // Token refresh scheduler
+    // Proactive token refresh scheduler for rolling sessions
     function startTokenRefreshScheduler() {
-        // Refresh token every 45 minutes if we have valid tokens
+        // Check every 5 minutes if token needs refreshing
         setInterval(async () => {
-            if (accessToken && refreshToken) {
+            if (accessToken && refreshToken && sessionManager.isSessionActive()) {
                 const expiration = sessionStorage.getItem('tokenExpiration');
                 const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
                 
-                // Only refresh if we have more than 30 minutes left
-                if (timeUntilExpiry > (30 * 60 * 1000)) {
+                // Proactively refresh if less than refresh threshold remaining
+                if (timeUntilExpiry < SESSION_CONFIG.REFRESH_THRESHOLD && timeUntilExpiry > 0) {
+                    console.log('Proactively refreshing token...');
                     await refreshTokenIfNeeded();
                 }
             }
-        }, 45 * 60 * 1000);
+        }, 5 * 60 * 1000); // Check every 5 minutes
     }
 
-    // App initialization
+    // App initialization with rolling session support
     async function initializeApp() {
         console.log('Connecting to backend at:', API_BASE_URL);
+        console.log('Rolling session configuration:', SESSION_CONFIG);
         
         // Don't show connection messages if we already have valid tokens
         const hasValidTokens = loadTokens();
@@ -1067,6 +1281,28 @@
         await checkAuthStatus();
     }
 
+    // Session info display function (for debugging)
+    function showSessionInfo() {
+        const info = sessionManager.getSessionInfo();
+        if (info) {
+            const sessionHours = Math.round(info.sessionDuration / (60 * 60 * 1000) * 10) / 10;
+            const inactiveMinutes = Math.round(info.inactivityDuration / (60 * 1000));
+            const expiryMinutes = Math.round(info.timeUntilExpiry / (60 * 1000));
+            
+            console.log(`Session Info:
+                Duration: ${sessionHours} hours
+                Inactive for: ${inactiveMinutes} minutes
+                Token expires in: ${expiryMinutes} minutes
+                Active: ${info.isActive}
+                Can extend: ${info.canExtend}`);
+            
+            showMessage(`SESSION: ${sessionHours}H ACTIVE, EXPIRES IN ${expiryMinutes}M`, true);
+        } else {
+            console.log('No active session');
+            showMessage('NO ACTIVE SESSION', false);
+        }
+    }
+
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
         // Add styles-loaded class to prevent FOUC
@@ -1079,10 +1315,11 @@
         startSessionMonitoring();
         startTokenRefreshScheduler();
         
-        // Handle page visibility changes (user switches tabs/apps)
+        // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && accessToken) {
-                // Page became visible, check if session is still valid
+                // Page became visible, record activity and check session
+                sessionManager.recordActivity();
                 checkAuthStatus();
             }
         });
@@ -1113,7 +1350,7 @@
                     }, 150);
                     
                     // Perform logout
-                    handleLogout();
+                    handleLogout(true, 'Manual logout');
                 });
                 
                 // Add hover effect to indicate it's clickable
@@ -1142,11 +1379,29 @@
             });
         }
 
-        // Add keyboard shortcut to reset attempts (for testing - Ctrl+Shift+R)
+        // Debug keyboard shortcuts
         document.addEventListener('keydown', function(e) {
+            // Ctrl+Shift+R to reset login attempts
             if (e.ctrlKey && e.shiftKey && e.key === 'R') {
                 e.preventDefault();
-                resetLoginAttempts();
+                loginManager.clearAllAttempts();
+                showMessage("ALL LOGIN ATTEMPTS RESET", true);
+            }
+            
+            // Ctrl+Shift+S to show session info
+            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                e.preventDefault();
+                showSessionInfo();
+            }
+            
+            // Ctrl+Shift+E to extend session manually (for testing)
+            if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+                e.preventDefault();
+                if (sessionManager.extendSession()) {
+                    showMessage("SESSION EXTENDED MANUALLY", true);
+                } else {
+                    showMessage("CANNOT EXTEND SESSION", false);
+                }
             }
         });
 
@@ -1164,7 +1419,7 @@
 
         window.addEventListener('offline', () => {
             wasOffline = true;
-            showMessage('NETWORK CONNECTION LOST. PLEASE CHECK YOUR INTERNET CONNECTION.');
+            showMessage('NETWORK CONNECTION LOST. SOME FEATURES MAY BE LIMITED.');
         });
     });
 
@@ -1172,8 +1427,8 @@
     window.handleSecureLogin = handleSecureLogin;
     window.handleLogout = handleLogout;
     window.assetManager = assetManager;
-    window.resetLoginAttempts = resetLoginAttempts;
-    window.loginManager = loginManager;
+    window.sessionManager = sessionManager;
+    window.showSessionInfo = showSessionInfo;
     
     // Legacy compatibility functions
     window.changeText = function(isSuccessful) {
