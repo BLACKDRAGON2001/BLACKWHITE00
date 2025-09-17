@@ -2653,6 +2653,314 @@ let allMusic = [
     },
 
     {
+        name: "All That I Need",
+        artist: "S3RL Kayliana And MC Riddle",
+        src: "AllThatINeed",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bass Slut",
+        artist: "S3RL",
+        src: "BassSlut",
+        coverType: "Images"
+    },
+
+    {
+        name: "Berserk",
+        artist: "S3RL And Iceman",
+        src: "Berserk",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bff",
+        artist: "S3RL",
+        src: "Bff",
+        coverType: "Images"
+    },
+
+    {
+        name: "Candy",
+        artist: "S3RL And Sara",
+        src: "Candy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Catchit",
+        artist: "S3RL",
+        src: "Catchit",
+        coverType: "Images"
+    },
+
+    {
+        name: "Cherry Pop",
+        artist: "S3RL And Gl!tch",
+        src: "CherryPop",
+        coverType: "Images"
+    },
+
+    {
+        name: "Come Inside",
+        artist: "S3RL GPF And DJ Gollum",
+        src: "ComeInside",
+        coverType: "Images"
+    },
+
+    {
+        name: "Da De Da",
+        artist: "S3RL And J0hnny",
+        src: "DaDeDa",
+        coverType: "Images"
+    },
+
+    {
+        name: "DJ Whore",
+        artist: "S3RL And Tamika",
+        src: "DJWhore",
+        coverType: "Images"
+    },
+
+    {
+        name: "Dopamine",
+        artist: "S3RL And Sara",
+        src: "Dopamine",
+        coverType: "Images"
+    },
+
+    {
+        name: "Fan Service",
+        artist: "S3RL",
+        src: "FanService",
+        coverType: "Images"
+    },
+
+    {
+        name: "Feel The Melody",
+        artist: "S3RL And Sara",
+        src: "FeelTheMelody",
+        coverType: "Images"
+    },
+
+    {
+        name: "Forbidden",
+        artist: "S3RL And Avanna",
+        src: "Forbidden",
+        coverType: "Images"
+    },
+
+    {
+        name: "Friendzoned",
+        artist: "S3RL And Mixie Moon",
+        src: "Friendzoned",
+        coverType: "Images"
+    },
+
+    {
+        name: "Genre Police",
+        artist: "S3RL And Lexi",
+        src: "GenrePolice",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hentai",
+        artist: "S3RL",
+        src: "Hentai",
+        coverType: "Images"
+    },
+
+    {
+        name: "Hentai Remix",
+        artist: "S3RL DJ Satomi And PiNKII",
+        src: "HentaiRemix",
+        coverType: "Images"
+    },
+
+    {
+        name: "I Will Pick You Up",
+        artist: "S3RL And Tamika",
+        src: "IWillPickYouUp",
+        coverType: "Images"
+    },
+
+    {
+        name: "I Will See You Again",
+        artist: "S3RL And Chi Chi",
+        src: "IWillSeeYouAgain",
+        coverType: "Images"
+    },
+
+    {
+        name: "Make Me Wanna",
+        artist: "S3RL Alaguan and Mixie Moon",
+        src: "MakeMeWanna",
+        coverType: "Images"
+    },
+
+    {
+        name: "MTC",
+        artist: "S3RL",
+        src: "MTC",
+        coverType: "Images"
+    },
+
+    {
+        name: "Music Is My Saviour",
+        artist: "S3RL And Mixie Moon",
+        src: "MusicIsMySaviour",
+        coverType: "Images"
+    },
+
+    {
+        name: "Now That I Have Found You",
+        artist: "S3RL And Deja",
+        src: "NowThatIHaveFoundYou",
+        coverType: "Images"
+    },
+
+    {
+        name: "One More",
+        artist: "S3RL Atef Hannah Fortune And Lowstattic",
+        src: "OneMore",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pika Girl",
+        artist: "S3RL",
+        src: "PikaGirl",
+        coverType: "Images"
+    },
+
+    {
+        name: "Predictable Rave Song",
+        artist: "S3RL And Tamika",
+        src: "PredictableRaveSong",
+        coverType: "Images"
+    },
+
+    {
+        name: "Princess Bubblegum",
+        artist: "S3RL And Yuki",
+        src: "PrincessBubblegum",
+        coverType: "Images"
+    },
+
+    {
+        name: "R4VE B0Y",
+        artist: "S3RL And Krystal",
+        src: "R4veB0y",
+        coverType: "Images"
+    },
+
+    {
+        name: "Ready For Love",
+        artist: "S3RL And Sara",
+        src: "ReadyForLove",
+        coverType: "Images"
+    },
+
+    {
+        name: "Request",
+        artist: "S3RL And Mixie Moon",
+        src: "Request",
+        coverType: "Images"
+    },
+
+    {
+        name: "Silicon XX",
+        artist: "S3RL And Nikolett",
+        src: "SiliconXX",
+        coverType: "Images"
+    },
+
+    {
+        name: "Super Hot",
+        artist: "S3RL LVL1 And IC3MANIA",
+        src: "SuperHot",
+        coverType: "Images"
+    },
+
+    {
+        name: "Tell Me What You Want",
+        artist: "S3RL And Tamika",
+        src: "TellMeWhatYouWant",
+        coverType: "Images"
+    },
+
+    {
+        name: "The Bass And The Melody",
+        artist: "S3RL",
+        src: "TheBassAndTheMelody",
+        coverType: "Images"
+    },
+
+    {
+        name: "MTC Saga: The Beginning",
+        artist: "S3RL And Radio Gosha",
+        src: "TheBeginning",
+        coverType: "Images"
+    },
+
+    {
+        name: "Through The Night",
+        artist: "S3RL And Tatsunoshin",
+        src: "ThroughTheNight",
+        coverType: "Images"
+    },
+
+    {
+        name: "Touch The Sky",
+        artist: "S3RL",
+        src: "TouchTheSky",
+        coverType: "Images"
+    },
+
+    {
+        name: "Viva Forever",
+        artist: "S3RL And Sara",
+        src: "VivaForever",
+        coverType: "Images"
+    },
+
+    {
+        name: "Waifu",
+        artist: "S3RL Alaguan And Lexi",
+        src: "Waifu",
+        coverType: "Images"
+    },
+
+    {
+        name: "Want It Harder",
+        artist: "S3RL And Sara",
+        src: "WantItHarder",
+        coverType: "Images"
+    },
+
+    {
+        name: "When I Am There",
+        artist: "S3RL And Nikolett",
+        src: "WhenIAmThere",
+        coverType: "Images"
+    },
+
+    {
+        name: "You Are Mine",
+        artist: "S3RL And Kayliana",
+        src: "YouAreMine",
+        coverType: "Images"
+    },
+
+    {
+        name: "MDMA",
+        artist: "S3RL And Little Sis Nora",
+        src: "MDMA",
+        coverType: "Images"
+    },
+
+    {
         name: "Yummy",
         artist: "Ayesha Erotica",
         src: "Yummy",
@@ -4174,20 +4482,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Hips Dont Lie",
-        artist: "Shakira",
-        src: "HipsDontLie",
-        coverType: "Images"
-    },
-
-    {
-        name: "Mantra",
-        artist: "JENNIE",
-        src: "Mantra",
-        coverType: "Images"
-    },
-
-    {
         name: "One Dance",
         artist: "Drake",
         src: "OneDance",
@@ -4237,13 +4531,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Good Life",
-        artist: "Kehlani And G-Eazy",
-        src: "GoodLife",
-        coverType: "Images"
-    },
-
-    {
         name: "In2",
         artist: "WSTRN",
         src: "In2",
@@ -4254,13 +4541,6 @@ let ReducedMusic = [
         name: "Swim",
         artist: "Chase Atlantic",
         src: "Swim",
-        coverType: "Images"
-    },
-
-    {
-        name: "Waka Waka",
-        artist: "Shakira",
-        src: "WakaWaka",
         coverType: "Images"
     },
 
@@ -4324,6 +4604,181 @@ let ReducedMusic = [
         name: "Montagem Bandido",
         artist: "Jmilton",
         src: "MontagemBandido",
+        coverType: "Images"
+    },
+
+    {
+        name: "Funk Criminal",
+        artist: "Icedmane",
+        src: "FunkCriminal",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Bueno",
+        artist: "WhxteSxde",
+        src: "MontagemBueno",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Bibi Game",
+        artist: "LXNGVX",
+        src: "MontagemBibiGame",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Fortuna",
+        artist: "Glichery",
+        src: "MontagemFortuna",
+        coverType: "Images"
+    },
+
+    {
+        name: "Maestro",
+        artist: "Cjbeards",
+        src: "Maestro",
+        coverType: "Images"
+    },
+
+    {
+        name: "Breath",
+        artist: "N1VALL",
+        src: "Breath",
+        coverType: "Images"
+    },
+
+    {
+        name: "Mande Mande",
+        artist: "CHASHKAKEFIRA",
+        src: "MandeMande",
+        coverType: "Images"
+    },
+
+    {
+        name: "Momento",
+        artist: "N1VALL",
+        src: "Momento",
+        coverType: "Images"
+    },
+
+    {
+        name: "Del Amor",
+        artist: "SEKIMANE",
+        src: "DelAmor",
+        coverType: "Images"
+    },
+
+    {
+        name: "Baila Contigo",
+        artist: "MVTRIIIX",
+        src: "BailaContigo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Slay Rock",
+        artist: "Eternxlkz",
+        src: "SlayRock",
+        coverType: "Images"
+    },
+
+    {
+        name: "Montagem Amarte",
+        artist: "Vlxdimir",
+        src: "MontagemAmarte",
+        coverType: "Images"
+    },
+
+    {
+        name: "Baila Loca",
+        artist: "Yb Wasg'ood",
+        src: "BailaLoca",
+        coverType: "Images"
+    },
+
+    {
+        name: "Chronosphere Two",
+        artist: "Sxdboy",
+        src: "ChronosphereTwo",
+        coverType: "Images"
+    },
+
+    {
+        name: "Canta La",
+        artist: "TRXSHBXY",
+        src: "CantaLa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Funk Love Again",
+        artist: "SCRXXCH",
+        src: "FunkLoveAgain",
+        coverType: "Images"
+    },
+
+    {
+        name: "Nevoa",
+        artist: "Zhanbxqq",
+        src: "Nevoa",
+        coverType: "Images"
+    },
+
+    {
+        name: "Pasos De Fuego",
+        artist: "Flame Runner",
+        src: "PasosDeFuego",
+        coverType: "Images"
+    },
+
+    {
+        name: "Violento",
+        artist: "Kobe Mane",
+        src: "Violento",
+        coverType: "Images"
+    },
+
+    {
+        name: "To Aqui",
+        artist: "Punic",
+        src: "ToAqui",
+        coverType: "Images"
+    },
+
+    {
+        name: "Safado No Bailao",
+        artist: "DJ FKU",
+        src: "SafadoNoBailao",
+        coverType: "Images"
+    },
+
+    {
+        name: "Con La Luz",
+        artist: "Luc Wall",
+        src: "ConLaLuz",
+        coverType: "Images"
+    },
+
+    {
+        name: "Sin Control",
+        artist: "ICEDMANE",
+        src: "SinControl",
+        coverType: "Images"
+    },
+
+    {
+        name: "Impacta",
+        artist: "Marian And Sean",
+        src: "Impacta",
+        coverType: "Images"
+    },
+
+    {
+        name: "Dale Dale",
+        artist: "SHIPU",
+        src: "DaleDale",
         coverType: "Images"
     },
 
@@ -4643,48 +5098,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Empire",
-        artist: "Laudividni",
-        src: "Empiree",
-        coverType: "Images"
-    },
-
-    {
-        name: "Greedy",
-        artist: "Tate Mcrae",
-        src: "Greedy",
-        coverType: "Images"
-    },
-
-    {
-        name: "It's Ok I'm Ok",
-        artist: "Tate Mcrae",
-        src: "ItsOkImOk",
-        coverType: "Images"
-    },
-
-    {
-        name: "Nonsense",
-        artist: "Sabrina Carpenter",
-        src: "Nonsense",
-        coverType: "Images"
-    },
-
-    {
-        name: "Feather",
-        artist: "Sabrina Carpenter",
-        src: "Feather",
-        coverType: "Images"
-    },
-
-    {
-        name: "New Rules",
-        artist: "Dua Lipa",
-        src: "NewRules",
-        coverType: "Images"
-    },
-
-    {
         name: "Where We Started",
         artist: "NCS",
         src: "WhereWeStarted",
@@ -4695,20 +5108,6 @@ let ReducedMusic = [
         name: "Shape Of You",
         artist: "Ed Sheeran",
         src: "ShapeOfYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Seven Rings",
-        artist: "Ariana Grande",
-        src: "SevenRings",
-        coverType: "Images"
-    },
-
-    {
-        name: "Taki Taki",
-        artist: "Dj Snake",
-        src: "TakiTaki",
         coverType: "Images"
     },
 
@@ -4727,23 +5126,9 @@ let ReducedMusic = [
     },
 
     {
-        name: "Make You Mine",
-        artist: "Madison Beer",
-        src: "MakeYouMine",
-        coverType: "Images"
-    },
-
-    {
         name: "Greatest",
         artist: "Sia",
         src: "Greatest",
-        coverType: "Images"
-    },
-
-    {
-        name: "Poker Face",
-        artist: "Lady Gaga",
-        src: "PokerFace",
         coverType: "Images"
     },
 
@@ -4765,20 +5150,6 @@ let ReducedMusic = [
         name: "Steal My Girl",
         artist: "One Direction",
         src: "StealMyGirl",
-        coverType: "Images"
-    },
-
-    {
-        name: "Best Song Ever",
-        artist: "One Direction",
-        src: "BestSongEver",
-        coverType: "Images"
-    },
-
-    {
-        name: "Drag Me Down",
-        artist: "One Direction",
-        src: "DragMeDown",
         coverType: "Images"
     },
 
@@ -4825,13 +5196,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "The Color Violet",
-        artist: "Tory Lanez",
-        src: "TheColorViolet",
-        coverType: "Images"
-    },
-
-    {
         name: "Love Nwantiti",
         artist: "CKay",
         src: "LoveNwantiti",
@@ -4867,27 +5231,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Attention",
-        artist: "Charlie Puth",
-        src: "Attention",
-        coverType: "Images"
-    },
-
-    {
-        name: "We Don't Talk Anymore",
-        artist: "Charlie Puth And Selena Gomez",
-        src: "WeDontTalkAnymore",
-        coverType: "Images"
-    },
-
-    {
-        name: "Treat You Better",
-        artist: "Shawn Mendes",
-        src: "TreatYouBetter",
-        coverType: "Images"
-    },
-
-    {
         name: "Centuries",
         artist: "Fall Out Boy",
         src: "Centuries",
@@ -4916,107 +5259,9 @@ let ReducedMusic = [
     },
 
     {
-        name: "Closer",
-        artist: "Chainsmokers And Halsey",
-        src: "Closer",
-        coverType: "Images"
-    },
-
-    {
-        name: "Blank Space",
-        artist: "Taylor Swift",
-        src: "BlankSpace",
-        coverType: "Images"
-    },
-
-    {
-        name: "You Belong With Me",
-        artist: "Taylor Swift",
-        src: "YouBelongWithMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Firework",
-        artist: "Katy Perry",
-        src: "Firework",
-        coverType: "Images"
-    },
-
-    {
-        name: "Girl On Fire",
-        artist: "Katy Perry",
-        src: "GirlOnFire",
-        coverType: "Images"
-    },
-
-    {
-        name: "All I Want For Christmas Is You",
-        artist: "Mariah Carey",
-        src: "AllIWantForChristmasIsYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Call Me Maybe",
-        artist: "Carly Rae Jepsen",
-        src: "CallMeMaybe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Power",
-        artist: "Little Mix And Stormzy",
-        src: "Power",
-        coverType: "Images"
-    },
-
-    {
         name: "Starboy",
         artist: "The Weeknd",
         src: "Starboy",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lean On",
-        artist: "Major Lazer and DJ Snake",
-        src: "LeanOn",
-        coverType: "Images"
-    },
-
-    {
-        name: "Stay",
-        artist: "The Kid LAROI And Justin Bieber",
-        src: "Stay",
-        coverType: "Images"
-    },
-
-    {
-        name: "Feel Invincible",
-        artist: "Skillet",
-        src: "FeelInvincible",
-        coverType: "Images"
-    },
-
-    {
-        name: "Resistance",
-        artist: "Skillet",
-        src: "Resistance",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hero",
-        artist: "Skillet",
-        src: "Hero",
-        coverType: "Images"
-    },
-
-    {
-        name: "Rise",
-        artist: "Skillet",
-        src: "Rise",
         coverType: "Images"
     },
 
@@ -5112,72 +5357,9 @@ let ReducedMusic = [
     },
 
     {
-        name: "Yeah",
-        artist: "Usher",
-        src: "Yeah",
-        coverType: "Images"
-    },
-
-    {
-        name: "A Cold Sunday",
-        artist: "Lil Yachty",
-        src: "AColdSunday",
-        coverType: "Images"
-    },
-
-    {
-        name: "StaySchemin",
-        artist: "Drake And French Montana",
-        src: "StaySchemin",
-        coverType: "Images"
-    },
-
-    {
-        name: "Keisha And Becky",
-        artist: "Russ Millions X Tion Wayne",
-        src: "KeishaAndBecky",
-        coverType: "Images"
-    },
-
-    {
-        name: "Je M'Appelle",
-        artist: "Benzz",
-        src: "JeMAppelle",
-        coverType: "Images"
-    },
-
-    {
         name: "Overseas",
         artist: "D-Block Europe And Central Cee",
         src: "Overseas",
-        coverType: "Images"
-    },
-
-    {
-        name: "Indulge",
-        artist: "M Huncho And D-Block Europe",
-        src: "Indulge",
-        coverType: "Images"
-    },
-
-    {
-        name: "Oliver Twist",
-        artist: "Arrdee",
-        src: "OliverTwist",
-        coverType: "Images"
-    },
-
-    {
-        name: "Loose",
-        artist: "S1mba And KSI",
-        src: "Loose",
-        coverType: "Images"
-    },
-
-    {
-        name: "Calm Down",
-        artist: "Selena Gomez And Rema",
-        src: "CalmDown",
         coverType: "Images"
     },
 
@@ -5196,69 +5378,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Loading",
-        artist: "Central Cee",
-        src: "Loading",
-        coverType: "Images"
-    },
-
-    {
-        name: "Band 4 Band",
-        artist: "Central Cee And Lil Baby",
-        src: "Band4Band",
-        coverType: "Images"
-    },
-
-    {
-        name: "Did It First",
-        artist: "Central Cee",
-        src: "DidItFirst",
-        coverType: "Images"
-    },
-
-    {
-        name: "Deli",
-        artist: "Ice Spice",
-        src: "Deli",
-        coverType: "Images"
-    },
-
-    {
-        name: "In Ha Mood",
-        artist: "Ice Spice",
-        src: "InHaMood",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lovin On Me",
-        artist: "Jack Harlow",
-        src: "LovinOnMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Come Get Her",
-        artist: "Rae Sremmurd",
-        src: "ComeGetHer",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lush Life",
-        artist: "Zara Larsson",
-        src: "LushLife",
-        coverType: "Images"
-    },
-
-    {
-        name: "On The Floor",
-        artist: "Jennifer Lopez",
-        src: "OnTheFloor",
-        coverType: "Images"
-    },
-
-    {
         name: "Turn Me On",
         artist: "Kevin Lyttle",
         src: "TurnMeOn",
@@ -5269,27 +5388,6 @@ let ReducedMusic = [
         name: "Get Lucky",
         artist: "Pharell Williams",
         src: "GetLucky",
-        coverType: "Images"
-    },
-
-    {
-        name: "Streets",
-        artist: "Doja Cat",
-        src: "Streets",
-        coverType: "Images"
-    },
-
-    {
-        name: "On My Own",
-        artist: "Darci",
-        src: "OnMyOwn",
-        coverType: "Images"
-    },
-
-    {
-        name: "Chammak Challo",
-        artist: "Akon",
-        src: "ChammakChallo",
         coverType: "Images"
     },
 
@@ -5378,62 +5476,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Collide",
-        artist: "Justine Skye and Tyga",
-        src: "Collide",
-        coverType: "Images"
-    },
-
-    {
-        name: "Collide Sped Up Version",
-        artist: "Justine Skye and Tyga",
-        src: "Collide2",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bad Boy",
-        artist: "Marwa Loud",
-        src: "BadBoy",
-        coverType: "Images"
-    },
-
-    {
-        name: "Wannabe",
-        artist: "Why Mona",
-        src: "Wannabe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Just Dance",
-        artist: "EQRIC And ISAEV",
-        src: "JustDance",
-        coverType: "Images"
-    },
-
-    {
-        name: "Without Me",
-        artist: "Two Hounds",
-        src: "WithoutMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Down",
-        artist: "Arc North",
-        src: "Down",
-        coverType: "Images"
-    },
-
-    {
-        name: "Payphone",
-        artist: "Alema And Robbe",
-        src: "Payphone",
-        coverType: "Images"
-    },
-
-    {
         name: "Impossible",
         artist: "James Arthur",
         src: "Impossible",
@@ -5444,13 +5486,6 @@ let ReducedMusic = [
         name: "Another Love",
         artist: "Tom Odell",
         src: "AnotherLove",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bye Bye Bye",
-        artist: "NSYNC",
-        src: "ByeByeBye",
         coverType: "Images"
     },
 
@@ -5672,188 +5707,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Nowhere",
-        artist: "Shaker",
-        src: "Nowhere",
-        coverType: "Images"
-    },
-
-    {
-        name: "In The Dark",
-        artist: "Shaker",
-        src: "InTheDark",
-        coverType: "Images"
-    },
-
-    {
-        name: "Blackberry Ice",
-        artist: "Shaker",
-        src: "BlackberryIce",
-        coverType: "Images"
-    },
-
-    {
-        name: "Pretty Lies",
-        artist: "Shaker",
-        src: "PrettyLies",
-        coverType: "Images"
-    },
-
-    {
-        name: "Played To Lose",
-        artist: "Shaker",
-        src: "PlayedToLose",
-        coverType: "Images"
-    },
-
-    {
-        name: "Body",
-        artist: "Shaker",
-        src: "Body",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hold You Down",
-        artist: "Shaker",
-        src: "HoldYouDown",
-        coverType: "Images"
-    },
-
-    {
-        name: "Control",
-        artist: "Shaker",
-        src: "Control",
-        coverType: "Images"
-    },
-
-    {
-        name: "Leave",
-        artist: "Shaker",
-        src: "Leave",
-        coverType: "Images"
-    },
-
-    {
-        name: "In My Veins",
-        artist: "Shaker",
-        src: "InMyVeins",
-        coverType: "Images"
-    },
-
-    {
-        name: "2/22",
-        artist: "Shaker and Limi",
-        src: "TwoTwoTwo",
-        coverType: "Images"
-    },
-
-    {
-        name: "Cinderella",
-        artist: "Limi",
-        src: "Cinderella",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dangerous",
-        artist: "Limi",
-        src: "Dangerous",
-        coverType: "Images"
-    },
-
-    {
-        name: "Saint Laurent",
-        artist: "Limi",
-        src: "SaintLaurent",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Best I Ever Had",
-        artist: "Limi",
-        src: "TheBestIEverHad",
-        coverType: "Images"
-    },
-
-    {
-        name: "Summertime",
-        artist: "Limi",
-        src: "Summertime",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hiding",
-        artist: "Limi",
-        src: "Hiding",
-        coverType: "Images"
-    },
-
-    {
-        name: "If I",
-        artist: "Limi",
-        src: "IfI",
-        coverType: "Images"
-    },
-
-    {
-        name: "Marilyn Monroe",
-        artist: "Limi",
-        src: "MarilynMonroe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Obsessed",
-        artist: "Limi",
-        src: "Obsessed",
-        coverType: "Images"
-    },
-
-    {
-        name: "Broken Line",
-        artist: "Limi",
-        src: "BrokenLine",
-        coverType: "Images"
-    },
-
-    {
-        name: "Colors",
-        artist: "Limi",
-        src: "Colors",
-        coverType: "Images"
-    },
-
-    {
-        name: "Interlude",
-        artist: "Limi",
-        src: "Interlude",
-        coverType: "Images"
-    },
-
-    {
-        name: "Distance",
-        artist: "Limi",
-        src: "Distance",
-        coverType: "Images"
-    },
-
-    {
-        name: "Cuts",
-        artist: "Limi",
-        src: "Cuts",
-        coverType: "Images"
-    },
-
-    {
-        name: "SOB",
-        artist: "Limi",
-        src: "Sob",
-        coverType: "Images"
-    },
-
-    {
         name: "Fatal Attraction",
         artist: "Reed Wonder",
         src: "FatalAttraction",
@@ -5875,13 +5728,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Home",
-        artist: "Yu And Damona",
-        src: "Home",
-        coverType: "Images"
-    },
-
-    {
         name: "One Of The Girls",
         artist: "The Weeknd JENNIE And Lily Depp Rose",
         src: "OneOfTheGirls",
@@ -5892,244 +5738,6 @@ let ReducedMusic = [
         name: "Born To Die",
         artist: "Lana Del Rey",
         src: "BornToDie",
-        coverType: "Images"
-    },
-
-    {
-        name: "Life For Rent",
-        artist: "Dido",
-        src: "LifeForRent",
-        coverType: "Images"
-    },
-
-    {
-        name: "Thank You",
-        artist: "Dido",
-        src: "ThankYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "White Flag",
-        artist: "Dido",
-        src: "WhiteFlag",
-        coverType: "Images"
-    },
-
-    {
-        name: "Here With Me",
-        artist: "Dido",
-        src: "HereWithMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "All-American Bitch",
-        artist: "Olivia Rodrigo",
-        src: "AllAmericanBitch",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bad Idea Right",
-        artist: "Olivia Rodrigo",
-        src: "BadIdeaRight",
-        coverType: "Images"
-    },
-
-    {
-        name: "Brutal",
-        artist: "Olivia Rodrigo",
-        src: "Brutal",
-        coverType: "Images"
-    },
-
-    {
-        name: "Traitor",
-        artist: "Olivia Rodrigo",
-        src: "Traitor",
-        coverType: "Images"
-    },
-
-    {
-        name: "Vampire",
-        artist: "Olivia Rodrigo",
-        src: "Vampire",
-        coverType: "Images"
-    },
-
-    {
-        name: "Drivers License",
-        artist: "Olivia Rodrigo",
-        src: "DriversLicense",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lacy",
-        artist: "Olivia Rodrigo",
-        src: "Lacy",
-        coverType: "Images"
-    },
-
-    {
-        name: "One Step Forward Three Steps Back",
-        artist: "Olivia Rodrigo",
-        src: "OneStepForwardThreeStepsBack",
-        coverType: "Images"
-    },
-
-    {
-        name: "Ballad Of A Homeschooled Girl",
-        artist: "Olivia Rodrigo",
-        src: "BalladOfAHomeschooledGirl",
-        coverType: "Images"
-    },
-
-    {
-        name: "Deja Vu",
-        artist: "Olivia Rodrigo",
-        src: "DejaVu",
-        coverType: "Images"
-    },
-
-    {
-        name: "Making The Bed",
-        artist: "Olivia Rodrigo",
-        src: "MakingTheBed",
-        coverType: "Images"
-    },
-
-    {
-        name: "Good Four U",
-        artist: "Olivia Rodrigo",
-        src: "Good4U",
-        coverType: "Images"
-    },
-
-    {
-        name: "Logical",
-        artist: "Olivia Rodrigo",
-        src: "Logical",
-        coverType: "Images"
-    },
-
-    {
-        name: "Enough For You",
-        artist: "Olivia Rodrigo",
-        src: "EnoughForYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Get Him Back!",
-        artist: "Olivia Rodrigo",
-        src: "GetHimBack",
-        coverType: "Images"
-    },
-
-    {
-        name: "Happier",
-        artist: "Olivia Rodrigo",
-        src: "Happier",
-        coverType: "Images"
-    },
-
-    {
-        name: "Love Is Embarrassing",
-        artist: "Olivia Rodrigo",
-        src: "LoveIsEmbarassing",
-        coverType: "Images"
-    },
-
-    {
-        name: "Jealousy Jealousy",
-        artist: "Olivia Rodrigo",
-        src: "JealousyJealousy",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Grudge",
-        artist: "Olivia Rodrigo",
-        src: "TheGrudge",
-        coverType: "Images"
-    },
-
-    {
-        name: "Favourite Crime",
-        artist: "Olivia Rodrigo",
-        src: "FavouriteCrime",
-        coverType: "Images"
-    },
-
-    {
-        name: "Pretty Isn't Pretty",
-        artist: "Olivia Rodrigo",
-        src: "PrettyIsNotPretty",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hope Ur Ok",
-        artist: "Olivia Rodrigo",
-        src: "HopeUrOk",
-        coverType: "Images"
-    },
-
-    {
-        name: "Teenage Dream",
-        artist: "Olivia Rodrigo",
-        src: "TeenageDream",
-        coverType: "Images"
-    },
-
-    {
-        name: "Obsessed",
-        artist: "Olivia Rodrigo",
-        src: "Obsessed2",
-        coverType: "Images"
-    },
-
-    {
-        name: "So American",
-        artist: "Olivia Rodrigo",
-        src: "SoAmerican",
-        coverType: "Images"
-    },
-
-    {
-        name: "Stranger",
-        artist: "Olivia Rodrigo",
-        src: "Stranger",
-        coverType: "Images"
-    },
-
-    {
-        name: "Girl I've Always Been",
-        artist: "Olivia Rodrigo",
-        src: "GirlIHaveAlwaysBeen",
-        coverType: "Images"
-    },
-
-    {
-        name: "Scared Of Me Guitar",
-        artist: "Olivia Rodrigo",
-        src: "ScaredOfMyGuitar",
-        coverType: "Images"
-    },
-
-    {
-        name: "Somewhere Only We Know",
-        artist: "Keane",
-        src: "SomewhereOnlyWeKnow",
-        coverType: "Images"
-    },
-
-    {
-        name: "Mathematical Disrespect",
-        artist: "Lil Mabu",
-        src: "MathematicalDisrespect",
         coverType: "Images"
     },
 
@@ -6190,20 +5798,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Ara",
-        artist: "Zeynep Bastik",
-        src: "Ara",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lan",
-        artist: "Zeynep Bastik",
-        src: "Lan",
-        coverType: "Images"
-    },
-
-    {
         name: "Habibi",
         artist: "Richy Rich",
         src: "Habibi",
@@ -6221,55 +5815,6 @@ let ReducedMusic = [
         name: "KAMNH Long Version",
         artist: "Emin and Jony",
         src: "KamnhLongVer",
-        coverType: "Images"
-    },
-
-    {
-        name: "Moonlit Night",
-        artist: "Emin and Jony",
-        src: "MoonlitNight",
-        coverType: "Images"
-    },
-
-    {
-        name: "подписи",
-        artist: "Jony",
-        src: "Captions",
-        coverType: "Images"
-    },
-
-    {
-        name: "взрослая жизнь",
-        artist: "Rauf and Faik",
-        src: "Adulthood",
-        coverType: "Images"
-    },
-
-    {
-        name: "Без тебя я не я",
-        artist: "JONY HammAli and Navai",
-        src: "WithoutYouImNotMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Darkside",
-        artist: "Neoni",
-        src: "Darkside",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Drum",
-        artist: "Alan Walker",
-        src: "TheDrum",
-        coverType: "Images"
-    },
-
-    {
-        name: "Who I Am",
-        artist: "Alan Walker",
-        src: "WhoIAm",
         coverType: "Images"
     },
 
@@ -6316,13 +5861,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Da Da Da",
-        artist: "Douyin",
-        src: "DaDaDa2",
-        coverType: "Images"
-    },
-
-    {
         name: "Often",
         artist: "The Weeknd",
         src: "Often",
@@ -6344,20 +5882,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Locked Out Of Heaven",
-        artist: "Bruno Mars",
-        src: "LockedOutOfHeaven",
-        coverType: "Images"
-    },
-
-    {
-        name: "Die With A Smile",
-        artist: "Bruno Mars and Lady Gaga",
-        src: "DieWithASmile",
-        coverType: "Images"
-    },
-
-    {
         name: "Fairytale",
         artist: "Alexander Ryback",
         src: "Fairytale",
@@ -6365,23 +5889,9 @@ let ReducedMusic = [
     },
 
     {
-        name: "Love Me Like You Do",
-        artist: "Ellie Golding",
-        src: "LoveMeLikeYouDo",
-        coverType: "Images"
-    },
-
-    {
         name: "Cheap Thrills",
         artist: "SIA",
         src: "CheapThrills",
-        coverType: "Images"
-    },
-
-    {
-        name: "Am I Wrong",
-        artist: "Nico And Vinz",
-        src: "AmIWrong",
         coverType: "Images"
     },
 
@@ -6428,27 +5938,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Never Give Up",
-        artist: "Sia",
-        src: "NeverGiveUp",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dust Til Dawn",
-        artist: "Sia and Zayn",
-        src: "DuskTilDawn",
-        coverType: "Images"
-    },
-
-    {
-        name: "Stitches",
-        artist: "Shawn Mendes",
-        src: "Stitches",
-        coverType: "Images"
-    },
-
-    {
         name: "Hello",
         artist: "Adele",
         src: "Hello",
@@ -6470,163 +5959,9 @@ let ReducedMusic = [
     },
 
     {
-        name: "Shoong",
-        artist: "TAEYANG And Lisa",
-        src: "Shoong",
-        coverType: "Images"
-    },
-
-    {
-        name: "Different",
-        artist: "LE SSERAFIM",
-        src: "Different",
-        coverType: "Images"
-    },
-
-    {
-        name: "Unforgiven",
-        artist: "LE SSERAFIM",
-        src: "Unforgiven",
-        coverType: "Images"
-    },
-
-    {
-        name: "Ash",
-        artist: "LE SSERAFIM",
-        src: "Ash",
-        coverType: "Images"
-    },
-
-    {
-        name: "Drama",
-        artist: "Aespa",
-        src: "Drama",
-        coverType: "Images"
-    },
-
-    {
-        name: "Forever Young",
-        artist: "BLACKPINK",
-        src: "ForeverYoung",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hands Up",
-        artist: "MEOVV",
-        src: "HandsUp",
-        coverType: "Images"
-    },
-
-    {
-        name: "Better Things",
-        artist: "Aespa",
-        src: "BetterThings",
-        coverType: "Images"
-    },
-
-    {
-        name: "Up Karina Solo",
-        artist: "Aespa",
-        src: "Up",
-        coverType: "Images"
-    },
-
-    {
-        name: "Magnetic",
-        artist: "ILLIT",
-        src: "Magnetic",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hold On Tight",
-        artist: "Aespa",
-        src: "HoldOnTight",
-        coverType: "Images"
-    },
-
-    {
-        name: "Seven",
-        artist: "Jungkook",
-        src: "Seven",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dna",
-        artist: "BTS",
-        src: "Dna",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dynamite",
-        artist: "BTS",
-        src: "BtsDynamite",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hall Of Fame Nightcore Version",
-        artist: "Nightcore",
-        src: "HallOfFame",
-        coverType: "Images"
-    },
-
-    {
         name: "Arms Around You",
         artist: "Lil Pump and Maluma",
         src: "ArmsAroundYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dance Monkey",
-        artist: "Tones And I",
-        src: "DanceMonkey",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dancin",
-        artist: "KRONO",
-        src: "Dancin",
-        coverType: "Images"
-    },
-
-    {
-        name: "Under The Influence",
-        artist: "Chris Brown",
-        src: "UnderTheInflucence",
-        coverType: "Images"
-    },
-
-    {
-        name: "Under The Influence X Streets",
-        artist: "Chris Brown x Weeknd",
-        src: "UnderTheInfluenceXStreets",
-        coverType: "Images"
-    },
-
-    {
-        name: "Chubina",
-        artist: "East Duo",
-        src: "Chubina",
-        coverType: "Images"
-    },
-
-    {
-        name: "Beautiful Things",
-        artist: "Benson Boone",
-        src: "BeautifulThings",
-        coverType: "Images"
-    },
-
-    {
-        name: "In The Stars",
-        artist: "Benson Boone",
-        src: "InTheStars",
         coverType: "Images"
     },
 
@@ -6669,20 +6004,6 @@ let ReducedMusic = [
         name: "All Of Me",
         artist: "John Legend",
         src: "AllOfMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "A Thousand Years",
-        artist: "Christina Perri",
-        src: "AThousandYears",
-        coverType: "Images"
-    },
-
-    {
-        name: "Seoul City",
-        artist: "JENNIE",
-        src: "SeoulCity",
         coverType: "Images"
     },
 
