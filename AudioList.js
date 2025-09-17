@@ -5280,13 +5280,6 @@ let ReducedMusic = [
     },
 
     {
-        name: "Gangsta",
-        artist: "Kehlani",
-        src: "Gangsta",
-        coverType: "Images"
-    },
-
-    {
         name: "If We Being Real",
         artist: "Yeat Music",
         src: "IfWeBeingReal",
