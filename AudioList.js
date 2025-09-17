@@ -1253,6 +1253,13 @@ let allMusic = [
     },
 
     {
+        name: "33 Max Verstappen",
+        artist: "Carte Blanq Nils Van Zandt And Maxx Power",
+        src: "MVSong",
+        coverType: "Images"
+    },
+
+    {
         name: "Too Many Nights",
         artist: "Metro Boomin Future And Don Toliver",
         src: "TooManyNights",
@@ -5332,6 +5339,13 @@ let ReducedMusic = [
         name: "Lose My Mind",
         artist: "Don Toliver And Doja Cat",
         src: "LoseMyMind",
+        coverType: "Images"
+    },
+
+    {
+        name: "33 Max Verstappen",
+        artist: "Carte Blanq Nils Van Zandt And Maxx Power",
+        src: "MVSong",
         coverType: "Images"
     },
 
