@@ -37,6 +37,50 @@ function pauseAudio2() {
   audio.pause();
 };
 
+class TrieNode {
+  constructor() {
+    this.children = {};
+    this.musicIndices = new Set(); // Store indices of songs that match this prefix
+    this.isEndOfWord = false;
+  }
+}
+
+class SearchTrie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  insert(word, musicIndex) {
+    let node = this.root;
+    const cleanWord = word.toLowerCase().replace(/<[^>]*>/g, '').trim();
+    
+    for (let i = 0; i < cleanWord.length; i++) {
+      const char = cleanWord[i];
+      if (!node.children[char]) {
+        node.children[char] = new TrieNode();
+      }
+      node = node.children[char];
+      node.musicIndices.add(musicIndex);
+    }
+    node.isEndOfWord = true;
+  }
+
+  searchPrefix(prefix) {
+    let node = this.root;
+    const cleanPrefix = prefix.toLowerCase().replace(/<[^>]*>/g, '').trim();
+    
+    for (let i = 0; i < cleanPrefix.length; i++) {
+      const char = cleanPrefix[i];
+      if (!node.children[char]) {
+        return new Set(); // No matches found
+      }
+      node = node.characters[char];
+    }
+    
+    return node.musicIndices;
+  }
+}
+
 class MusicPlayer {
   constructor(suffix = '') {
     if (!localStorage.getItem(`musicIndex${suffix}`)) {
@@ -95,6 +139,10 @@ class MusicPlayer {
     this.isMuted = false;
     this.isInitializing = true;
 
+    this.searchField = this.wrapper.querySelector('.search-field');
+    this.isSearching = false;
+    this.filteredMusic = [];
+
     this.forceRender = false;
 
     this.r2Available = true;
@@ -111,6 +159,17 @@ class MusicPlayer {
     this.lastRenderStart = -1;
     this.lastRenderEnd = -1;
     this.renderTicking = false;
+
+    // Search optimization properties
+    this.searchCache = new Map();
+    this.lastQuery = '';
+    this.lastResults = [];
+    this.nameTrie = new SearchTrie();
+    this.artistTrie = new SearchTrie();
+    this.indexCache = new Map();
+
+    this.searchTimeout = null;
+    this.renderFrame = null;
 
     this.controlsToggledManually = false;
     this.videoOverride = false;
@@ -158,6 +217,8 @@ class MusicPlayer {
     this.populateMusicList(this.originalOrder);
     this.updatePlayingSong();
     this.setupResizeObserver();
+    // Initialize search optimization
+    this.initializeSearchOptimization();
     
     // Test autoplay capability on mobile
     //this.testAutoplaySupport();
@@ -236,6 +297,10 @@ class MusicPlayer {
     const seeVideoBtn = document.querySelector('.seeVideo');
     if (seeVideoBtn) {
       seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
+    }
+
+    if (this.searchField) {
+      this.searchField.addEventListener('input', (e) => this.handleSearch(e));
     }
   }
 
@@ -885,6 +950,10 @@ class MusicPlayer {
       case "repeat":
         this.repeatBtn.textContent = "repeat_one";
         this.repeatBtn.title = "Song looped";
+
+        this.searchCache.clear();
+        this.lastQuery = '';
+        this.lastResults = [];
         break;
       case "repeat_one":
         this.repeatBtn.textContent = "shuffle";
@@ -904,6 +973,10 @@ class MusicPlayer {
         this.loadMusic(this.musicIndex);
         this.playMusic();
         this.forceListRender();
+
+        this.searchCache.clear();
+        this.lastQuery = '';
+        this.lastResults = [];
         break;
       case "shuffle":
         this.repeatBtn.textContent = "repeat";
@@ -916,6 +989,10 @@ class MusicPlayer {
         this.loadMusic(this.musicIndex);
         this.playMusic();
         this.forceListRender();
+
+        this.searchCache.clear();
+        this.lastQuery = '';
+        this.lastResults = [];
         break;
     }
   }
@@ -950,8 +1027,6 @@ class MusicPlayer {
 
   // VIRTUALIZED MUSIC LIST METHODS
   populateMusicList(musicArray) {
-    this.currentMusicArray = this.musicSource;
-    
     // Clear existing content
     this.ulTag.innerHTML = "";
     
@@ -1151,26 +1226,112 @@ class MusicPlayer {
     liTag.style.color = isDarkMode ? 'white' : 'black';
     liTag.style.borderBottom = isDarkMode ? '3px solid white' : '3px solid black';
   
-    // Handle clicking a list item
+    // UPDATED click handler to work with search
     liTag.addEventListener("click", () => {
       try {
-        if (this.isShuffleMode) {
+        if (this.isSearching) {
+          // When searching, we need to find the correct index in the current mode
           const clickedMusic = this.musicSource[actualIndex];
-          const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
-          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+          
+          if (this.isShuffleMode) {
+            const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
+            this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+          } else {
+            this.musicIndex = actualIndex + 1;
+          }
         } else {
-          this.musicIndex = actualIndex + 1;
+          // Normal behavior when not searching
+          if (this.isShuffleMode) {
+            const clickedMusic = this.musicSource[actualIndex];
+            const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
+            this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+          } else {
+            this.musicIndex = actualIndex + 1;
+          }
         }
+        
         this.loadMusic(this.musicIndex);
         this.playMusic();
         this.resetVideoSize();
+        
+        // Close search results after selection
+        if (this.isSearching && this.searchField) {
+          this.searchField.value = '';
+          this.restoreOriginalList();
+        }
       } catch (error) {
         this.throttledLog('click_error', `Click handler error: ${error.message}`, music.src);
       }
     });
   
     return liTag;
-  }  
+  }
+
+  createSearchListItem(music, originalIndex) {
+    const liTag = document.createElement("li");
+    liTag.className = 'search-result-item'; // Unique class for search items
+    liTag.setAttribute("li-index", originalIndex + 1);
+    liTag.setAttribute("data-search-result", "true"); // Mark as search result
+  
+    // Use cached duration if available, otherwise show placeholder
+    const cachedDuration = this.getDurationCache(music.src);
+    const displayDuration = cachedDuration || "0:00";
+  
+    // Clean the display text to prevent any HTML injection
+    const cleanName = String(music.name).replace(/<[^>]*>/g, '').trim();
+    const cleanArtist = String(music.artist).replace(/<[^>]*>/g, '').trim();
+  
+    liTag.innerHTML = `
+      <div class="row">
+        <span>${cleanName}</span>
+        <p>${cleanArtist}</p>
+      </div>
+      <span id="search-${music.src}" class="audio-duration">${displayDuration}</span>
+    `;
+  
+    // Apply dark mode styles immediately if in dark mode
+    const isDarkMode = this.wrapper.classList.contains("dark-mode");
+    liTag.style.color = isDarkMode ? 'white' : 'black';
+    liTag.style.borderBottom = isDarkMode ? '3px solid white' : '3px solid black';
+  
+    // Search-specific click handler
+    liTag.addEventListener("click", () => {
+      try {
+        // Verify this is still a valid music item
+        if (!music || !music.src || originalIndex < 0 || originalIndex >= this.musicSource.length) {
+          console.warn('Invalid music selection in search results');
+          return;
+        }
+  
+        // Find the correct index based on current playback mode
+        if (this.isShuffleMode) {
+          const shuffledIndex = this.shuffledOrder.findIndex(song => 
+            song && song.src === music.src
+          );
+          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
+        } else {
+          this.musicIndex = originalIndex + 1;
+        }
+        
+        this.loadMusic(this.musicIndex);
+        this.playMusic();
+        this.resetVideoSize();
+        
+        // Clear search and restore normal view
+        if (this.searchField) {
+          this.searchField.value = '';
+        }
+        this.isSearching = false;
+        this.filteredMusic = [];
+        this.restoreOriginalList();
+        
+      } catch (error) {
+        this.throttledLog('search_click_error', `Search click handler error: ${error.message}`, music.src);
+      }
+    });
+  
+    return liTag;
+  }
 
   getDurationCache(src) {
     if (!this.durationCache) this.durationCache = {};
@@ -1244,6 +1405,14 @@ class MusicPlayer {
       if (progressBar) {
         progressBar.style.setProperty('background', 'linear-gradient(90deg, white 0%, white 100%)', 'important');
       }
+
+      if (this.searchField) {
+        this.searchField.style.setProperty('background-color', 'black', 'important');
+        this.searchField.style.setProperty('color', 'white', 'important');
+        this.searchField.style.setProperty('border-color', 'white', 'important');
+      }
+
+      this.updatePlaceholderStyles('white');
       
       // Make ALL content inside controls box red (except play-pause icon)
       const controlsContent = this.wrapper.querySelectorAll('.control-box *');
@@ -1322,6 +1491,14 @@ class MusicPlayer {
       if (progressBar) {
         progressBar.style.removeProperty('background');
       }
+
+      if (this.searchField) {
+        this.searchField.style.removeProperty('background-color');
+        this.searchField.style.removeProperty('color');
+        this.searchField.style.removeProperty('border-color');
+      }
+
+      this.updatePlaceholderStyles('black');
       
       // Reset all content inside controls box
       const controlsContent = this.wrapper.querySelectorAll('.control-box *');
@@ -1358,6 +1535,359 @@ class MusicPlayer {
         this.updateBorderBoxDisplay();
       }
     }
+  }
+
+  updatePlaceholderStyles(color) {
+    const styleId = `placeholder-style${this.suffix}`;
+    
+    // Remove existing style if it exists
+    const existingStyle = document.getElementById(styleId);
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    
+    // Create new style element
+    const styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    styleElement.textContent = `
+      #wrapper${this.suffix} .search-field::placeholder {
+        color: ${color} !important;
+      }
+      #wrapper${this.suffix} .search-field::-webkit-input-placeholder {
+        color: ${color} !important;
+      }
+      #wrapper${this.suffix} .search-field::-moz-placeholder {
+        color: ${color} !important;
+      }
+      #wrapper${this.suffix} .search-field:-ms-input-placeholder {
+        color: ${color} !important;
+      }
+    `;
+    
+    // Add to document head
+    document.head.appendChild(styleElement);
+  }
+
+  initializeSearchOptimization() {
+    this.nameTrie = new SearchTrie();
+    this.artistTrie = new SearchTrie();
+    this.indexCache = new Map();
+    
+    // Build tries for efficient prefix searching
+    this.musicSource.forEach((music, index) => {
+      if (music && music.name && music.artist) {
+        this.nameTrie.insert(music.name, index);
+        this.artistTrie.insert(music.artist, index);
+        
+        // Cache index strings for numeric search
+        const displayIndex = (index + 1).toString();
+        if (!this.indexCache.has(displayIndex[0])) {
+          this.indexCache.set(displayIndex[0], []);
+        }
+        this.indexCache.get(displayIndex[0]).push({ index, displayIndex });
+      }
+    });
+  }
+  
+  searchByIndexOptimized(query) {
+    const results = [];
+    const firstDigit = query[0];
+    
+    // Use cached index data for O(1) lookup of first digit
+    const candidates = this.indexCache.get(firstDigit) || [];
+    
+    for (const candidate of candidates) {
+      if (candidate.displayIndex.startsWith(query)) {
+        const music = this.musicSource[candidate.index];
+        if (music && music.name && music.artist) {
+          results.push(music);
+        }
+      }
+    }
+    
+    return results;
+  }
+  
+  searchByTextOptimized(query) {
+    const queryLower = query.toLowerCase();
+    
+    // Use tries to get matching indices efficiently
+    const nameMatches = this.nameTrie.searchPrefix(queryLower);
+    const artistMatches = this.artistTrie.searchPrefix(queryLower);
+    
+    // Combine results using Set for O(1) deduplication
+    const allMatches = new Set([...nameMatches, ...artistMatches]);
+    
+    // Convert back to music objects
+    const results = [];
+    for (const index of allMatches) {
+      const music = this.musicSource[index];
+      if (music && music.name && music.artist) {
+        results.push(music);
+      }
+    }
+    
+    return results;
+  }
+  
+  filterFromPreviousResults(query, previousResults) {
+    const isNumericQuery = /^\d+$/.test(query);
+    const queryLower = query.toLowerCase();
+    
+    return previousResults.filter((music, originalIndex) => {
+      if (!music || !music.name || !music.artist) {
+        return false;
+      }
+      
+      if (isNumericQuery) {
+        const actualIndex = this.musicSource.indexOf(music);
+        const displayIndex = (actualIndex + 1).toString();
+        return displayIndex.startsWith(query);
+      } else {
+        const songName = String(music.name).toLowerCase().replace(/<[^>]*>/g, '').trim();
+        const artistName = String(music.artist).toLowerCase().replace(/<[^>]*>/g, '').trim();
+        return songName.startsWith(queryLower) || artistName.startsWith(queryLower);
+      }
+    });
+  }
+  
+  performFullSearch(query) {
+    const isNumericQuery = /^\d+$/.test(query);
+    const queryLower = query.toLowerCase();
+    const results = [];
+    
+    // Use for loop for better performance with instant refresh
+    const sourceLength = this.musicSource.length;
+    
+    for (let index = 0; index < sourceLength; index++) {
+      const music = this.musicSource[index];
+      
+      // Skip invalid entries quickly
+      if (!music?.name || !music?.artist) continue;
+      
+      let matches = false;
+      
+      if (isNumericQuery) {
+        // Fast numeric check
+        const displayIndex = (index + 1).toString();
+        matches = displayIndex.startsWith(query);
+      } else {
+        // Optimized text matching - avoid repeated operations
+        const songName = music.name.toLowerCase();
+        const artistName = music.artist.toLowerCase();
+        matches = songName.startsWith(queryLower) || artistName.startsWith(queryLower);
+      }
+      
+      if (matches) {
+        results.push(music);
+        
+        // Optional: Limit results for very fast rendering
+        if (results.length >= 200) break;
+      }
+    }
+    
+    return results;
+  }
+
+  handleSearch(e) {
+    const query = e.target.value.trim();
+    
+    if (query === '') {
+      this.isSearching = false;
+      this.filteredMusic = [];
+      this.restoreOriginalList();
+      this.searchCache.clear();
+      this.lastQuery = '';
+      this.lastResults = [];
+      return;
+    }
+    
+    if (query.length < 1) {
+      return;
+    }
+    
+    // Clear any existing timeout for immediate response
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = null;
+    }
+    
+    // Perform search immediately for every character
+    this.performInstantSearch(query);
+  }
+
+  performInstantSearch(query) {
+    // Check cache first for performance
+    if (this.searchCache.has(query)) {
+      this.filteredMusic = [...this.searchCache.get(query)];
+      this.isSearching = true;
+      this.renderFilteredItems();
+      return;
+    }
+    
+    // Perform full search every time for consistency
+    this.filteredMusic = this.performFullSearch(query);
+    
+    // Cache the result (limit cache size)
+    if (this.searchCache.size > 50) { // Reduced cache size for instant refresh
+      const firstKey = this.searchCache.keys().next().value;
+      this.searchCache.delete(firstKey);
+    }
+    this.searchCache.set(query, [...this.filteredMusic]);
+    
+    this.isSearching = true;
+    this.renderFilteredItems();
+  }
+
+  performSearch(query) {
+    // Check cache first
+    if (this.searchCache.has(query)) {
+      this.filteredMusic = [...this.searchCache.get(query)]; // Create new array to avoid reference issues
+      this.isSearching = true;
+      this.renderFilteredItems();
+      return;
+    }
+    
+    // For reliability, always do a full search instead of incremental
+    // The caching provides the performance benefit we need
+    this.filteredMusic = this.performFullSearch(query);
+    
+    // Cache the result (limit cache size to prevent memory issues)
+    if (this.searchCache.size > 100) {
+      const firstKey = this.searchCache.keys().next().value;
+      this.searchCache.delete(firstKey);
+    }
+    this.searchCache.set(query, [...this.filteredMusic]);
+    this.lastQuery = query;
+    this.lastResults = [...this.filteredMusic];
+    
+    this.isSearching = true;
+    this.renderFilteredItems();
+  }
+  
+  // Replace the renderFilteredItems method:
+  renderFilteredItems() {
+    if (!this.musicListItems || !this.ulTag) return;
+    
+    // Use requestAnimationFrame for smoother updates
+    if (this.renderFrame) {
+      cancelAnimationFrame(this.renderFrame);
+    }
+    
+    this.renderFrame = requestAnimationFrame(() => {
+      // Clear existing content efficiently
+      this.musicListItems.innerHTML = '';
+      this.musicListItems.style.transform = 'translateY(0px)';
+      
+      const resultCount = this.filteredMusic.length;
+      const minHeight = Math.max(resultCount * this.ROW_HEIGHT, this.ROW_HEIGHT);
+      
+      // Update spacer height
+      if (this.musicListSpacer) {
+        this.musicListSpacer.style.height = `${minHeight}px`;
+      }
+      
+      // Adjust scrolling based on result count
+      this.ulTag.style.overflowY = resultCount <= 8 ? 'hidden' : 'auto';
+      
+      const fragment = document.createDocumentFragment();
+      
+      if (resultCount === 0) {
+        // No results message
+        const noResults = document.createElement('li');
+        noResults.className = 'search-no-results';
+        noResults.style.cssText = `
+          height: ${this.ROW_HEIGHT}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          list-style: none;
+          box-sizing: border-box;
+        `;
+        
+        noResults.innerHTML = `
+          <div class="row" style="justify-content: center; text-align: center; width: 100%;">
+            <span>No songs found</span>
+          </div>
+        `;
+        
+        const isDarkMode = this.wrapper.classList.contains("dark-mode");
+        noResults.style.color = isDarkMode ? 'white' : 'black';
+        noResults.style.borderBottom = 'none';
+        
+        fragment.appendChild(noResults);
+      } else {
+        // Render results with performance optimization
+        const maxResults = Math.min(resultCount, 100); // Limit for performance
+        
+        for (let i = 0; i < maxResults; i++) {
+          const music = this.filteredMusic[i];
+          
+          if (!music?.name || !music?.artist || !music?.src) continue;
+          
+          // Find original index efficiently
+          const originalIndex = this.musicSource.indexOf(music);
+          if (originalIndex === -1) continue;
+          
+          const liTag = this.createSearchListItem(music, originalIndex);
+          fragment.appendChild(liTag);
+        }
+        
+        // Show truncation message if needed
+        if (resultCount > 100) {
+          const truncateMsg = document.createElement('li');
+          truncateMsg.style.cssText = `
+            height: ${this.ROW_HEIGHT}px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            font-style: italic;
+            opacity: 0.7;
+          `;
+          truncateMsg.innerHTML = `<span>Showing first 100 of ${resultCount} results</span>`;
+          
+          const isDarkMode = this.wrapper.classList.contains("dark-mode");
+          truncateMsg.style.color = isDarkMode ? 'white' : 'black';
+          
+          fragment.appendChild(truncateMsg);
+        }
+      }
+      
+      // Apply changes in single operation
+      this.musicListItems.appendChild(fragment);
+      
+      // Update playing indicators
+      this.updatePlayingSong();
+      
+      this.renderFrame = null;
+    });
+  }
+  
+  // Replace the restoreOriginalList method:
+  restoreOriginalList() {
+    if (!this.musicListItems || !this.ulTag) return;
+    
+    // Reset search state
+    this.isSearching = false;
+    this.filteredMusic = [];
+    
+    // Reset spacer height to original
+    if (this.musicListSpacer) {
+      this.musicListSpacer.style.height = `${this.musicSource.length * this.ROW_HEIGHT}px`;
+    }
+    
+    // Restore normal scrolling behavior
+    this.ulTag.style.overflowY = 'auto';
+    
+    // Reset render state to force re-render
+    this.lastRenderStart = -1;
+    this.lastRenderEnd = -1;
+    this.forceRender = true;
+    
+    // Restore virtualized rendering
+    this.renderVisibleItems();
   }
 
   handleMute() {
