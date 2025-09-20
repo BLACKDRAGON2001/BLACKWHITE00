@@ -74,7 +74,7 @@ class SearchTrie {
       if (!node.children[char]) {
         return new Set(); // No matches found
       }
-      node = node.characters[char];
+      node = node.children[char];
     }
     
     return node.musicIndices;
@@ -2121,36 +2121,38 @@ window.initializeHomeMusicPlayer = function() {
   
   console.log('Initializing Home Music Player...');
   
-  // Ensure disguise player is completely stopped
-  if (window.disguisePlayer) {
+  // Stop disguise player if it exists and is real
+  if (window.disguisePlayer && typeof window.disguisePlayer.pauseMusic === 'function') {
       window.disguisePlayer.pauseMusic();
-      const disguiseAudio = document.getElementById('main-audio2');
-      const disguiseVideo = document.getElementById('video2');
-      const disguiseMediaContainer = document.getElementById('media-container2');
-      
-      if (disguiseAudio) {
-          disguiseAudio.pause();
-          disguiseAudio.src = '';
-          disguiseAudio.currentTime = 0;
-      }
-      if (disguiseVideo) {
-          disguiseVideo.pause();
-          disguiseVideo.src = '';
-          disguiseVideo.currentTime = 0;
-          disguiseVideo.style.display = 'none';
-      }
-      if (disguiseMediaContainer) {
-          disguiseMediaContainer.innerHTML = '';
-      }
   }
   
-  // Initialize home player if not already done
-  if (window.homePlayer && !window.homePlayer.hasInitialized) {
-      window.homePlayer.delayedInitialize();
+  const disguiseAudio = document.getElementById('main-audio2');
+  const disguiseVideo = document.getElementById('video2');
+  const disguiseMediaContainer = document.getElementById('media-container2');
+  
+  if (disguiseAudio) {
+      disguiseAudio.pause();
+      disguiseAudio.src = '';
+      disguiseAudio.currentTime = 0;
+  }
+  if (disguiseVideo) {
+      disguiseVideo.pause();
+      disguiseVideo.src = '';
+      disguiseVideo.currentTime = 0;
+      disguiseVideo.style.display = 'none';
+  }
+  if (disguiseMediaContainer) {
+      disguiseMediaContainer.innerHTML = '';
   }
   
-  // Reset and load first song
-  if (window.homePlayer) {
+  // Create real home player if it doesn't exist or is a dummy
+  if (!window.homePlayer || typeof window.homePlayer.loadMusic !== 'function') {
+      console.log('Creating real home player...');
+      window.homePlayer = new MusicPlayer();
+  }
+  
+  // Initialize/reset home player
+  if (window.homePlayer && typeof window.homePlayer.loadMusic === 'function') {
       window.homePlayer.musicIndex = 1;
       window.homePlayer.isMusicPaused = true;
       
@@ -2173,7 +2175,7 @@ window.initializeHomeMusicPlayer = function() {
           homeMediaContainer.innerHTML = '';
       }
       
-      // Load first song with delay to prevent flicker
+      // Load first song with delay
       setTimeout(() => {
           if (window.homePlayer && window.homePlayer.musicSource && window.homePlayer.musicSource.length > 0) {
               window.homePlayer.loadMusic(1);
@@ -2186,43 +2188,45 @@ window.initializeHomeMusicPlayer = function() {
   disguisePlayerInitialized = false;
 };
 
-// 5. UPDATE your window.initializeDisguiseMusicPlayer function in AudioPlayer00.js:
+// UPDATE your window.initializeDisguiseMusicPlayer function:
 
 window.initializeDisguiseMusicPlayer = function() {
   if (disguisePlayerInitialized) return;
   
   console.log('Initializing Disguise Music Player...');
   
-  // Ensure home player is completely stopped
-  if (window.homePlayer) {
+  // Stop home player if it exists and is real
+  if (window.homePlayer && typeof window.homePlayer.pauseMusic === 'function') {
       window.homePlayer.pauseMusic();
-      const homeAudio = document.getElementById('main-audio');
-      const homeVideo = document.getElementById('video');
-      const homeMediaContainer = document.getElementById('media-container');
-      
-      if (homeAudio) {
-          homeAudio.pause();
-          homeAudio.src = '';
-          homeAudio.currentTime = 0;
-      }
-      if (homeVideo) {
-          homeVideo.pause();
-          homeVideo.src = '';
-          homeVideo.currentTime = 0;
-          homeVideo.style.display = 'none';
-      }
-      if (homeMediaContainer) {
-          homeMediaContainer.innerHTML = '';
-      }
   }
   
-  // Initialize disguise player if not already done
-  if (window.disguisePlayer && !window.disguisePlayer.hasInitialized) {
-      window.disguisePlayer.delayedInitialize();
+  const homeAudio = document.getElementById('main-audio');
+  const homeVideo = document.getElementById('video');
+  const homeMediaContainer = document.getElementById('media-container');
+  
+  if (homeAudio) {
+      homeAudio.pause();
+      homeAudio.src = '';
+      homeAudio.currentTime = 0;
+  }
+  if (homeVideo) {
+      homeVideo.pause();
+      homeVideo.src = '';
+      homeVideo.currentTime = 0;
+      homeVideo.style.display = 'none';
+  }
+  if (homeMediaContainer) {
+      homeMediaContainer.innerHTML = '';
   }
   
-  // Reset and load first song
-  if (window.disguisePlayer) {
+  // Create real disguise player if it doesn't exist or is a dummy
+  if (!window.disguisePlayer || typeof window.disguisePlayer.loadMusic !== 'function') {
+      console.log('Creating real disguise player...');
+      window.disguisePlayer = new MusicPlayer('2');
+  }
+  
+  // Initialize/reset disguise player
+  if (window.disguisePlayer && typeof window.disguisePlayer.loadMusic === 'function') {
       window.disguisePlayer.musicIndex = 1;
       window.disguisePlayer.isMusicPaused = true;
       
@@ -2245,7 +2249,7 @@ window.initializeDisguiseMusicPlayer = function() {
           disguiseMediaContainer.innerHTML = '';
       }
       
-      // Load first song with delay to prevent flicker
+      // Load first song with delay
       setTimeout(() => {
           if (window.disguisePlayer && window.disguisePlayer.musicSource && window.disguisePlayer.musicSource.length > 0) {
               window.disguisePlayer.loadMusic(1);
@@ -2294,10 +2298,95 @@ window.cleanupPlayers = function() {
 // Initialize players when DOM loads
 // REPLACE your existing DOMContentLoaded event listener with this enhanced version:
 
+// REPLACE your DOMContentLoaded listener in AudioPlayer00.js with this:
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Wait for authentication to complete
-  setTimeout(() => {
-      window.initializeCorrectPlayer();
+  // Wait for auth state to be determined
+  const initPlayers = () => {
+      if (!window.authStateReady) {
+          setTimeout(initPlayers, 50);
+          return;
+      }
+      
+      const initialPage = window.initialPageDetermined;
+      console.log('Initializing players based on:', initialPage);
+      
+      if (initialPage === 'home') {
+          // Only create home player
+          console.log('Creating HOME player only');
+          window.homePlayer = new MusicPlayer();
+          window.disguisePlayer = { 
+              pauseMusic: () => {}, 
+              loadMusic: () => {},
+              updatePlayingSong: () => {}
+          }; // Dummy object to prevent errors
+      } else if (initialPage === 'disguise') {
+          // Only create disguise player
+          console.log('Creating DISGUISE player only');
+          window.disguisePlayer = new MusicPlayer('2');
+          window.homePlayer = { 
+              pauseMusic: () => {}, 
+              loadMusic: () => {},
+              updatePlayingSong: () => {}
+          }; // Dummy object to prevent errors
+      } else if (initialPage === 'login') {
+          // Create dummy objects for login page
+          console.log('Login page - creating dummy players');
+          window.homePlayer = { 
+              pauseMusic: () => {}, 
+              loadMusic: () => {},
+              updatePlayingSong: () => {}
+          };
+          window.disguisePlayer = { 
+              pauseMusic: () => {}, 
+              loadMusic: () => {},
+              updatePlayingSong: () => {}
+          };
+      } else {
+          // Fallback - create both but don't initialize
+          console.log('Fallback - creating both players');
+          window.homePlayer = new MusicPlayer();
+          window.disguisePlayer = new MusicPlayer('2');
+      }
+      
       handleSize();
-  }, 200);
+  };
+  
+  initPlayers();
+  
+  // Add visibility change handler
+  document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+          const isHomePage = document.getElementById("HomePage")?.style.display !== "none";
+          const isDisguisePage = document.getElementById("DisguisePage")?.style.display !== "none";
+          
+          if (isHomePage && window.disguisePlayer && typeof window.disguisePlayer.pauseMusic === 'function') {
+              window.disguisePlayer.pauseMusic();
+              const disguiseAudio = document.getElementById('main-audio2');
+              const disguiseVideo = document.getElementById('video2');
+              if (disguiseAudio) {
+                  disguiseAudio.pause();
+                  disguiseAudio.src = '';
+              }
+              if (disguiseVideo) {
+                  disguiseVideo.pause();
+                  disguiseVideo.src = '';
+                  disguiseVideo.style.display = 'none';
+              }
+          } else if (isDisguisePage && window.homePlayer && typeof window.homePlayer.pauseMusic === 'function') {
+              window.homePlayer.pauseMusic();
+              const homeAudio = document.getElementById('main-audio');
+              const homeVideo = document.getElementById('video');
+              if (homeAudio) {
+                  homeAudio.pause();
+                  homeAudio.src = '';
+              }
+              if (homeVideo) {
+                  homeVideo.pause();
+                  homeVideo.src = '';
+                  homeVideo.style.display = 'none';
+              }
+          }
+      }
+  });
 });

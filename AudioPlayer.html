@@ -1382,7 +1382,10 @@
     async function checkAuthStatus() {
         if (!loadTokens()) {
             console.log('No valid tokens found, showing login');
-            showLoginPage();
+            // Only show login if we haven't already determined the initial page
+            if (window.initialPageDetermined !== 'login') {
+                showLoginPage();
+            }
             return;
         }
 
@@ -1394,15 +1397,27 @@
                 // Extend session on successful API call
                 sessionManager.recordActivity();
                 
-                // Clean up before switching pages
-                stopAllMedia();
-                clearAllMediaSources();
+                // Only navigate if we're not already on the correct page
+                const currentPage = window.initialPageDetermined;
                 
-                // Navigate and initialize proper player
-                if (currentUser.role === 'home') {
+                if (currentUser.role === 'home' && currentPage !== 'home') {
+                    console.log('Navigating to home page');
+                    stopAllMedia();
+                    clearAllMediaSources();
                     showHomePage();
-                } else if (currentUser.role === 'disguise') {
+                } else if (currentUser.role === 'disguise' && currentPage !== 'disguise') {
+                    console.log('Navigating to disguise page');
+                    stopAllMedia();
+                    clearAllMediaSources();
                     showDisguisePage();
+                } else {
+                    console.log('Already on correct page:', currentPage);
+                    // We're already on the right page, just ensure the right player is initialized
+                    if (currentUser.role === 'home' && window.initializeHomeMusicPlayer) {
+                        window.initializeHomeMusicPlayer();
+                    } else if (currentUser.role === 'disguise' && window.initializeDisguiseMusicPlayer) {
+                        window.initializeDisguiseMusicPlayer();
+                    }
                 }
             }
         } catch (error) {
