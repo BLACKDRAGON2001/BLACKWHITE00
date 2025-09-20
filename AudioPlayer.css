@@ -465,3 +465,106 @@ ul li.playing{
   scroll-behavior: smooth;
   transition: scroll-behavior 0.3s ease;
 }
+
+.PABox .PABoxButton{
+  width: 100%;
+  background-color: white;
+  font-size: 10px;
+  font-family: monospace;
+  color: black;
+  border: none;
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* Add these CSS rules to your AudioPlayer.css to prevent flicker */
+
+/* Hide media containers during page initialization */
+.img-area, 
+#media-container, 
+#media-container2 {
+    transition: opacity 0.15s ease-out;
+    min-height: 280px; /* Maintain space to prevent layout shifts */
+}
+
+/* Prevent any content from showing during initialization */
+#HomePage:not([style*="display: block"]) #media-container,
+#HomePage:not([style*="display: block"]) #media-container img,
+#HomePage:not([style*="display: block"]) #media-container video {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#DisguisePage:not([style*="display: block"]) #media-container2,
+#DisguisePage:not([style*="display: block"]) #media-container2 img,
+#DisguisePage:not([style*="display: block"]) #media-container2 video {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Hide audio/video elements when page is not active */
+#HomePage:not([style*="display: block"]) audio,
+#HomePage:not([style*="display: block"]) video {
+    display: none !important;
+}
+
+#DisguisePage:not([style*="display: block"]) audio,
+#DisguisePage:not([style*="display: block"]) video {
+    display: none !important;
+}
+
+/* Ensure media elements are properly hidden during transitions */
+audio:not([src]), video:not([src]) {
+    opacity: 0;
+    visibility: hidden;
+}
+
+audio[src=""], video[src=""] {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Prevent layout shifts during media loading */
+#media-container:empty,
+#media-container2:empty {
+    background: transparent;
+    min-height: 280px;
+    width: 100%;
+}
+
+/* Additional safeguards for specific cases */
+.home-box:not([style*="display: block"]) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+}
+
+.home-box[style*="display: block"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    top: auto !important;
+}
+
+/* Ensure smooth transitions when showing content */
+.img-area img,
+.img-area video,
+#media-container img,
+#media-container video,
+#media-container2 img,
+#media-container2 video {
+    transition: opacity 0.2s ease-in;
+}
+
+/* Force immediate hiding of wrong player content */
+body:has(#HomePage[style*="display: block"]) #DisguisePage,
+body:has(#DisguisePage[style*="display: block"]) #HomePage {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}

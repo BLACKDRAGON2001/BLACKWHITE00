@@ -196,7 +196,15 @@ class MusicPlayer {
       this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 16);
     }
     
-    this.initialize();
+    // Only initialize if not blocked
+    if (!window.playerInitBlocked) {
+      this.initialize();
+    } else {
+      // Just set up basic event listeners
+      this.setupEventListeners();
+      this.isInitializing = false;
+      console.log(`Player ${this.suffix || '1'} created but initialization blocked`);
+    }
   }
 
   debounce(func, wait) {
@@ -231,6 +239,28 @@ class MusicPlayer {
     setTimeout(() => {
       this.isInitializing = false;
     }, 100)
+  }
+
+  delayedInitialize() {
+    if (this.hasInitialized) return;
+    
+    console.log(`Delayed initialization for player ${this.suffix || '1'}`);
+    
+    this.loadPersistedState();
+    this.populateMusicList(this.originalOrder);
+    this.updatePlayingSong();
+    this.setupResizeObserver();
+    this.initializeSearchOptimization();
+    
+    if (this.suffix === '2') {
+        this.initializeBorderBox();
+    }
+    
+    this.hasInitialized = true;
+    
+    setTimeout(() => {
+        this.isInitializing = false;
+    }, 100);
   }
 
   // Only used for Player 2
@@ -1385,6 +1415,7 @@ class MusicPlayer {
     const controlsBox = this.wrapper.querySelector('.control-box');
     const progressArea = this.wrapper.querySelector('.progress-area');
     const progressBar = this.wrapper.querySelector('.progress-bar');
+    const voiceBtns = this.wrapper.querySelector('.PABoxButton');
 
     if (isDarkMode) {
       document.body.style.backgroundColor = "white";
@@ -1404,6 +1435,11 @@ class MusicPlayer {
       // Make progress bar red (the filled portion)
       if (progressBar) {
         progressBar.style.setProperty('background', 'linear-gradient(90deg, white 0%, white 100%)', 'important');
+      }
+
+      if (voiceBtns) {
+        voiceBtns.style.setProperty('background-color', 'black', 'important')
+        voiceBtns.style.setProperty('color', 'white', 'important')
       }
 
       if (this.searchField) {
@@ -1490,6 +1526,11 @@ class MusicPlayer {
       // Reset progress bar to original color
       if (progressBar) {
         progressBar.style.removeProperty('background');
+      }
+
+      if (voiceBtns) {
+        voiceBtns.style.removeProperty('background-color')
+        voiceBtns.style.removeProperty('color')
       }
 
       if (this.searchField) {
@@ -2068,9 +2109,195 @@ function handleSize() {
   });
 }
 
+// ADD these functions at the END of your AudioPlayer00.js file, just before the DOMContentLoaded event listener
+
+// Global player state isolation
+let homePlayerInitialized = false;
+let disguisePlayerInitialized = false;
+
+// Initialize Home Player
+window.initializeHomeMusicPlayer = function() {
+  if (homePlayerInitialized) return;
+  
+  console.log('Initializing Home Music Player...');
+  
+  // Ensure disguise player is completely stopped
+  if (window.disguisePlayer) {
+      window.disguisePlayer.pauseMusic();
+      const disguiseAudio = document.getElementById('main-audio2');
+      const disguiseVideo = document.getElementById('video2');
+      const disguiseMediaContainer = document.getElementById('media-container2');
+      
+      if (disguiseAudio) {
+          disguiseAudio.pause();
+          disguiseAudio.src = '';
+          disguiseAudio.currentTime = 0;
+      }
+      if (disguiseVideo) {
+          disguiseVideo.pause();
+          disguiseVideo.src = '';
+          disguiseVideo.currentTime = 0;
+          disguiseVideo.style.display = 'none';
+      }
+      if (disguiseMediaContainer) {
+          disguiseMediaContainer.innerHTML = '';
+      }
+  }
+  
+  // Initialize home player if not already done
+  if (window.homePlayer && !window.homePlayer.hasInitialized) {
+      window.homePlayer.delayedInitialize();
+  }
+  
+  // Reset and load first song
+  if (window.homePlayer) {
+      window.homePlayer.musicIndex = 1;
+      window.homePlayer.isMusicPaused = true;
+      
+      const homeAudio = document.getElementById('main-audio');
+      const homeVideo = document.getElementById('video');
+      const homeMediaContainer = document.getElementById('media-container');
+      
+      if (homeAudio) {
+          homeAudio.pause();
+          homeAudio.src = '';
+          homeAudio.currentTime = 0;
+      }
+      if (homeVideo) {
+          homeVideo.pause();
+          homeVideo.src = '';
+          homeVideo.currentTime = 0;
+          homeVideo.style.display = 'none';
+      }
+      if (homeMediaContainer) {
+          homeMediaContainer.innerHTML = '';
+      }
+      
+      // Load first song with delay to prevent flicker
+      setTimeout(() => {
+          if (window.homePlayer && window.homePlayer.musicSource && window.homePlayer.musicSource.length > 0) {
+              window.homePlayer.loadMusic(1);
+              window.homePlayer.updatePlayingSong();
+          }
+      }, 200);
+  }
+  
+  homePlayerInitialized = true;
+  disguisePlayerInitialized = false;
+};
+
+// 5. UPDATE your window.initializeDisguiseMusicPlayer function in AudioPlayer00.js:
+
+window.initializeDisguiseMusicPlayer = function() {
+  if (disguisePlayerInitialized) return;
+  
+  console.log('Initializing Disguise Music Player...');
+  
+  // Ensure home player is completely stopped
+  if (window.homePlayer) {
+      window.homePlayer.pauseMusic();
+      const homeAudio = document.getElementById('main-audio');
+      const homeVideo = document.getElementById('video');
+      const homeMediaContainer = document.getElementById('media-container');
+      
+      if (homeAudio) {
+          homeAudio.pause();
+          homeAudio.src = '';
+          homeAudio.currentTime = 0;
+      }
+      if (homeVideo) {
+          homeVideo.pause();
+          homeVideo.src = '';
+          homeVideo.currentTime = 0;
+          homeVideo.style.display = 'none';
+      }
+      if (homeMediaContainer) {
+          homeMediaContainer.innerHTML = '';
+      }
+  }
+  
+  // Initialize disguise player if not already done
+  if (window.disguisePlayer && !window.disguisePlayer.hasInitialized) {
+      window.disguisePlayer.delayedInitialize();
+  }
+  
+  // Reset and load first song
+  if (window.disguisePlayer) {
+      window.disguisePlayer.musicIndex = 1;
+      window.disguisePlayer.isMusicPaused = true;
+      
+      const disguiseAudio = document.getElementById('main-audio2');
+      const disguiseVideo = document.getElementById('video2');
+      const disguiseMediaContainer = document.getElementById('media-container2');
+      
+      if (disguiseAudio) {
+          disguiseAudio.pause();
+          disguiseAudio.src = '';
+          disguiseAudio.currentTime = 0;
+      }
+      if (disguiseVideo) {
+          disguiseVideo.pause();
+          disguiseVideo.src = '';
+          disguiseVideo.currentTime = 0;
+          disguiseVideo.style.display = 'none';
+      }
+      if (disguiseMediaContainer) {
+          disguiseMediaContainer.innerHTML = '';
+      }
+      
+      // Load first song with delay to prevent flicker
+      setTimeout(() => {
+          if (window.disguisePlayer && window.disguisePlayer.musicSource && window.disguisePlayer.musicSource.length > 0) {
+              window.disguisePlayer.loadMusic(1);
+              window.disguisePlayer.updatePlayingSong();
+          }
+      }, 200);
+  }
+  
+  disguisePlayerInitialized = true;
+  homePlayerInitialized = false;
+};
+
+// Add cleanup function
+window.cleanupPlayers = function() {
+    homePlayerInitialized = false;
+    disguisePlayerInitialized = false;
+    
+    // Stop all media
+    const allAudio = document.querySelectorAll('audio');
+    const allVideo = document.querySelectorAll('video');
+    
+    allAudio.forEach(audio => {
+        audio.pause();
+        audio.src = '';
+        audio.currentTime = 0;
+    });
+    
+    allVideo.forEach(video => {
+        video.pause();
+        video.src = '';
+        video.currentTime = 0;
+        video.style.display = 'none';
+    });
+    
+    // Clear media containers
+    const containers = document.querySelectorAll('#media-container, #media-container2');
+    containers.forEach(container => {
+        container.innerHTML = '';
+    });
+    
+    console.log('Players cleaned up');
+};
+
+// MODIFY the existing DOMContentLoaded event listener (replace the existing one at the bottom):
+
 // Initialize players when DOM loads
+// REPLACE your existing DOMContentLoaded event listener with this enhanced version:
+
 document.addEventListener("DOMContentLoaded", () => {
-  window.homePlayer = new MusicPlayer();       // Original page
-  window.disguisePlayer = new MusicPlayer('2'); // Disguise page
-  handleSize();
+  // Wait for authentication to complete
+  setTimeout(() => {
+      window.initializeCorrectPlayer();
+      handleSize();
+  }, 200);
 });
