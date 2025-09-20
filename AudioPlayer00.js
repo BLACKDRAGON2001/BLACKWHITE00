@@ -74,7 +74,7 @@ class SearchTrie {
       if (!node.children[char]) {
         return new Set(); // No matches found
       }
-      node = node.children[char];
+      node = node.characters[char];
     }
     
     return node.musicIndices;
@@ -196,15 +196,7 @@ class MusicPlayer {
       this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 16);
     }
     
-    // Only initialize if not blocked
-    if (!window.playerInitBlocked) {
-      this.initialize();
-    } else {
-      // Just set up basic event listeners
-      this.setupEventListeners();
-      this.isInitializing = false;
-      console.log(`Player ${this.suffix || '1'} created but initialization blocked`);
-    }
+    this.initialize();
   }
 
   debounce(func, wait) {
@@ -239,28 +231,6 @@ class MusicPlayer {
     setTimeout(() => {
       this.isInitializing = false;
     }, 100)
-  }
-
-  delayedInitialize() {
-    if (this.hasInitialized) return;
-    
-    console.log(`Delayed initialization for player ${this.suffix || '1'}`);
-    
-    this.loadPersistedState();
-    this.populateMusicList(this.originalOrder);
-    this.updatePlayingSong();
-    this.setupResizeObserver();
-    this.initializeSearchOptimization();
-    
-    if (this.suffix === '2') {
-        this.initializeBorderBox();
-    }
-    
-    this.hasInitialized = true;
-    
-    setTimeout(() => {
-        this.isInitializing = false;
-    }, 100);
   }
 
   // Only used for Player 2
@@ -1438,8 +1408,8 @@ class MusicPlayer {
       }
 
       if (voiceBtns) {
-        voiceBtns.style.setProperty('background-color', 'black', 'important')
-        voiceBtns.style.setProperty('color', 'white', 'important')
+        voiceBtns.style.setProperty('background-color', 'black', 'important');
+        voiceBtns.style.setProperty('color', 'white', 'important');
       }
 
       if (this.searchField) {
@@ -1529,7 +1499,7 @@ class MusicPlayer {
       }
 
       if (voiceBtns) {
-        voiceBtns.style.removeProperty('background-color')
+        voiceBtns.style.removeProperty('background-color');
         voiceBtns.style.removeProperty('color')
       }
 
@@ -2109,284 +2079,9 @@ function handleSize() {
   });
 }
 
-// ADD these functions at the END of your AudioPlayer00.js file, just before the DOMContentLoaded event listener
-
-// Global player state isolation
-let homePlayerInitialized = false;
-let disguisePlayerInitialized = false;
-
-// Initialize Home Player
-window.initializeHomeMusicPlayer = function() {
-  if (homePlayerInitialized) return;
-  
-  console.log('Initializing Home Music Player...');
-  
-  // Stop disguise player if it exists and is real
-  if (window.disguisePlayer && typeof window.disguisePlayer.pauseMusic === 'function') {
-      window.disguisePlayer.pauseMusic();
-  }
-  
-  const disguiseAudio = document.getElementById('main-audio2');
-  const disguiseVideo = document.getElementById('video2');
-  const disguiseMediaContainer = document.getElementById('media-container2');
-  
-  if (disguiseAudio) {
-      disguiseAudio.pause();
-      disguiseAudio.src = '';
-      disguiseAudio.currentTime = 0;
-  }
-  if (disguiseVideo) {
-      disguiseVideo.pause();
-      disguiseVideo.src = '';
-      disguiseVideo.currentTime = 0;
-      disguiseVideo.style.display = 'none';
-  }
-  if (disguiseMediaContainer) {
-      disguiseMediaContainer.innerHTML = '';
-  }
-  
-  // Create real home player if it doesn't exist or is a dummy
-  if (!window.homePlayer || typeof window.homePlayer.loadMusic !== 'function') {
-      console.log('Creating real home player...');
-      window.homePlayer = new MusicPlayer();
-  }
-  
-  // Initialize/reset home player
-  if (window.homePlayer && typeof window.homePlayer.loadMusic === 'function') {
-      window.homePlayer.musicIndex = 1;
-      window.homePlayer.isMusicPaused = true;
-      
-      const homeAudio = document.getElementById('main-audio');
-      const homeVideo = document.getElementById('video');
-      const homeMediaContainer = document.getElementById('media-container');
-      
-      if (homeAudio) {
-          homeAudio.pause();
-          homeAudio.src = '';
-          homeAudio.currentTime = 0;
-      }
-      if (homeVideo) {
-          homeVideo.pause();
-          homeVideo.src = '';
-          homeVideo.currentTime = 0;
-          homeVideo.style.display = 'none';
-      }
-      if (homeMediaContainer) {
-          homeMediaContainer.innerHTML = '';
-      }
-      
-      // Load first song with delay
-      setTimeout(() => {
-          if (window.homePlayer && window.homePlayer.musicSource && window.homePlayer.musicSource.length > 0) {
-              window.homePlayer.loadMusic(1);
-              window.homePlayer.updatePlayingSong();
-          }
-      }, 200);
-  }
-  
-  homePlayerInitialized = true;
-  disguisePlayerInitialized = false;
-};
-
-// UPDATE your window.initializeDisguiseMusicPlayer function:
-
-window.initializeDisguiseMusicPlayer = function() {
-  if (disguisePlayerInitialized) return;
-  
-  console.log('Initializing Disguise Music Player...');
-  
-  // Stop home player if it exists and is real
-  if (window.homePlayer && typeof window.homePlayer.pauseMusic === 'function') {
-      window.homePlayer.pauseMusic();
-  }
-  
-  const homeAudio = document.getElementById('main-audio');
-  const homeVideo = document.getElementById('video');
-  const homeMediaContainer = document.getElementById('media-container');
-  
-  if (homeAudio) {
-      homeAudio.pause();
-      homeAudio.src = '';
-      homeAudio.currentTime = 0;
-  }
-  if (homeVideo) {
-      homeVideo.pause();
-      homeVideo.src = '';
-      homeVideo.currentTime = 0;
-      homeVideo.style.display = 'none';
-  }
-  if (homeMediaContainer) {
-      homeMediaContainer.innerHTML = '';
-  }
-  
-  // Create real disguise player if it doesn't exist or is a dummy
-  if (!window.disguisePlayer || typeof window.disguisePlayer.loadMusic !== 'function') {
-      console.log('Creating real disguise player...');
-      window.disguisePlayer = new MusicPlayer('2');
-  }
-  
-  // Initialize/reset disguise player
-  if (window.disguisePlayer && typeof window.disguisePlayer.loadMusic === 'function') {
-      window.disguisePlayer.musicIndex = 1;
-      window.disguisePlayer.isMusicPaused = true;
-      
-      const disguiseAudio = document.getElementById('main-audio2');
-      const disguiseVideo = document.getElementById('video2');
-      const disguiseMediaContainer = document.getElementById('media-container2');
-      
-      if (disguiseAudio) {
-          disguiseAudio.pause();
-          disguiseAudio.src = '';
-          disguiseAudio.currentTime = 0;
-      }
-      if (disguiseVideo) {
-          disguiseVideo.pause();
-          disguiseVideo.src = '';
-          disguiseVideo.currentTime = 0;
-          disguiseVideo.style.display = 'none';
-      }
-      if (disguiseMediaContainer) {
-          disguiseMediaContainer.innerHTML = '';
-      }
-      
-      // Load first song with delay
-      setTimeout(() => {
-          if (window.disguisePlayer && window.disguisePlayer.musicSource && window.disguisePlayer.musicSource.length > 0) {
-              window.disguisePlayer.loadMusic(1);
-              window.disguisePlayer.updatePlayingSong();
-          }
-      }, 200);
-  }
-  
-  disguisePlayerInitialized = true;
-  homePlayerInitialized = false;
-};
-
-// Add cleanup function
-window.cleanupPlayers = function() {
-    homePlayerInitialized = false;
-    disguisePlayerInitialized = false;
-    
-    // Stop all media
-    const allAudio = document.querySelectorAll('audio');
-    const allVideo = document.querySelectorAll('video');
-    
-    allAudio.forEach(audio => {
-        audio.pause();
-        audio.src = '';
-        audio.currentTime = 0;
-    });
-    
-    allVideo.forEach(video => {
-        video.pause();
-        video.src = '';
-        video.currentTime = 0;
-        video.style.display = 'none';
-    });
-    
-    // Clear media containers
-    const containers = document.querySelectorAll('#media-container, #media-container2');
-    containers.forEach(container => {
-        container.innerHTML = '';
-    });
-    
-    console.log('Players cleaned up');
-};
-
-// MODIFY the existing DOMContentLoaded event listener (replace the existing one at the bottom):
-
 // Initialize players when DOM loads
-// REPLACE your existing DOMContentLoaded event listener with this enhanced version:
-
-// REPLACE your DOMContentLoaded listener in AudioPlayer00.js with this:
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Wait for auth state to be determined
-  const initPlayers = () => {
-      if (!window.authStateReady) {
-          setTimeout(initPlayers, 50);
-          return;
-      }
-      
-      const initialPage = window.initialPageDetermined;
-      console.log('Initializing players based on:', initialPage);
-      
-      if (initialPage === 'home') {
-          // Only create home player
-          console.log('Creating HOME player only');
-          window.homePlayer = new MusicPlayer();
-          window.disguisePlayer = { 
-              pauseMusic: () => {}, 
-              loadMusic: () => {},
-              updatePlayingSong: () => {}
-          }; // Dummy object to prevent errors
-      } else if (initialPage === 'disguise') {
-          // Only create disguise player
-          console.log('Creating DISGUISE player only');
-          window.disguisePlayer = new MusicPlayer('2');
-          window.homePlayer = { 
-              pauseMusic: () => {}, 
-              loadMusic: () => {},
-              updatePlayingSong: () => {}
-          }; // Dummy object to prevent errors
-      } else if (initialPage === 'login') {
-          // Create dummy objects for login page
-          console.log('Login page - creating dummy players');
-          window.homePlayer = { 
-              pauseMusic: () => {}, 
-              loadMusic: () => {},
-              updatePlayingSong: () => {}
-          };
-          window.disguisePlayer = { 
-              pauseMusic: () => {}, 
-              loadMusic: () => {},
-              updatePlayingSong: () => {}
-          };
-      } else {
-          // Fallback - create both but don't initialize
-          console.log('Fallback - creating both players');
-          window.homePlayer = new MusicPlayer();
-          window.disguisePlayer = new MusicPlayer('2');
-      }
-      
-      handleSize();
-  };
-  
-  initPlayers();
-  
-  // Add visibility change handler
-  document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) {
-          const isHomePage = document.getElementById("HomePage")?.style.display !== "none";
-          const isDisguisePage = document.getElementById("DisguisePage")?.style.display !== "none";
-          
-          if (isHomePage && window.disguisePlayer && typeof window.disguisePlayer.pauseMusic === 'function') {
-              window.disguisePlayer.pauseMusic();
-              const disguiseAudio = document.getElementById('main-audio2');
-              const disguiseVideo = document.getElementById('video2');
-              if (disguiseAudio) {
-                  disguiseAudio.pause();
-                  disguiseAudio.src = '';
-              }
-              if (disguiseVideo) {
-                  disguiseVideo.pause();
-                  disguiseVideo.src = '';
-                  disguiseVideo.style.display = 'none';
-              }
-          } else if (isDisguisePage && window.homePlayer && typeof window.homePlayer.pauseMusic === 'function') {
-              window.homePlayer.pauseMusic();
-              const homeAudio = document.getElementById('main-audio');
-              const homeVideo = document.getElementById('video');
-              if (homeAudio) {
-                  homeAudio.pause();
-                  homeAudio.src = '';
-              }
-              if (homeVideo) {
-                  homeVideo.pause();
-                  homeVideo.src = '';
-                  homeVideo.style.display = 'none';
-              }
-          }
-      }
-  });
+  window.homePlayer = new MusicPlayer();       // Original page
+  window.disguisePlayer = new MusicPlayer('2'); // Disguise page
+  handleSize();
 });

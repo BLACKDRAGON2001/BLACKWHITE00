@@ -225,3 +225,1765 @@
   <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  
+  <!-- DNS Prefetch for external resources -->
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  <link rel="dns-prefetch" href="//kit.fontawesome.com">
+  <link rel="dns-prefetch" href="//audioplayerbackend.onrender.com">
+  
+  <!-- Preconnect to critical domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://audioplayerbackend.onrender.com" crossorigin>
+  
+  <!-- Critical CSS loaded synchronously to prevent FOUC -->
+  <link rel="stylesheet" href="AudioPlayer.css">
+  <link rel="stylesheet" href="AudioLogin.css">
+  
+  <!-- Non-critical CSS can still be preloaded -->
+  <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"></noscript>
+  
+  <!-- FontAwesome - defer loading -->
+  <link rel="preload" href="Assets/css/all.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="Assets/css/all.css"></noscript>
+  
+  <title>BLACKWHITE</title>
+  
+  <!-- Favicon resources -->
+  <link rel="apple-touch-icon" sizes="180x180" href="SystemImages/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="SystemImages/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="SystemImages/favicon_io/favicon-16x16.png">
+  <link rel="manifest" href="SystemImages/favicon_io/site.webmanifest">
+  
+  <!-- Prefetch critical images that will be used -->
+  <script>
+    // Dynamic prefetching based on user role/common assets
+    window.prefetchAssets = function() {
+      // Common system images
+      const criticalImages = [
+        'SystemImages/favicon_io/apple-touch-icon.png',
+        'SystemImages/favicon_io/favicon-32x32.png',
+        'SystemImages/favicon_io/favicon-16x16.png'
+      ];
+      
+      // Prefetch critical images
+      criticalImages.forEach(src => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = src;
+        link.as = 'image';
+        document.head.appendChild(link);
+      });
+    };
+    
+    // Prefetch assets after page loads
+    window.addEventListener('load', () => {
+      requestIdleCallback(() => {
+        window.prefetchAssets();
+      });
+    });
+  </script>
+
+  <!-- Prevent login page flicker by checking auth immediately -->
+  <script>
+    // Enhanced auth check to prevent flicker
+    (function() {
+        const hasTokens = sessionStorage.getItem('accessToken') && sessionStorage.getItem('refreshToken');
+        const expiration = sessionStorage.getItem('tokenExpiration');
+        
+        // Check if tokens exist and aren't expired
+        const isTokenValid = hasTokens && expiration && (Date.now() < parseInt(expiration));
+        
+        // Set initial display state IMMEDIATELY
+        if (isTokenValid) {
+            // Determine user role from token
+            try {
+                const accessToken = sessionStorage.getItem('accessToken');
+                if (accessToken) {
+                    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                    const userRole = payload.role;
+                    
+                    if (userRole === 'disguise') {
+                        // Disguise user - show disguise page, hide others
+                        document.documentElement.style.setProperty('--initial-login-display', 'none');
+                        document.documentElement.style.setProperty('--initial-home-display', 'none');
+                        document.documentElement.style.setProperty('--initial-disguise-display', 'block');
+                        document.body.style.backgroundColor = "black";
+                        document.body.classList.remove("login-active");
+                        window.initialPageDetermined = 'disguise';
+                    } else {
+                        // Home user - show home page, hide others  
+                        document.documentElement.style.setProperty('--initial-login-display', 'none');
+                        document.documentElement.style.setProperty('--initial-home-display', 'block');
+                        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+                        document.body.style.backgroundColor = "black";
+                        document.body.classList.remove("login-active");
+                        window.initialPageDetermined = 'home';
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not parse token for role, showing login');
+                // Show login if token parsing fails
+                document.documentElement.style.setProperty('--initial-login-display', 'block');
+                document.documentElement.style.setProperty('--initial-home-display', 'none');
+                document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+                document.body.style.backgroundColor = "white";
+                document.body.classList.add("login-active");
+                window.initialPageDetermined = 'login';
+            }
+        } else {
+            // No valid tokens - show login page
+            document.documentElement.style.setProperty('--initial-login-display', 'block');
+            document.documentElement.style.setProperty('--initial-home-display', 'none');
+            document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+            document.body.style.backgroundColor = "white";
+            document.body.classList.add("login-active");
+            window.initialPageDetermined = 'login';
+        }
+        
+        // Flag to prevent player initialization conflicts
+        window.authStateReady = true;
+        
+        console.log('Initial page determined:', window.initialPageDetermined);
+    })();
+    </script>
+
+  <style>
+    /* Critical styles inlined to prevent FOUC (Flash of Unstyled Content) */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: white;
+    }
+    
+    /* Hide all content initially to prevent unstyled flash */
+    .login-box, .home-box {
+      opacity: 0;
+    }
+    
+    /* Show content when styles are loaded */
+    .styles-loaded .login-box,
+    .styles-loaded .home-box {
+      opacity: 1;
+    }
+    
+    /* Use CSS variables to prevent flicker */
+    :root {
+      --initial-login-display: block;
+      --initial-home-display: none;
+      --initial-disguise-display: none;
+    }
+    
+    /* Default to white background for login page */
+    body {
+      background-color: white;
+    }
+    
+    /* Login page should always have white background */
+    body:has(#LoginPage[style*="display: block"]) {
+      background-color: white !important;
+    }
+    
+    /* When login page is visible via CSS variables, ensure white background */
+    body:has(#LoginPage[style*="--initial-login-display: block"]),
+    body:has(#LoginPage) {
+      background-color: white;
+    }
+    
+    /* Fallback for browsers that don't support :has() */
+    .login-active {
+      background-color: white !important;
+    }
+    
+    #LoginPage {
+      display: var(--initial-login-display) !important;
+    }
+    
+    #HomePage {
+      display: var(--initial-home-display) !important;
+    }
+    
+    #DisguisePage {
+      display: var(--initial-disguise-display) !important;
+    }
+    
+    /* Force white background when login page is showing */
+    #LoginPage:not([style*="display: none"]) ~ * {
+      /* This targets elements after login page when it's visible */
+    }
+    
+    /* Ensure login page visibility forces white background */
+    body:has(#LoginPage:not([style*="display: none"])) {
+      background-color: white !important;
+    }
+
+    /* Override when JavaScript updates display */
+    #LoginPage[style*="display: block"] {
+      display: block !important;
+    }
+    
+    #HomePage[style*="display: block"] {
+      display: block !important;
+    }
+    
+    #DisguisePage[style*="display: block"] {
+      display: block !important;
+    }
+    
+    #LoginPage[style*="display: none"] {
+      display: none !important;
+    }
+    
+    #HomePage[style*="display: none"] {
+      display: none !important;
+    }
+    
+    #DisguisePage[style*="display: none"] {
+      display: none !important;
+    }
+  </style>
+
+    <script>
+    // Prevent blinking by blocking player initialization until page is determined
+    window.playerInitBlocked = true;
+    window.correctPlayerDetermined = false;
+    
+    // Function to safely initialize the correct player
+    window.initializeCorrectPlayer = function() {
+        if (window.correctPlayerDetermined) return;
+        
+        const isDisguise = document.getElementById("DisguisePage")?.style.display === "block" ||
+                          document.documentElement.style.getPropertyValue('--initial-disguise-display') === 'block';
+        
+        const isHome = document.getElementById("HomePage")?.style.display === "block" ||
+                       document.documentElement.style.getPropertyValue('--initial-home-display') === 'block';
+        
+        console.log('Determining correct player - Home:', isHome, 'Disguise:', isDisguise);
+        
+        if (isDisguise && !isHome) {
+            // Initialize ONLY disguise player
+            console.log('Creating ONLY disguise player');
+            window.disguisePlayer = new MusicPlayer('2');
+            window.homePlayer = null;
+        } else if (isHome && !isDisguise) {
+            // Initialize ONLY home player
+            console.log('Creating ONLY home player');
+            window.homePlayer = new MusicPlayer();
+            window.disguisePlayer = null;
+        } else {
+            // Fallback - determine from token
+            try {
+                const accessToken = sessionStorage.getItem('accessToken');
+                if (accessToken) {
+                    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                    if (payload.role === 'disguise') {
+                        console.log('Token indicates disguise - creating disguise player only');
+                        window.disguisePlayer = new MusicPlayer('2');
+                        window.homePlayer = null;
+                    } else {
+                        console.log('Token indicates home - creating home player only');
+                        window.homePlayer = new MusicPlayer();
+                        window.disguisePlayer = null;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not determine from token, creating home player');
+                window.homePlayer = new MusicPlayer();
+                window.disguisePlayer = null;
+            }
+        }
+        
+        window.correctPlayerDetermined = true;
+        window.playerInitBlocked = false;
+    };
+    </script>
+</head>
+<body>
+
+  <div id="LoginPage" class="login-box">
+    <div class="login-header">
+        <header>SIGN-IN</header>
+    </div>
+    <div class="input-box">
+        <input id="username" type="text" class="input-field" placeholder="ENTER YOUR USERNAME" autocomplete="off">
+    </div>
+    <div class="input-box">
+        <input id="password" type="password" class="input-field" placeholder="ENTER YOUR PASSWORD" autocomplete="off">
+    </div>
+    <div class="login-message">
+        <p id="MessageBox"></p>
+    </div>
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <p>AUTHENTICATING...</p>
+    </div>
+    <div class="input-submit">
+        <button class="submit-btn" id="signinBtn">SIGN IN</button>
+    </div>
+  </div>
+
+  <div id="HomePage" class="home-box">
+    <div class="wrapper" id="wrapper">
+      <div class="top-bar">
+        <button id="modeToggle" class="DarkMode">
+          <i id="fontawesome-icons" class="fa-solid fa-moon fa-3x"></i>
+        </button>
+        <span id="title" class="title">BLACKWHITE</span>
+        <i id="muteButton" class="material-icons seeVideo">star</i>
+      </div>
+      <div id="moreOptionsPage" class="more-options" style="display: none;">
+        <p id="moreOptionsTitle" class="more-options-title">MORE OPTIONS</p>
+        <button id="Add" class="more-options-button">ADD</button>
+        <button class="more-options-button">EDIT</button>
+        <button class="more-options-button">DELETE</button>
+        <button class="more-options-button">CLOSE</button>
+      </div>
+      <div class="Major-Container">
+        <div class="img-area" id="media-container">
+          <!-- This area will dynamically include either an img or video elements -->
+        </div>
+        <div id="video-border-box" class="video-border-box"></div>
+        <video id="video" class="overlay-video" src="" playsinline muted loop preload="metadata"></video>
+      </div>
+      <div class="song-details">
+        <p class="name"></p>
+        <p class="artist"></p>
+      </div>
+      <div class="control-box">
+        <div class="progress-area">
+          <div class="progress-bar">
+            <audio id="main-audio" src="" preload="metadata"></audio>
+          </div>
+          <div class="song-timer">
+            <span class="current-time">0:00</span>
+            <span class="max-duration">0:00</span>
+          </div>
+        </div>
+        <div class="controls">
+          <i id="repeat-plist" class="material-icons" title="Playlist looped">repeat</i>
+          <i id="prev" class="material-icons">skip_previous</i>
+          <div class="play-pause">
+            <i class="material-icons play">play_arrow</i>
+          </div>
+          <i id="next" class="material-icons">skip_next</i>
+          <i id="more-music" class="material-icons">queue_music</i>
+        </div>
+      </div>
+      <div class="music-list">
+        <div class="header">
+          <div class="row">
+            <i class="list material-icons">queue_music</i>
+            <span>Music list</span>
+          </div>
+          <i id="close" class="material-icons">close</i>
+        </div>
+        <div class="search-list">
+            <div class="search-box">
+                <input type="text" class="search-field" placeholder="SEARCH$$$" autocomplete="off">
+            </div>
+        </div>
+        <ul>
+          <!-- here li list are coming from js -->
+        </ul>
+      </div>
+      <div class="PABox">
+        <button id="voiceBtn" class="PABoxButton">START VOICE CONTROL</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="DisguisePage" class="home-box">
+    <div class="wrapper" id="wrapper2">
+      <div class="top-bar">
+        <button id="modeToggle2" class="DarkMode">
+          <i id="fontawesome-icons2" class="fa-solid fa-moon fa-3x"></i>
+        </button>
+        <span id="title2" class="title">BLACKWHITE</span>
+        <i id="muteButton2" class="material-icons seeAllMusic" style="pointer-events: none;">star</i>
+      </div>
+      <div class="Major-Container">
+        <div class="img-area" id="media-container2">
+          <!-- This area will dynamically include either an img or video elements -->
+        </div>
+        <div id="video-border-box2" class="video-border-box" style="display: none;"></div>
+        <video id="video2" class="overlay-video" style="border: none; display: none;" src="" autoplay playsinline muted loop preload="metadata"></video>
+      </div>
+      <div class="song-details">
+        <p class="name"></p>
+        <p class="artist"></p>
+      </div>
+      <div class="control-box">
+        <div class="progress-area">
+          <div class="progress-bar">
+            <audio id="main-audio2" src="" preload="metadata"></audio>
+          </div>
+          <div class="song-timer">
+            <span class="current-time">0:00</span>
+            <span class="max-duration">0:00</span>
+          </div>
+        </div>
+        <div class="controls">
+          <i id="repeat-plist2" class="material-icons" title="Playlist looped">repeat</i>
+          <i id="prev2" class="material-icons">skip_previous</i>
+          <div class="play-pause">
+            <i class="material-icons play">play_arrow</i>
+          </div>
+          <i id="next2" class="material-icons">skip_next</i>
+          <i id="more-music2" class="material-icons">queue_music</i>
+        </div>
+      </div>
+      <div class="music-list">
+        <div class="header">
+          <div class="row">
+            <i class="list material-icons">queue_music</i>
+            <span>Music list</span>
+          </div>
+          <i id="close2" class="material-icons" style="color: black;">close</i>
+        </div>
+        <div class="search-list">
+            <div class="search-box">
+                <input type="text" class="search-field" placeholder="SEARCH$$$" autocomplete="off">
+            </div>
+        </div>
+        <ul>
+          <!-- here li list are coming from js -->
+        </ul>
+      </div>
+      <div class="PABox">
+        <button id="voiceBtn2" class="PABoxButton">START VOICE CONTROL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rolling Session Authentication System -->
+  <script>
+    // API Configuration
+    const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
+    
+    // Rolling Session Configuration
+    const SESSION_CONFIG = {
+        // Base token duration (4 hours)
+        BASE_TOKEN_DURATION: 4 * 60 * 60 * 1000,
+        // Maximum session duration (24 hours)
+        MAX_SESSION_DURATION: 24 * 60 * 60 * 1000,
+        // Activity extension (30 minutes added per activity)
+        ACTIVITY_EXTENSION: 30 * 60 * 1000,
+        // Minimum time between extensions (5 minutes)
+        EXTENSION_COOLDOWN: 5 * 60 * 1000,
+        // Token refresh threshold (refresh when 30 minutes remaining)
+        REFRESH_THRESHOLD: 30 * 60 * 1000,
+        // Activity check interval (1 minute)
+        ACTIVITY_CHECK_INTERVAL: 1 * 60 * 1000,
+        // Inactivity timeout (2 hours of inactivity = logout)
+        INACTIVITY_TIMEOUT: 2 * 60 * 60 * 1000
+    };
+
+    // Enhanced prefetching and caching
+    class AssetManager {
+        constructor() {
+            this.prefetchedAssets = new Set();
+            this.imageCache = new Map();
+        }
+
+        async prefetchImage(src) {
+            if (this.prefetchedAssets.has(src)) return;
+            
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    this.imageCache.set(src, img);
+                    this.prefetchedAssets.add(src);
+                    resolve(img);
+                };
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        async prefetchAudio(src) {
+            if (this.prefetchedAssets.has(src)) return;
+            
+            return new Promise((resolve, reject) => {
+                const audio = new Audio();
+                audio.preload = 'metadata';
+                audio.oncanplaythrough = () => {
+                    this.prefetchedAssets.add(src);
+                    resolve(audio);
+                };
+                audio.onerror = reject;
+                audio.src = src;
+            });
+        }
+
+        async prefetchVideo(src) {
+            if (this.prefetchedAssets.has(src)) return;
+            
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.src = src;
+            this.prefetchedAssets.add(src);
+            return video;
+        }
+
+        async prefetchPlaylistAssets(playlist) {
+            const prefetchPromises = [];
+            
+            playlist.forEach((track, index) => {
+                if (index < 3) {
+                    if (track.image) {
+                        prefetchPromises.push(this.prefetchImage(track.image));
+                    }
+                    if (track.video) {
+                        prefetchPromises.push(this.prefetchVideo(track.video));
+                    }
+                    if (track.audio) {
+                        prefetchPromises.push(this.prefetchAudio(track.audio));
+                    }
+                }
+            });
+
+            try {
+                await Promise.allSettled(prefetchPromises);
+                console.log('Prefetched', prefetchPromises.length, 'assets');
+            } catch (error) {
+                console.warn('Some assets failed to prefetch:', error);
+            }
+        }
+    }
+
+    // Initialize asset manager
+    const assetManager = new AssetManager();
+
+    // Rolling Session Manager
+    class RollingSessionManager {
+        constructor() {
+            this.sessionStartTime = null;
+            this.lastActivityTime = null;
+            this.lastExtensionTime = null;
+            this.activityCheckInterval = null;
+            this.activities = ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'];
+            this.activityThrottle = null;
+        }
+
+        startSession() {
+            const now = Date.now();
+            this.sessionStartTime = now;
+            this.lastActivityTime = now;
+            this.lastExtensionTime = now;
+            
+            sessionStorage.setItem('sessionStartTime', now.toString());
+            sessionStorage.setItem('lastActivityTime', now.toString());
+            sessionStorage.setItem('lastExtensionTime', now.toString());
+            
+            this.startActivityMonitoring();
+            console.log('Rolling session started');
+        }
+
+        endSession() {
+            this.sessionStartTime = null;
+            this.lastActivityTime = null;
+            this.lastExtensionTime = null;
+            
+            sessionStorage.removeItem('sessionStartTime');
+            sessionStorage.removeItem('lastActivityTime');
+            sessionStorage.removeItem('lastExtensionTime');
+            
+            this.stopActivityMonitoring();
+            console.log('Rolling session ended');
+        }
+
+        loadSessionData() {
+            this.sessionStartTime = parseInt(sessionStorage.getItem('sessionStartTime')) || null;
+            this.lastActivityTime = parseInt(sessionStorage.getItem('lastActivityTime')) || null;
+            this.lastExtensionTime = parseInt(sessionStorage.getItem('lastExtensionTime')) || null;
+        }
+
+        recordActivity() {
+            const now = Date.now();
+            this.lastActivityTime = now;
+            sessionStorage.setItem('lastActivityTime', now.toString());
+            
+            // Check if we should extend the session
+            this.checkForSessionExtension();
+        }
+
+        checkForSessionExtension() {
+            const now = Date.now();
+            
+            // Don't extend if we haven't passed the cooldown period
+            if (this.lastExtensionTime && (now - this.lastExtensionTime) < SESSION_CONFIG.EXTENSION_COOLDOWN) {
+                return false;
+            }
+            
+            // Don't extend if we're at maximum session duration
+            if (this.sessionStartTime && (now - this.sessionStartTime) >= SESSION_CONFIG.MAX_SESSION_DURATION) {
+                console.log('Maximum session duration reached, no extension allowed');
+                return false;
+            }
+            
+            // Extend the session
+            return this.extendSession();
+        }
+
+        extendSession() {
+            const now = Date.now();
+            const currentExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
+            
+            // Calculate new expiration time
+            let newExpiration = Math.max(currentExpiration, now) + SESSION_CONFIG.ACTIVITY_EXTENSION;
+            
+            // Ensure we don't exceed maximum session duration
+            const maxAllowedExpiration = this.sessionStartTime + SESSION_CONFIG.MAX_SESSION_DURATION;
+            newExpiration = Math.min(newExpiration, maxAllowedExpiration);
+            
+            // Update token expiration
+            sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+            this.lastExtensionTime = now;
+            sessionStorage.setItem('lastExtensionTime', now.toString());
+            
+            const extensionMinutes = Math.round((newExpiration - now) / (60 * 1000));
+            console.log(`Session extended by activity. New expiration in ${extensionMinutes} minutes`);
+            
+            return true;
+        }
+
+        isSessionActive() {
+            const now = Date.now();
+            
+            // Check if session has been started
+            if (!this.sessionStartTime || !this.lastActivityTime) {
+                return false;
+            }
+            
+            // Check for inactivity timeout
+            if ((now - this.lastActivityTime) > SESSION_CONFIG.INACTIVITY_TIMEOUT) {
+                console.log('Session ended due to inactivity');
+                return false;
+            }
+            
+            // Check maximum session duration
+            if ((now - this.sessionStartTime) > SESSION_CONFIG.MAX_SESSION_DURATION) {
+                console.log('Session ended due to maximum duration reached');
+                return false;
+            }
+            
+            return true;
+        }
+
+        getSessionInfo() {
+            if (!this.sessionStartTime) return null;
+            
+            const now = Date.now();
+            const sessionDuration = now - this.sessionStartTime;
+            const inactivityDuration = now - this.lastActivityTime;
+            const tokenExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
+            const timeUntilExpiry = tokenExpiration - now;
+            
+            return {
+                sessionDuration,
+                inactivityDuration,
+                timeUntilExpiry,
+                isActive: this.isSessionActive(),
+                canExtend: (now - this.sessionStartTime) < SESSION_CONFIG.MAX_SESSION_DURATION
+            };
+        }
+
+        startActivityMonitoring() {
+            // Remove any existing listeners
+            this.stopActivityMonitoring();
+            
+            // Throttled activity handler
+            const throttledActivityHandler = () => {
+                if (this.activityThrottle) return;
+                
+                this.activityThrottle = setTimeout(() => {
+                    this.recordActivity();
+                    this.activityThrottle = null;
+                }, 1000); // Throttle activity recording to once per second
+            };
+            
+            // Add activity listeners
+            this.activities.forEach(activity => {
+                document.addEventListener(activity, throttledActivityHandler, { passive: true });
+            });
+            
+            // Start periodic activity check
+            this.activityCheckInterval = setInterval(() => {
+                if (!this.isSessionActive()) {
+                    console.log('Session inactive, logging out');
+                    handleLogout(true, 'Session ended due to inactivity');
+                }
+            }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL);
+            
+            this.activityHandler = throttledActivityHandler;
+        }
+
+        stopActivityMonitoring() {
+            if (this.activityHandler) {
+                this.activities.forEach(activity => {
+                    document.removeEventListener(activity, this.activityHandler);
+                });
+                this.activityHandler = null;
+            }
+            
+            if (this.activityCheckInterval) {
+                clearInterval(this.activityCheckInterval);
+                this.activityCheckInterval = null;
+            }
+            
+            if (this.activityThrottle) {
+                clearTimeout(this.activityThrottle);
+                this.activityThrottle = null;
+            }
+        }
+    }
+
+    // Initialize rolling session manager
+    const sessionManager = new RollingSessionManager();
+    
+    // Enhanced login attempt management
+    class LoginAttemptManager {
+        constructor() {
+            this.maxAttempts = 3;
+            this.lockoutDuration = 15 * 60 * 1000; // 15 minutes
+        }
+
+        getStorageKey(username) {
+            return `loginAttempts_${username}`;
+        }
+
+        getAttemptData(username) {
+            const key = this.getStorageKey(username);
+            const data = sessionStorage.getItem(key);
+            if (!data) return null;
+            
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+        }
+
+        setAttemptData(username, data) {
+            const key = this.getStorageKey(username);
+            sessionStorage.setItem(key, JSON.stringify(data));
+        }
+
+        clearAttempts(username) {
+            const key = this.getStorageKey(username);
+            sessionStorage.removeItem(key);
+        }
+
+        canAttemptLogin(username) {
+            const data = this.getAttemptData(username);
+            if (!data) return { allowed: true, remaining: this.maxAttempts };
+
+            if (data.lockedUntil && Date.now() > data.lockedUntil) {
+                this.clearAttempts(username);
+                return { allowed: true, remaining: this.maxAttempts };
+            }
+
+            const remaining = Math.max(0, this.maxAttempts - data.count);
+            const isLocked = data.lockedUntil && Date.now() < data.lockedUntil;
+
+            return {
+                allowed: !isLocked && remaining > 0,
+                remaining: remaining,
+                lockedUntil: data.lockedUntil,
+                isLocked: isLocked
+            };
+        }
+
+        recordFailedAttempt(username) {
+            const data = this.getAttemptData(username) || { count: 0, lastAttempt: null };
+            
+            data.count++;
+            data.lastAttempt = Date.now();
+
+            if (data.count >= this.maxAttempts) {
+                data.lockedUntil = Date.now() + this.lockoutDuration;
+            }
+
+            this.setAttemptData(username, data);
+            return this.canAttemptLogin(username);
+        }
+
+        recordSuccessfulLogin(username) {
+            this.clearAttempts(username);
+        }
+    }
+
+    // Initialize the login attempt manager
+    const loginManager = new LoginAttemptManager();
+    
+    // State management - unified token handling with rolling sessions
+    let currentUser = null;
+    let accessToken = null;
+    let refreshToken = null;
+    let sessionCheckInterval = null;
+    let serverConnectionEstablished = false;
+
+    // Enhanced API Helper functions
+    const SecureAPI = {
+        async request(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+                },
+                timeout: 15000,
+                ...options
+            };
+
+            if (config.body && typeof config.body === 'object') {
+                config.body = JSON.stringify(config.body);
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+                
+                const response = await fetch(url, {
+                    ...config,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'REQUEST FAILED');
+                }
+
+                return data;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('REQUEST TIMED OUT. PLEASE CHECK YOUR CONNECTION.');
+                }
+                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                    throw new Error('CANNOT CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.');
+                }
+                throw error;
+            }
+        },
+
+        async login(username, password) {
+            return this.request('/api/auth/login', {
+                method: 'POST',
+                body: { username, password }
+            });
+        },
+
+        async logout() {
+            return this.request('/api/auth/logout', {
+                method: 'POST'
+            });
+        },
+
+        async getUserProfile() {
+            return this.request('/api/user/profile');
+        },
+
+        async refreshAccessToken() {
+            return this.request('/api/auth/refresh', {
+                method: 'POST',
+                body: { refreshToken }
+            });
+        },
+
+        async testConnection(retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/health`, { timeout: 5000 });
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Backend connection successful:', data);
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn(`Backend connection attempt ${i + 1} failed:`, error);
+                    if (i < retries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+            return false;
+        }
+    };
+
+    // UI Helper functions
+    function showMessage(text, isSuccess = false) {
+        const messageBox = document.getElementById("MessageBox");
+        if (messageBox) {
+            messageBox.textContent = text.toUpperCase();
+            messageBox.style.color = "#000000";
+            messageBox.style.display = "block";
+            
+            setTimeout(() => {
+                if (messageBox.textContent === text.toUpperCase()) {
+                    messageBox.style.display = "none";
+                }
+            }, 5000);
+        }
+    }
+
+    function showLoading(show = true) {
+        const loadingEl = document.getElementById("loadingIndicator");
+        const signInBtn = document.getElementById("signinBtn");
+        const messageBox = document.getElementById("MessageBox");
+        
+        if (show) {
+            if (loadingEl) loadingEl.style.display = "none";
+            
+            if (messageBox) {
+                messageBox.textContent = "AUTHENTICATING CREDENTIALS...";
+                messageBox.style.color = "#000000";
+                messageBox.style.display = "block";
+            }
+            
+            if (signInBtn) {
+                signInBtn.disabled = true;
+                signInBtn.textContent = "SIGNING IN...";
+                signInBtn.style.opacity = "0.7";
+            }
+        } else {
+            if (loadingEl) loadingEl.style.display = "none";
+            
+            if (signInBtn) {
+                signInBtn.disabled = false;
+                signInBtn.textContent = "SIGN IN";
+                signInBtn.style.opacity = "1";
+            }
+        }
+    }
+
+    function clearInputFields() {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const messageBox = document.getElementById("MessageBox");
+        
+        if (username) username.value = "";
+        if (password) password.value = "";
+        if (messageBox) {
+            messageBox.textContent = "";
+            messageBox.style.display = "none";
+        }
+    }
+
+    // Enhanced token management with rolling session support
+    function saveTokens(tokens) {
+        accessToken = tokens.accessToken;
+        refreshToken = tokens.refreshToken;
+        
+        // Initial token expiration (4 hours base duration)
+        const expirationTime = Date.now() + SESSION_CONFIG.BASE_TOKEN_DURATION;
+        
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('refreshToken', refreshToken);
+        sessionStorage.setItem('tokenTimestamp', Date.now().toString());
+        sessionStorage.setItem('tokenExpiration', expirationTime.toString());
+    }
+
+    function loadTokens() {
+        accessToken = sessionStorage.getItem('accessToken');
+        refreshToken = sessionStorage.getItem('refreshToken');
+        const expiration = sessionStorage.getItem('tokenExpiration');
+        
+        // Load session data
+        sessionManager.loadSessionData();
+        
+        // Check if session is still active
+        if (!sessionManager.isSessionActive()) {
+            console.log('Session inactive, clearing tokens');
+            clearTokens();
+            return false;
+        }
+        
+        // Check if tokens are expired
+        if (expiration && Date.now() > parseInt(expiration)) {
+            console.log('Tokens expired, clearing session');
+            clearTokens();
+            return false;
+        }
+        
+        return !!(accessToken && refreshToken);
+    }
+
+    // Stop all media when session ends
+    function stopAllMedia() {
+        // Stop all audio elements
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        
+        // Stop all video elements
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+            video.style.display = 'none';
+        });
+        
+        // Clean up player states
+        if (window.cleanupPlayers) {
+            window.cleanupPlayers();
+        }
+    }
+
+    function initializeHomePlayer() {
+        // Reset home player state
+        if (window.musicIndex !== undefined) {
+            window.musicIndex = 0;
+        }
+        
+        // Clear any existing listeners that might interfere
+        clearPlayerEventListeners('home');
+        
+        // Initialize home player specific elements
+        const homeAudio = document.getElementById('main-audio');
+        const homeVideo = document.getElementById('video');
+        
+        if (homeAudio) {
+            homeAudio.src = '';
+            homeAudio.currentTime = 0;
+        }
+        
+        if (homeVideo) {
+            homeVideo.src = '';
+            homeVideo.currentTime = 0;
+            homeVideo.style.display = 'none';
+        }
+        
+        // Trigger your existing home player initialization
+        // This should call your existing AudioPlayer00.js initialization for home
+        if (window.initializeHomeMusicPlayer) {
+            window.initializeHomeMusicPlayer();
+        }
+    }
+
+    function initializeDisguisePlayer() {
+        // Reset disguise player state
+        if (window.musicIndex2 !== undefined) {
+            window.musicIndex2 = 0;
+        }
+        
+        // Clear any existing listeners that might interfere
+        clearPlayerEventListeners('disguise');
+        
+        // Initialize disguise player specific elements
+        const disguiseAudio = document.getElementById('main-audio2');
+        const disguiseVideo = document.getElementById('video2');
+        
+        if (disguiseAudio) {
+            disguiseAudio.src = '';
+            disguiseAudio.currentTime = 0;
+        }
+        
+        if (disguiseVideo) {
+            disguiseVideo.src = '';
+            disguiseVideo.currentTime = 0;
+            disguiseVideo.style.display = 'none';
+        }
+        
+        // Trigger your existing disguise player initialization
+        // This should call your existing AudioPlayer00.js initialization for disguise
+        if (window.initializeDisguiseMusicPlayer) {
+            window.initializeDisguiseMusicPlayer();
+        }
+    }
+
+    function clearPlayerEventListeners(playerType) {
+        const elements = playerType === 'home' ? 
+            ['#main-audio', '#video', '#play-pause', '#prev', '#next'] :
+            ['#main-audio2', '#video2', '#play-pause', '#prev2', '#next2'];
+        
+        elements.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                // Clone the element to remove all event listeners
+                const newElement = element.cloneNode(true);
+                element.parentNode.replaceChild(newElement, element);
+            }
+        });
+    }
+
+    function clearAllMediaSources() {
+        setTimeout(() => {
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach(audio => {
+                audio.src = '';
+                audio.removeAttribute('src');
+                audio.load(); // Force reload to clear buffer
+            });
+            
+            const videoElements = document.querySelectorAll('video');
+            videoElements.forEach(video => {
+                video.src = '';
+                video.removeAttribute('src');
+                video.style.display = 'none';
+                video.load(); // Force reload to clear buffer
+            });
+            
+            // Clear media containers
+            const mediaContainers = document.querySelectorAll('#media-container, #media-container2');
+            mediaContainers.forEach(container => {
+                container.innerHTML = '';
+            });
+        }, 50);
+    }
+
+    function clearTokens() {
+        accessToken = null;
+        refreshToken = null;
+        currentUser = null;
+        
+        // Clear all session data
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('tokenTimestamp');
+        sessionStorage.removeItem('tokenExpiration');
+        sessionStorage.removeItem('HomeLoginTime');
+        sessionStorage.removeItem('DisguiseLoginTime');
+        
+        // End rolling session
+        sessionManager.endSession();
+        
+        // Stop any ongoing audio/video
+        stopAllMedia();
+    }
+
+    // Enhanced session monitoring with rolling session support
+    function startSessionMonitoring() {
+        // Clear any existing interval
+        if (sessionCheckInterval) {
+            clearInterval(sessionCheckInterval);
+        }
+        
+        sessionCheckInterval = setInterval(() => {
+            if (accessToken) {
+                const expiration = sessionStorage.getItem('tokenExpiration');
+                const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
+                const sessionInfo = sessionManager.getSessionInfo();
+                
+                // Check if session is still active
+                if (!sessionInfo || !sessionInfo.isActive) {
+                    console.log('Session inactive during monitoring');
+                    handleLogout(true, 'Session ended');
+                    return;
+                }
+                
+                // Try to refresh if approaching expiration
+                if (timeUntilExpiry < SESSION_CONFIG.REFRESH_THRESHOLD && timeUntilExpiry > 0) {
+                    console.log('Token expiring soon, refreshing...');
+                    refreshTokenIfNeeded();
+                }
+                // If expired, end session
+                else if (timeUntilExpiry <= 0) {
+                    console.log('Token expired during monitoring');
+                    handleLogout(true, 'Session expired');
+                }
+                
+                // Log session info periodically (every 10 checks)
+                if (Math.random() < 0.1) {
+                    const sessionDurationHours = Math.round(sessionInfo.sessionDuration / (60 * 60 * 1000) * 10) / 10;
+                    const inactivityMinutes = Math.round(sessionInfo.inactivityDuration / (60 * 1000));
+                    console.log(`Session active: ${sessionDurationHours}h, inactive for: ${inactivityMinutes}m`);
+                }
+            }
+        }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL); // Check every minute
+    }
+
+    function stopSessionMonitoring() {
+        if (sessionCheckInterval) {
+            clearInterval(sessionCheckInterval);
+            sessionCheckInterval = null;
+        }
+    }
+
+    // Updated handleSecureLogin function with rolling session initialization
+    async function handleSecureLogin() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+            showMessage("PLEASE ENTER BOTH USERNAME AND PASSWORD");
+            return;
+        }
+
+        // Client-side attempt check
+        const clientAttemptStatus = loginManager.canAttemptLogin(username);
+        
+        if (!clientAttemptStatus.allowed) {
+            if (clientAttemptStatus.isLocked) {
+                const timeRemaining = Math.ceil((clientAttemptStatus.lockedUntil - Date.now()) / (60 * 1000));
+                showMessage(`ACCOUNT LOCKED FOR ${timeRemaining} MORE MINUTES. PLEASE TRY AGAIN LATER.`);
+            } else {
+                showMessage("MAXIMUM LOGIN ATTEMPTS REACHED. PLEASE WAIT BEFORE TRYING AGAIN.");
+            }
+            return;
+        }
+
+        // Check server connection
+        if (!serverConnectionEstablished) {
+            showMessage("ESTABLISHING CONNECTION... PLEASE WAIT A MOMENT");
+            
+            const isConnected = await SecureAPI.testConnection();
+            if (!isConnected) {
+                showMessage("UNABLE TO CONNECT TO SERVER. PLEASE CHECK YOUR INTERNET CONNECTION.");
+                return;
+            }
+            serverConnectionEstablished = true;
+        }
+
+        showLoading(true);
+
+        try {
+            const response = await SecureAPI.login(username, password);
+            
+            if (response.success) {
+                currentUser = response.data.user;
+                saveTokens({
+                    accessToken: response.data.accessToken,
+                    refreshToken: response.data.refreshToken
+                });
+
+                clearInputFields();
+                
+                // Record successful login and clear attempts
+                loginManager.recordSuccessfulLogin(username);
+                
+                // Start rolling session
+                sessionManager.startSession();
+                
+                // Navigate based on user role
+                if (currentUser.role === 'home') {
+                    showHomePage();
+                    
+                    requestIdleCallback(() => {
+                        if (window.allMusic) {
+                            assetManager.prefetchPlaylistAssets(window.allMusic);
+                        }
+                    });
+                } else if (currentUser.role === 'disguise') {
+                    showDisguisePage();
+                    
+                    requestIdleCallback(() => {
+                        if (window.allMusicDisguise) {
+                            assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
+                        }
+                    });
+                } else {
+                    console.warn('Unknown user role:', currentUser.role);
+                    showHomePage();
+                }
+                
+                showMessage("LOGIN SUCCESSFUL - SESSION WILL EXTEND WITH ACTIVITY", true);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            
+            // Record failed attempt
+            const newAttemptStatus = loginManager.recordFailedAttempt(username);
+            
+            let errorMessage = (error.message || 'LOGIN FAILED. PLEASE TRY AGAIN.').toUpperCase();
+            
+            if (error.message && error.message.includes('TOO MANY LOGIN ATTEMPTS')) {
+                showMessage(errorMessage);
+            } else {
+                if (newAttemptStatus.remaining > 0) {
+                    errorMessage += ` [${newAttemptStatus.remaining}] ATTEMPTS REMAINING`;
+                } else if (newAttemptStatus.isLocked) {
+                    const timeRemaining = Math.ceil((newAttemptStatus.lockedUntil - Date.now()) / (60 * 1000));
+                    errorMessage = `MAXIMUM LOGIN ATTEMPTS REACHED. ACCOUNT LOCKED FOR ${timeRemaining} MINUTES.`;
+                }
+                
+                showMessage(errorMessage);
+            }
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Page navigation functions with rolling session monitoring
+    function showLoginPage() {
+        // Stop and clear all media before switching
+        stopAllMedia();
+        clearAllMediaSources();
+        
+        document.getElementById("LoginPage").style.display = "block";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "none";
+        
+        // Ensure white background for login page
+        document.body.style.backgroundColor = "white";
+        document.body.classList.add("login-active");
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'block');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        
+        // Stop monitoring when showing login page
+        stopSessionMonitoring();
+    }
+
+    function showHomePage() {
+        // Stop and clear all media before switching
+        stopAllMedia();
+        clearAllMediaSources();
+        
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("HomePage").style.display = "block";
+        document.getElementById("DisguisePage").style.display = "none";
+        
+        // Remove login background override and set background to black
+        document.body.classList.remove("login-active");
+        document.body.style.backgroundColor = "black";
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-home-display', 'block');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        
+        sessionStorage.setItem("HomeLoginTime", new Date().getTime());
+        sessionStorage.removeItem("DisguiseLoginTime");
+        
+        // Initialize home player after a brief delay to ensure DOM is ready
+        setTimeout(() => {
+            if (window.initializeHomeMusicPlayer) {
+                window.initializeHomeMusicPlayer();
+            }
+        }, 150);
+        
+        // Start monitoring when logged in
+        startSessionMonitoring();
+    }
+
+    function showDisguisePage() {
+        // Stop and clear all media before switching
+        stopAllMedia();
+        clearAllMediaSources();
+        
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "block";
+        
+        // Remove login background override and set background to black
+        document.body.classList.remove("login-active");
+        document.body.style.backgroundColor = "black";
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'block');
+        
+        sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
+        sessionStorage.removeItem("HomeLoginTime");
+        
+        // Initialize disguise player after a brief delay to ensure DOM is ready
+        setTimeout(() => {
+            if (window.initializeDisguiseMusicPlayer) {
+                window.initializeDisguiseMusicPlayer();
+            }
+        }, 150);
+        
+        // Start monitoring when logged in
+        startSessionMonitoring();
+    }
+
+    // Enhanced auth status check with rolling session validation
+    async function checkAuthStatus() {
+        if (!loadTokens()) {
+            console.log('No valid tokens found, showing login');
+            // Only show login if we haven't already determined the initial page
+            if (window.initialPageDetermined !== 'login') {
+                showLoginPage();
+            }
+            return;
+        }
+
+        try {
+            const userResponse = await SecureAPI.getUserProfile();
+            if (userResponse.success) {
+                currentUser = userResponse.data;
+                
+                // Extend session on successful API call
+                sessionManager.recordActivity();
+                
+                // Only navigate if we're not already on the correct page
+                const currentPage = window.initialPageDetermined;
+                
+                if (currentUser.role === 'home' && currentPage !== 'home') {
+                    console.log('Navigating to home page');
+                    stopAllMedia();
+                    clearAllMediaSources();
+                    showHomePage();
+                } else if (currentUser.role === 'disguise' && currentPage !== 'disguise') {
+                    console.log('Navigating to disguise page');
+                    stopAllMedia();
+                    clearAllMediaSources();
+                    showDisguisePage();
+                } else {
+                    console.log('Already on correct page:', currentPage);
+                    // We're already on the right page, just ensure the right player is initialized
+                    if (currentUser.role === 'home' && window.initializeHomeMusicPlayer) {
+                        window.initializeHomeMusicPlayer();
+                    } else if (currentUser.role === 'disguise' && window.initializeDisguiseMusicPlayer) {
+                        window.initializeDisguiseMusicPlayer();
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            
+            // Try to refresh token once
+            const refreshed = await refreshTokenIfNeeded();
+            if (!refreshed) {
+                console.log('Token refresh failed, ending session');
+                handleLogout(true, 'Authentication failed');
+            }
+        }
+    }
+
+    // Enhanced token refresh with rolling session support
+    async function refreshTokenIfNeeded() {
+        if (!refreshToken) {
+            console.log('No refresh token available');
+            return false;
+        }
+
+        // Check if session is still active before refreshing
+        if (!sessionManager.isSessionActive()) {
+            console.log('Session inactive, cannot refresh token');
+            return false;
+        }
+
+        try {
+            console.log('Attempting to refresh access token...');
+            const response = await SecureAPI.refreshAccessToken();
+            
+            if (response.success) {
+                accessToken = response.data.accessToken;
+                
+                // Extend session with new token
+                const now = Date.now();
+                const newExpiration = now + SESSION_CONFIG.BASE_TOKEN_DURATION;
+                
+                sessionStorage.setItem('accessToken', accessToken);
+                sessionStorage.setItem('tokenTimestamp', now.toString());
+                sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+                
+                // Record activity to potentially extend session further
+                sessionManager.recordActivity();
+                
+                console.log('Token refreshed successfully');
+                return true;
+            }
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            handleLogout(false, 'Token refresh failed');
+        }
+        return false;
+    }
+
+    // Enhanced logout function with rolling session cleanup
+    async function handleLogout(showMessageFlag = true, reason = 'Manual logout') {
+        console.log(`Logging out user... Reason: ${reason}`);
+        
+        try {
+            if (accessToken) {
+                await SecureAPI.logout();
+            }
+        } catch (error) {
+            console.error('Logout API error:', error);
+        } finally {
+            clearTokens();
+            clearInputFields();
+            showLoginPage();
+            
+            if (showMessageFlag) {
+                const message = reason === 'Manual logout' 
+                    ? "LOGGED OUT SUCCESSFULLY" 
+                    : `SESSION ENDED - ${reason.toUpperCase()} - PLEASE LOG IN AGAIN`;
+                showMessage(message, reason === 'Manual logout');
+            }
+        }
+    }
+
+    // Proactive token refresh scheduler for rolling sessions
+    function startTokenRefreshScheduler() {
+        // Check every 5 minutes if token needs refreshing
+        setInterval(async () => {
+            if (accessToken && refreshToken && sessionManager.isSessionActive()) {
+                const expiration = sessionStorage.getItem('tokenExpiration');
+                const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
+                
+                // Proactively refresh if less than refresh threshold remaining
+                if (timeUntilExpiry < SESSION_CONFIG.REFRESH_THRESHOLD && timeUntilExpiry > 0) {
+                    console.log('Proactively refreshing token...');
+                    await refreshTokenIfNeeded();
+                }
+            }
+        }, 5 * 60 * 1000); // Check every 5 minutes
+    }
+
+    // App initialization with rolling session support
+    async function initializeApp() {
+        console.log('Connecting to backend at:', API_BASE_URL);
+        console.log('Rolling session configuration:', SESSION_CONFIG);
+        
+        // Don't show connection messages if we already have valid tokens
+        const hasValidTokens = loadTokens();
+        
+        if (!hasValidTokens) {
+            showMessage('CONNECTING TO SERVER...', true);
+        }
+        
+        const isConnected = await SecureAPI.testConnection();
+        if (!isConnected) {
+            if (!hasValidTokens) {
+                showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+            }
+            serverConnectionEstablished = false;
+        } else {
+            console.log('Backend connection successful');
+            serverConnectionEstablished = true;
+            if (!hasValidTokens) {
+                showMessage('SERVER CONNECTION ESTABLISHED', true);
+            }
+        }
+        
+        // Always check auth status regardless of connection
+        await checkAuthStatus();
+    }
+
+    // Session info display function (for debugging)
+    function showSessionInfo() {
+        const info = sessionManager.getSessionInfo();
+        if (info) {
+            const sessionHours = Math.round(info.sessionDuration / (60 * 60 * 1000) * 10) / 10;
+            const inactiveMinutes = Math.round(info.inactivityDuration / (60 * 1000));
+            const expiryMinutes = Math.round(info.timeUntilExpiry / (60 * 1000));
+            
+            console.log(`Session Info:
+                Duration: ${sessionHours} hours
+                Inactive for: ${inactiveMinutes} minutes
+                Token expires in: ${expiryMinutes} minutes
+                Active: ${info.isActive}
+                Can extend: ${info.canExtend}`);
+            
+            showMessage(`SESSION: ${sessionHours}H ACTIVE, EXPIRES IN ${expiryMinutes}M`, true);
+        } else {
+            console.log('No active session');
+            showMessage('NO ACTIVE SESSION', false);
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add styles-loaded class to prevent FOUC
+        document.body.classList.add('styles-loaded');
+        
+        // Initialize immediately
+        initializeApp();
+        
+        // Start session monitoring and token refresh scheduler
+        startSessionMonitoring();
+        startTokenRefreshScheduler();
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && accessToken) {
+                // Page became visible, record activity and check session
+                sessionManager.recordActivity();
+                
+                // Prevent media bleed by ensuring only current player is active
+                const isHomePage = document.getElementById("HomePage").style.display !== "none";
+                const isDisguisePage = document.getElementById("DisguisePage").style.display !== "none";
+                
+                if (isHomePage) {
+                    // Ensure disguise player is completely stopped
+                    const disguiseAudio = document.getElementById('main-audio2');
+                    const disguiseVideo = document.getElementById('video2');
+                    if (disguiseAudio) {
+                        disguiseAudio.pause();
+                        disguiseAudio.src = '';
+                    }
+                    if (disguiseVideo) {
+                        disguiseVideo.pause();
+                        disguiseVideo.src = '';
+                        disguiseVideo.style.display = 'none';
+                    }
+                } else if (isDisguisePage) {
+                    // Ensure home player is completely stopped
+                    const homeAudio = document.getElementById('main-audio');
+                    const homeVideo = document.getElementById('video');
+                    if (homeAudio) {
+                        homeAudio.pause();
+                        homeAudio.src = '';
+                    }
+                    if (homeVideo) {
+                        homeVideo.pause();
+                        homeVideo.src = '';
+                        homeVideo.style.display = 'none';
+                    }
+                }
+                
+                checkAuthStatus();
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            stopSessionMonitoring();
+            stopAllMedia();
+            clearAllMediaSources();
+        });
+    
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', function(event) {
+            stopAllMedia();
+            clearAllMediaSources();
+            // Re-initialize based on current auth state
+            setTimeout(() => {
+                checkAuthStatus();
+            }, 100);
+        });
+        
+        // Handle page unload - cleanup
+        window.addEventListener('beforeunload', function() {
+            stopSessionMonitoring();
+        });
+        
+        // Sign in button
+        const signinBtn = document.getElementById("signinBtn");
+        if (signinBtn) {
+            signinBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                handleSecureLogin();
+            });
+        }
+
+        // Title logout functionality
+        ["title", "title2"].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener("click", function() {
+                    // Add visual feedback
+                    this.style.opacity = "0.7";
+                    setTimeout(() => {
+                        this.style.opacity = "1";
+                    }, 150);
+                    
+                    // Perform logout
+                    handleLogout(true, 'Manual logout');
+                });
+                
+                // Add hover effect to indicate it's clickable
+                element.style.cursor = "pointer";
+                element.title = "Click to logout";
+            }
+        });
+
+        // Keyboard support
+        const usernameField = document.getElementById("username");
+        const passwordField = document.getElementById("password");
+        
+        if (usernameField) {
+            usernameField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    passwordField?.focus();
+                }
+            });
+        }
+        
+        if (passwordField) {
+            passwordField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    handleSecureLogin();
+                }
+            });
+        }
+
+        // Debug keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Shift+R to reset login attempts
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                loginManager.clearAllAttempts();
+                showMessage("ALL LOGIN ATTEMPTS RESET", true);
+            }
+            
+            // Ctrl+Shift+S to show session info
+            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                e.preventDefault();
+                showSessionInfo();
+            }
+            
+            // Ctrl+Shift+E to extend session manually (for testing)
+            if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+                e.preventDefault();
+                if (sessionManager.extendSession()) {
+                    showMessage("SESSION EXTENDED MANUALLY", true);
+                } else {
+                    showMessage("CANNOT EXTEND SESSION", false);
+                }
+            }
+        });
+
+        // Network status monitoring
+        let wasOffline = false;
+        
+        window.addEventListener('online', () => {
+            console.log('Connection restored');
+            showMessage('CONNECTION RESTORED', true);
+            if (wasOffline) {
+                checkAuthStatus();
+                wasOffline = false;
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            wasOffline = true;
+            showMessage('NETWORK CONNECTION LOST. SOME FEATURES MAY BE LIMITED.');
+        });
+    });
+
+    // Expose functions globally for compatibility
+    window.handleSecureLogin = handleSecureLogin;
+    window.handleLogout = handleLogout;
+    window.assetManager = assetManager;
+    window.sessionManager = sessionManager;
+    window.showSessionInfo = showSessionInfo;
+    
+    // Legacy compatibility functions
+    window.changeText = function(isSuccessful) {
+        showMessage(isSuccessful ? "LOGIN SUCCESSFUL" : "LOGIN UNSUCCESSFUL", isSuccessful);
+    };
+    
+    window.clearInputFields = clearInputFields;
+  </script>
+
+  <!-- Your existing scripts in original order -->
+  <script src="AudioList.js"></script>
+  <script src="AudioPlayer00.js"></script>
+  <script src="VoiceControl.js"></script>
+  <!--<script src="voice-assistant.js"></script> -->
+  <script src="ServiceWorker.js"></script>
+  <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
+</body>
+</html>
