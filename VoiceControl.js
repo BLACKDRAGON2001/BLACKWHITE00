@@ -6,6 +6,9 @@ class VoiceControlSystem {
     this.buttons = {}; // Store buttons by ID
     this.originalButtonText = "START VOICE CONTROL";
     this.activeButtonText = "STOP VOICE CONTROL";
+    this.permissionGranted = false; // Track permission status
+    this.permissionChecked = false; // Track if we've checked permission
+    this.mediaStream = null; // Store the media stream to properly close it
     
     // Voice commands mapping to player methods
     this.commands = {
@@ -36,7 +39,7 @@ class VoiceControlSystem {
     this.initialize();
   }
 
-  initialize() {
+  async initialize() {
     // Check for Web Speech API support
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       console.warn('Web Speech API not supported in this browser');
@@ -81,6 +84,7 @@ class VoiceControlSystem {
         return;
       }
       if (event.error === 'not-allowed') {
+        this.permissionGranted = false;
         alert('Microphone access denied. Please allow microphone access to use voice control.');
         this.stopListening();
       }
@@ -95,7 +99,67 @@ class VoiceControlSystem {
       }
     };
 
+    // Check microphone permission once during initialization
+    await this.checkMicrophonePermission();
+    
     this.setupButtons();
+  }
+
+  async checkMicrophonePermission() {
+    if (this.permissionChecked) {
+      return this.permissionGranted;
+    }
+
+    try {
+      // Check current permission status
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+      
+      if (permissionStatus.state === 'granted') {
+        this.permissionGranted = true;
+        console.log('Microphone permission already granted');
+      } else if (permissionStatus.state === 'denied') {
+        this.permissionGranted = false;
+        console.log('Microphone permission denied');
+      } else {
+        // Permission state is 'prompt' - we'll ask when needed
+        this.permissionGranted = false;
+        console.log('Microphone permission not yet requested');
+      }
+
+      // Listen for permission changes
+      permissionStatus.onchange = () => {
+        this.permissionGranted = permissionStatus.state === 'granted';
+        console.log('Microphone permission changed:', permissionStatus.state);
+        
+        if (!this.permissionGranted && this.isListening) {
+          this.stopListening();
+        }
+      };
+
+      this.permissionChecked = true;
+      return this.permissionGranted;
+      
+    } catch (error) {
+      // Fallback for browsers that don't support permissions API
+      console.log('Permissions API not supported, will request permission when needed');
+      this.permissionChecked = true;
+      return false;
+    }
+  }
+
+  async requestMicrophonePermission() {
+    try {
+      // Request microphone access and store the stream
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.permissionGranted = true;
+      console.log('Microphone permission granted');
+      return true;
+    } catch (error) {
+      this.permissionGranted = false;
+      console.error('Microphone permission denied:', error);
+      alert('Microphone access is required for voice control. Please allow microphone access and try again.');
+      return false;
+    }
   }
 
   setupButtons() {
@@ -260,36 +324,27 @@ class VoiceControlSystem {
       return;
     }
 
-    try {
-      // Check if we already have microphone permission
-      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
-      
-      if (permissionStatus.state === 'granted') {
-        // Permission already granted, start directly
-        this.isListening = true;
-        this.recognition.start();
-        console.log('Voice control started');
-      } else if (permissionStatus.state === 'prompt') {
-        // Need to request permission
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.isListening = true;
-        this.recognition.start();
-        console.log('Voice control started with new permission');
-      } else {
-        // Permission denied
-        alert('Microphone access is required for voice control. Please enable microphone access in your browser settings.');
-        console.warn('Microphone permission denied');
+    // Check if we already have permission
+    if (!this.permissionGranted) {
+      // Only request permission if we don't have it
+      const granted = await this.requestMicrophonePermission();
+      if (!granted) {
+        return;
       }
+    }
+
+    try {
+      this.isListening = true;
+      this.recognition.start();
+      console.log('Voice control started');
     } catch (error) {
-      // Fallback for browsers that don't support permissions API
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.isListening = true;
-        this.recognition.start();
-        console.log('Voice control started (fallback method)');
-      } catch (fallbackError) {
-        console.error('Microphone access denied:', fallbackError);
-        alert('Microphone access is required for voice control. Please allow microphone access and try again.');
+      console.error('Failed to start voice recognition:', error);
+      this.isListening = false;
+      
+      // If we get an error, the permission might have been revoked
+      if (error.name === 'NotAllowedError') {
+        this.permissionGranted = false;
+        alert('Microphone access was denied. Please allow microphone access in your browser settings.');
       }
     }
   }
@@ -299,8 +354,23 @@ class VoiceControlSystem {
     if (this.recognition) {
       this.recognition.stop();
     }
+    
+    // Properly close the microphone stream
+    this.closeMicrophoneStream();
+    
     this.updateButtonState(false);
     console.log('Voice control stopped');
+  }
+
+  closeMicrophoneStream() {
+    if (this.mediaStream) {
+      // Stop all tracks in the media stream
+      this.mediaStream.getTracks().forEach(track => {
+        track.stop();
+        console.log('Microphone track stopped');
+      });
+      this.mediaStream = null;
+    }
   }
 
   updateButtonState(listening) {
@@ -527,7 +597,7 @@ class VoiceControlSystem {
   }
 
   handleLogout() {
-    // Stop voice control before logout
+    // Stop voice control and close microphone before logout
     this.stopListening();
     
     // Execute logout function
@@ -551,6 +621,9 @@ class VoiceControlSystem {
   destroy() {
     this.stopListening();
     
+    // Ensure microphone is properly closed
+    this.closeMicrophoneStream();
+    
     // Clean up event listeners for each button
     Object.values(this.buttons).forEach(buttonInfo => {
       const button = buttonInfo.element;
@@ -565,6 +638,11 @@ class VoiceControlSystem {
 
   isActive() {
     return this.isListening;
+  }
+
+  // New method to check permission status
+  hasPermission() {
+    return this.permissionGranted;
   }
 }
 
@@ -582,12 +660,36 @@ document.addEventListener('DOMContentLoaded', function() {
   const originalHandleLogout = window.handleLogout;
   if (originalHandleLogout) {
     window.handleLogout = function(...args) {
-      // Stop voice control before logout
-      if (window.voiceControl && window.voiceControl.isActive()) {
-        window.voiceControl.stopListening();
+      // Stop voice control and close microphone before logout
+      if (window.voiceControl) {
+        if (window.voiceControl.isActive()) {
+          window.voiceControl.stopListening();
+        }
+        // Ensure microphone stream is closed
+        window.voiceControl.closeMicrophoneStream();
       }
       // Call original logout function
       return originalHandleLogout.apply(this, args);
     };
+  }
+});
+
+// Also handle page unload/refresh to ensure microphone is released
+window.addEventListener('beforeunload', function() {
+  if (window.voiceControl) {
+    window.voiceControl.stopListening();
+    window.voiceControl.closeMicrophoneStream();
+  }
+});
+
+// Handle visibility change (tab switching) to pause voice control
+document.addEventListener('visibilitychange', function() {
+  if (window.voiceControl && window.voiceControl.isActive()) {
+    if (document.hidden) {
+      // Tab is hidden, pause voice control
+      window.voiceControl.stopListening();
+      console.log('Voice control paused - tab hidden');
+    }
+    // Note: We don't auto-resume when tab becomes visible to avoid unexpected behavior
   }
 });
