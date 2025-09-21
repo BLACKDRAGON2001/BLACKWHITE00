@@ -1705,9 +1705,14 @@
     async function handleLogout(showMessageFlag = true, reason = 'Manual logout') {
         console.log(`Logging out user... Reason: ${reason}`);
         
+        // Clean up players before logout
+        if (typeof cleanupPlayers === 'function') {
+            cleanupPlayers();
+        }
+        
         try {
             if (accessToken) {
-                await SecureAPI.logout();
+            await SecureAPI.logout();
             }
         } catch (error) {
             console.error('Logout API error:', error);
@@ -1717,10 +1722,10 @@
             showLoginPage();
             
             if (showMessageFlag) {
-                const message = reason === 'Manual logout' 
-                    ? "LOGGED OUT SUCCESSFULLY" 
-                    : `SESSION ENDED - ${reason.toUpperCase()} - PLEASE LOG IN AGAIN`;
-                showMessage(message, reason === 'Manual logout');
+            const message = reason === 'Manual logout' 
+                ? "LOGGED OUT SUCCESSFULLY" 
+                : `SESSION ENDED - ${reason.toUpperCase()} - PLEASE LOG IN AGAIN`;
+            showMessage(message, reason === 'Manual logout');
             }
         }
     }

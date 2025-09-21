@@ -1,9 +1,14 @@
 // Add this to your existing test.js file
 document.getElementById("title").addEventListener("click", function() {
-  pauseAudio();
+  // Clean up players instead of just pausing
+  if (typeof cleanupPlayers === 'function') {
+    cleanupPlayers();
+  }
+  
   // Clear HomePage player state
   localStorage.removeItem("musicIndex");
   localStorage.removeItem("isMusicPaused");
+  
   // Existing logout logic
   document.getElementById("HomePage").style.display = "none";
   document.getElementById("LoginPage").style.display = "block";
@@ -14,10 +19,15 @@ document.getElementById("title").addEventListener("click", function() {
 });
 
 document.getElementById("title2").addEventListener("click", function() {
-  pauseAudio2();
+  // Clean up players instead of just pausing
+  if (typeof cleanupPlayers === 'function') {
+    cleanupPlayers();
+  }
+  
   // Clear DisguisePage player state
   localStorage.removeItem("musicIndex2");
   localStorage.removeItem("isMusicPaused2");
+  
   // Existing logout logic
   document.getElementById("DisguisePage").style.display = "none";
   document.getElementById("LoginPage").style.display = "block";
@@ -2080,8 +2090,119 @@ function handleSize() {
 }
 
 // Initialize players when DOM loads
+// Global player initialization functions
+function initializeHomePlayer() {
+  if (!window.homePlayer) {
+    console.log('Initializing Home Player...');
+    window.homePlayer = new MusicPlayer();
+    handleSize();
+    
+    // Prefetch assets for home player
+    requestIdleCallback(() => {
+      if (window.allMusic) {
+        window.homePlayer.assetManager?.prefetchPlaylistAssets(window.allMusic);
+      }
+    });
+  }
+}
+
+function initializeDisguisePlayer() {
+  if (!window.disguisePlayer) {
+    console.log('Initializing Disguise Player...');
+    window.disguisePlayer = new MusicPlayer('2');
+    
+    // Prefetch assets for disguise player  
+    requestIdleCallback(() => {
+      if (window.allMusicDisguise) {
+        window.disguisePlayer.assetManager?.prefetchPlaylistAssets(window.allMusicDisguise);
+      }
+    });
+  }
+}
+
+function cleanupPlayers() {
+  console.log('Cleaning up music players...');
+  
+  if (window.homePlayer) {
+    // Stop any playing audio/video
+    const audio = document.getElementById('main-audio');
+    const video = document.getElementById('video');
+    
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = '';
+      audio.load(); // Reset the audio element
+    }
+    
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      video.src = '';
+      video.load(); // Reset the video element
+    }
+    
+    // Clear any intervals/timeouts the player might have
+    if (window.homePlayer.sessionCheckInterval) {
+      clearInterval(window.homePlayer.sessionCheckInterval);
+    }
+    if (window.homePlayer.searchTimeout) {
+      clearTimeout(window.homePlayer.searchTimeout);
+    }
+    if (window.homePlayer.renderFrame) {
+      cancelAnimationFrame(window.homePlayer.renderFrame);
+    }
+    
+    console.log('Home player deinitialized');
+    window.homePlayer = null;
+  }
+  
+  if (window.disguisePlayer) {
+    // Stop any playing audio/video
+    const audio2 = document.getElementById('main-audio2');
+    const video2 = document.getElementById('video2');
+    
+    if (audio2) {
+      audio2.pause();
+      audio2.currentTime = 0;
+      audio2.src = '';
+      audio2.load(); // Reset the audio element
+    }
+    
+    if (video2) {
+      video2.pause();
+      video2.currentTime = 0;
+      video2.src = '';
+      video2.load(); // Reset the video element
+    }
+    
+    // Clear any intervals/timeouts the player might have
+    if (window.disguisePlayer.sessionCheckInterval) {
+      clearInterval(window.disguisePlayer.sessionCheckInterval);
+    }
+    if (window.disguisePlayer.searchTimeout) {
+      clearTimeout(window.disguisePlayer.searchTimeout);
+    }
+    if (window.disguisePlayer.renderFrame) {
+      cancelAnimationFrame(window.disguisePlayer.renderFrame);
+    }
+    
+    console.log('Disguise player deinitialized');
+    window.disguisePlayer = null;
+  }
+  
+  // Clear any cached data
+  if (window.assetManager) {
+    window.assetManager.prefetchedAssets?.clear();
+    window.assetManager.imageCache?.clear();
+  }
+  
+  console.log('All players cleaned up successfully');
+}
+
+// Only initialize handleSize on DOM load - players will be initialized on login
 document.addEventListener("DOMContentLoaded", () => {
-  window.homePlayer = new MusicPlayer();       // Original page
-  window.disguisePlayer = new MusicPlayer('2'); // Disguise page
   handleSize();
 });
+
+window.cleanupPlayers = cleanupPlayers;

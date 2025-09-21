@@ -504,12 +504,6 @@
                 return false;
             }
             
-            // Don't extend if we're at maximum session duration
-            if (this.sessionStartTime && (now - this.sessionStartTime) >= SESSION_CONFIG.MAX_SESSION_DURATION) {
-                console.log('Maximum session duration reached, no extension allowed');
-                return false;
-            }
-            
             // Extend the session
             return this.extendSession();
         }
@@ -518,12 +512,8 @@
             const now = Date.now();
             const currentExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
             
-            // Calculate new expiration time
+            // Calculate new expiration time - no maximum session limit
             let newExpiration = Math.max(currentExpiration, now) + SESSION_CONFIG.ACTIVITY_EXTENSION;
-            
-            // Ensure we don't exceed maximum session duration
-            const maxAllowedExpiration = this.sessionStartTime + SESSION_CONFIG.MAX_SESSION_DURATION;
-            newExpiration = Math.min(newExpiration, maxAllowedExpiration);
             
             // Update token expiration
             sessionStorage.setItem('tokenExpiration', newExpiration.toString());
@@ -544,15 +534,9 @@
                 return false;
             }
             
-            // Check for inactivity timeout
+            // Only check for inactivity timeout - ignore maximum session duration
             if ((now - this.lastActivityTime) > SESSION_CONFIG.INACTIVITY_TIMEOUT) {
                 console.log('Session ended due to inactivity');
-                return false;
-            }
-            
-            // Check maximum session duration
-            if ((now - this.sessionStartTime) > SESSION_CONFIG.MAX_SESSION_DURATION) {
-                console.log('Session ended due to maximum duration reached');
                 return false;
             }
             
@@ -598,8 +582,13 @@
             
             // Start periodic activity check
             this.activityCheckInterval = setInterval(() => {
-                if (!this.isSessionActive()) {
-                    console.log('Session inactive, logging out');
+                const now = Date.now();
+                const lastActivity = parseInt(sessionStorage.getItem('lastActivityTime')) || 0;
+                const inactivityDuration = now - lastActivity;
+                
+                // Only logout after exactly 2 hours of inactivity
+                if (inactivityDuration > SESSION_CONFIG.INACTIVITY_TIMEOUT) {
+                    console.log(`Session inactive for ${Math.round(inactivityDuration / (60 * 1000))} minutes, logging out`);
                     handleLogout(true, 'Session ended due to inactivity');
                 }
             }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL);
@@ -959,14 +948,15 @@
                 }
                 
                 // Try to refresh if approaching expiration
+                // Try to refresh if approaching expiration
                 if (timeUntilExpiry < SESSION_CONFIG.REFRESH_THRESHOLD && timeUntilExpiry > 0) {
                     console.log('Token expiring soon, refreshing...');
                     refreshTokenIfNeeded();
                 }
-                // If expired, end session
+                // Only logout if session is truly inactive, not just token expired
                 else if (timeUntilExpiry <= 0) {
-                    console.log('Token expired during monitoring');
-                    handleLogout(true, 'Session expired');
+                    console.log('Token expired, attempting refresh...');
+                    refreshTokenIfNeeded(); // Try to refresh instead of logging out
                 }
                 
                 // Log session info periodically (every 10 checks)
@@ -1044,20 +1034,8 @@
                 // Navigate based on user role
                 if (currentUser.role === 'home') {
                     showHomePage();
-                    
-                    requestIdleCallback(() => {
-                        if (window.allMusic) {
-                            assetManager.prefetchPlaylistAssets(window.allMusic);
-                        }
-                    });
                 } else if (currentUser.role === 'disguise') {
                     showDisguisePage();
-                    
-                    requestIdleCallback(() => {
-                        if (window.allMusicDisguise) {
-                            assetManager.prefetchPlaylistAssets(window.allMusicDisguise);
-                        }
-                    });
                 } else {
                     console.warn('Unknown user role:', currentUser.role);
                     showHomePage();
@@ -1126,6 +1104,11 @@
         sessionStorage.setItem("HomeLoginTime", new Date().getTime());
         sessionStorage.removeItem("DisguiseLoginTime");
         
+        // Initialize Home Player after login
+        if (typeof initializeHomePlayer === 'function') {
+            initializeHomePlayer();
+        }
+        
         // Start monitoring when logged in
         startSessionMonitoring();
     }
@@ -1146,6 +1129,11 @@
         
         sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
         sessionStorage.removeItem("HomeLoginTime");
+        
+        // Initialize Disguise Player after login
+        if (typeof initializeDisguisePlayer === 'function') {
+            initializeDisguisePlayer();
+        }
         
         // Start monitoring when logged in
         startSessionMonitoring();
