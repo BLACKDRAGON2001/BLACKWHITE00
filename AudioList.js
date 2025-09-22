@@ -679,6 +679,13 @@ let allMusic = [
     },
 
     {
+        name: "Roxanne",
+        artist: "Arizona Zervas",
+        src: "Roxanne",
+        coverType: "Images"
+    },
+
+    {
         name: "Islands",
         artist: "Opoem And Tomo",
         src: "Islands",
@@ -1092,6 +1099,14 @@ let allMusic = [
     },
 
     {
+        name: "E.T.",
+        artist: "Katy Perry",
+        src: "ET",
+        coverType: "Images",
+        type: "gif"
+    },
+
+    {
         name: "Firework",
         artist: "Katy Perry",
         src: "Firework",
@@ -1100,7 +1115,7 @@ let allMusic = [
 
     {
         name: "Girl On Fire",
-        artist: "Katy Perry",
+        artist: "Alicia Keys",
         src: "GirlOnFire",
         coverType: "Images"
     },
@@ -1197,6 +1212,13 @@ let allMusic = [
     },
 
     {
+        name: "Liar Liar",
+        artist: "MoStack",
+        src: "LiarLiar",
+        coverType: "Images"
+    },
+
+    {
         name: "If We Being Real",
         artist: "Yeat Music",
         src: "IfWeBeingReal",
@@ -1256,6 +1278,55 @@ let allMusic = [
         name: "33 Max Verstappen",
         artist: "Carte Blanq Nils Van Zandt And Maxx Power",
         src: "MVSong",
+        coverType: "Images"
+    },
+
+    {
+        name: "Just Keep Watching",
+        artist: "Tate McRae",
+        src: "JustKeepWatching",
+        coverType: "Images"
+    },
+
+    {
+        name: "All At Once",
+        artist: "Madison Beer",
+        src: "AllAtOnce",
+        coverType: "Images"
+    },
+
+    {
+        name: "Messy",
+        artist: "ROSÉ",
+        src: "Messy",
+        coverType: "Images"
+    },
+
+    {
+        name: "Drive",
+        artist: "Ed Sheeran",
+        src: "Drive",
+        coverType: "Images"
+    },
+
+    {
+        name: "No Room For A Saint",
+        artist: "Dom Dolla And Nathan Nicholson",
+        src: "NoRoomForASaint",
+        coverType: "Images"
+    },
+
+    {
+        name: "Dont Let Me Drown",
+        artist: "Burna Boy",
+        src: "DontLetMeDrown",
+        coverType: "Images"
+    },
+
+    {
+        name: "OMG",
+        artist: "Tiesto And Sexyy Red",
+        src: "OMG",
         coverType: "Images"
     },
 
@@ -1445,6 +1516,20 @@ let allMusic = [
         name: "Wet Vagina",
         artist: "Doja Cat",
         src: "WetVagina",
+        coverType: "Images"
+    },
+
+    {
+        name: "Candy",
+        artist: "Doja Cat",
+        src: "Candy2",
+        coverType: "Images"
+    },
+
+    {
+        name: "Megatron",
+        artist: "Doja Cat",
+        src: "Megatron",
         coverType: "Images"
     },
 
@@ -2250,6 +2335,13 @@ let allMusic = [
         name: "I Wanna Cum",
         artist: "Letha Weapons",
         src: "IWannaCum",
+        coverType: "Images"
+    },
+
+    {
+        name: "CUM Remix",
+        artist: "Brooke Candy And SOPHIE",
+        src: "CUMRemix",
         coverType: "Images"
     },
 
@@ -3500,6 +3592,13 @@ let allMusic = [
     },
 
     {
+        name: "Viva La Vida",
+        artist: "Coldplay",
+        src: "VivaLaVida",
+        coverType: "Images"
+    },
+
+    {
         name: "Life For Rent",
         artist: "Dido",
         src: "LifeForRent",
@@ -3948,6 +4047,14 @@ let allMusic = [
     },
 
     {
+        name: "Bikini Porn",
+        artist: "Tove Lo",
+        src: "BikiniPorn",
+        coverType: "Images",
+        type: "gif"
+    },
+
+    {
         name: "Gasoline Slowed",
         artist: "Halsey",
         src: "GasolineSlowed",
@@ -4357,6 +4464,20 @@ let allMusic = [
         name: "Under The Influence X Streets",
         artist: "Chris Brown x Weeknd",
         src: "UnderTheInfluenceXStreets",
+        coverType: "Images"
+    },
+
+    {
+        name: "Or Nah",
+        artist: "Ty Dolla Weeknd $ign Wiz Khalifa And DJ Mustard",
+        src: "OrNah",
+        coverType: "Images"
+    },
+
+    {
+        name: "Call Out My Name",
+        artist: "Weeknd",
+        src: "CallOutMyName",
         coverType: "Images"
     },
 
