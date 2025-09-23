@@ -69,8 +69,8 @@
   <script>
     // Quick auth check to prevent flicker
     (function() {
-      const hasTokens = sessionStorage.getItem('accessToken') && sessionStorage.getItem('refreshToken');
-      const expiration = sessionStorage.getItem('tokenExpiration');
+      const hasTokens = localStorage.getItem('accessToken') && localStorage.getItem('refreshToken');
+      const expiration = localStorage.getItem('tokenExpiration');
       
       // Check if tokens exist and aren't expired
       const isTokenValid = hasTokens && expiration && (Date.now() < parseInt(expiration));
@@ -344,17 +344,16 @@
     </div>
   </div>
 
-  <!-- Rolling Session Authentication System -->
+  <!-- Updated JWT Authentication System -->
   <script>
     // API Configuration
     const API_BASE_URL = 'https://audioplayerbackend.onrender.com';
     
     // Rolling Session Configuration
     const SESSION_CONFIG = {
-        // Base token duration (4 hours)
+        // Base token duration (4 hours - matches backend)
         BASE_TOKEN_DURATION: 4 * 60 * 60 * 1000,
-        // Maximum session duration (24 hours)
-        MAX_SESSION_DURATION: 24 * 60 * 60 * 1000,
+        // Maximum session duration removed - unlimited with activity
         // Activity extension (30 minutes added per activity)
         ACTIVITY_EXTENSION: 30 * 60 * 1000,
         // Minimum time between extensions (5 minutes)
@@ -460,9 +459,9 @@
             this.lastActivityTime = now;
             this.lastExtensionTime = now;
             
-            sessionStorage.setItem('sessionStartTime', now.toString());
-            sessionStorage.setItem('lastActivityTime', now.toString());
-            sessionStorage.setItem('lastExtensionTime', now.toString());
+            localStorage.setItem('sessionStartTime', now.toString());
+            localStorage.setItem('lastActivityTime', now.toString());
+            localStorage.setItem('lastExtensionTime', now.toString());
             
             this.startActivityMonitoring();
             console.log('Rolling session started');
@@ -473,24 +472,24 @@
             this.lastActivityTime = null;
             this.lastExtensionTime = null;
             
-            sessionStorage.removeItem('sessionStartTime');
-            sessionStorage.removeItem('lastActivityTime');
-            sessionStorage.removeItem('lastExtensionTime');
+            localStorage.removeItem('sessionStartTime');
+            localStorage.removeItem('lastActivityTime');
+            localStorage.removeItem('lastExtensionTime');
             
             this.stopActivityMonitoring();
             console.log('Rolling session ended');
         }
 
         loadSessionData() {
-            this.sessionStartTime = parseInt(sessionStorage.getItem('sessionStartTime')) || null;
-            this.lastActivityTime = parseInt(sessionStorage.getItem('lastActivityTime')) || null;
-            this.lastExtensionTime = parseInt(sessionStorage.getItem('lastExtensionTime')) || null;
+            this.sessionStartTime = parseInt(localStorage.getItem('sessionStartTime')) || null;
+            this.lastActivityTime = parseInt(localStorage.getItem('lastActivityTime')) || null;
+            this.lastExtensionTime = parseInt(localStorage.getItem('lastExtensionTime')) || null;
         }
 
         recordActivity() {
             const now = Date.now();
             this.lastActivityTime = now;
-            sessionStorage.setItem('lastActivityTime', now.toString());
+            localStorage.setItem('lastActivityTime', now.toString());
             
             // Check if we should extend the session
             this.checkForSessionExtension();
@@ -510,15 +509,15 @@
 
         extendSession() {
             const now = Date.now();
-            const currentExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
+            const currentExpiration = parseInt(localStorage.getItem('tokenExpiration')) || 0;
             
-            // Calculate new expiration time - no maximum session limit
+            // Calculate new expiration time
             let newExpiration = Math.max(currentExpiration, now) + SESSION_CONFIG.ACTIVITY_EXTENSION;
             
             // Update token expiration
-            sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+            localStorage.setItem('tokenExpiration', newExpiration.toString());
             this.lastExtensionTime = now;
-            sessionStorage.setItem('lastExtensionTime', now.toString());
+            localStorage.setItem('lastExtensionTime', now.toString());
             
             const extensionMinutes = Math.round((newExpiration - now) / (60 * 1000));
             console.log(`Session extended by activity. New expiration in ${extensionMinutes} minutes`);
@@ -534,7 +533,7 @@
                 return false;
             }
             
-            // Only check for inactivity timeout - ignore maximum session duration
+            // Check for inactivity timeout
             if ((now - this.lastActivityTime) > SESSION_CONFIG.INACTIVITY_TIMEOUT) {
                 console.log('Session ended due to inactivity');
                 return false;
@@ -549,15 +548,14 @@
             const now = Date.now();
             const sessionDuration = now - this.sessionStartTime;
             const inactivityDuration = now - this.lastActivityTime;
-            const tokenExpiration = parseInt(sessionStorage.getItem('tokenExpiration')) || 0;
+            const tokenExpiration = parseInt(localStorage.getItem('tokenExpiration')) || 0;
             const timeUntilExpiry = tokenExpiration - now;
             
             return {
                 sessionDuration,
                 inactivityDuration,
                 timeUntilExpiry,
-                isActive: this.isSessionActive(),
-                canExtend: (now - this.sessionStartTime) < SESSION_CONFIG.MAX_SESSION_DURATION
+                isActive: this.isSessionActive()
             };
         }
 
@@ -583,7 +581,7 @@
             // Start periodic activity check
             this.activityCheckInterval = setInterval(() => {
                 const now = Date.now();
-                const lastActivity = parseInt(sessionStorage.getItem('lastActivityTime')) || 0;
+                const lastActivity = parseInt(localStorage.getItem('lastActivityTime')) || 0;
                 const inactivityDuration = now - lastActivity;
                 
                 // Only logout after exactly 2 hours of inactivity
@@ -632,25 +630,33 @@
 
         getAttemptData(username) {
             const key = this.getStorageKey(username);
-            const data = sessionStorage.getItem(key);
+            const data = localStorage.getItem(key);
             if (!data) return null;
             
             try {
                 return JSON.parse(data);
             } catch (e) {
-                sessionStorage.removeItem(key);
+                localStorage.removeItem(key);
                 return null;
             }
         }
 
         setAttemptData(username, data) {
             const key = this.getStorageKey(username);
-            sessionStorage.setItem(key, JSON.stringify(data));
+            localStorage.setItem(key, JSON.stringify(data));
         }
 
         clearAttempts(username) {
             const key = this.getStorageKey(username);
-            sessionStorage.removeItem(key);
+            localStorage.removeItem(key);
+        }
+
+        clearAllAttempts() {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('loginAttempts_')) {
+                    localStorage.removeItem(key);
+                }
+            });
         }
 
         canAttemptLogin(username) {
@@ -772,10 +778,19 @@
             });
         },
 
+        async sendHeartbeat() {
+            return this.request('/api/auth/heartbeat', {
+                method: 'POST'
+            });
+        },
+
         async testConnection(retries = 3) {
             for (let i = 0; i < retries; i++) {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/health`, { timeout: 5000 });
+                    const response = await fetch(`${API_BASE_URL}/health`, { 
+                        timeout: 5000,
+                        signal: AbortSignal.timeout(5000)
+                    });
                     if (response.ok) {
                         const data = await response.json();
                         console.log('Backend connection successful:', data);
@@ -859,16 +874,16 @@
         // Initial token expiration (4 hours base duration)
         const expirationTime = Date.now() + SESSION_CONFIG.BASE_TOKEN_DURATION;
         
-        sessionStorage.setItem('accessToken', accessToken);
-        sessionStorage.setItem('refreshToken', refreshToken);
-        sessionStorage.setItem('tokenTimestamp', Date.now().toString());
-        sessionStorage.setItem('tokenExpiration', expirationTime.toString());
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
+        localStorage.setItem('tokenExpiration', expirationTime.toString());
     }
 
     function loadTokens() {
-        accessToken = sessionStorage.getItem('accessToken');
-        refreshToken = sessionStorage.getItem('refreshToken');
-        const expiration = sessionStorage.getItem('tokenExpiration');
+        accessToken = localStorage.getItem('accessToken');
+        refreshToken = localStorage.getItem('refreshToken');
+        const expiration = localStorage.getItem('tokenExpiration');
         
         // Load session data
         sessionManager.loadSessionData();
@@ -913,12 +928,12 @@
         currentUser = null;
         
         // Clear all session data
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        sessionStorage.removeItem('tokenTimestamp');
-        sessionStorage.removeItem('tokenExpiration');
-        sessionStorage.removeItem('HomeLoginTime');
-        sessionStorage.removeItem('DisguiseLoginTime');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('tokenTimestamp');
+        localStorage.removeItem('tokenExpiration');
+        localStorage.removeItem('HomeLoginTime');
+        localStorage.removeItem('DisguiseLoginTime');
         
         // End rolling session
         sessionManager.endSession();
@@ -936,7 +951,7 @@
         
         sessionCheckInterval = setInterval(() => {
             if (accessToken) {
-                const expiration = sessionStorage.getItem('tokenExpiration');
+                const expiration = localStorage.getItem('tokenExpiration');
                 const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
                 const sessionInfo = sessionManager.getSessionInfo();
                 
@@ -948,15 +963,14 @@
                 }
                 
                 // Try to refresh if approaching expiration
-                // Try to refresh if approaching expiration
                 if (timeUntilExpiry < SESSION_CONFIG.REFRESH_THRESHOLD && timeUntilExpiry > 0) {
                     console.log('Token expiring soon, refreshing...');
                     refreshTokenIfNeeded();
                 }
-                // Only logout if session is truly inactive, not just token expired
+                // Try to refresh instead of logging out immediately when token expires
                 else if (timeUntilExpiry <= 0) {
                     console.log('Token expired, attempting refresh...');
-                    refreshTokenIfNeeded(); // Try to refresh instead of logging out
+                    refreshTokenIfNeeded();
                 }
                 
                 // Log session info periodically (every 10 checks)
@@ -966,7 +980,7 @@
                     console.log(`Session active: ${sessionDurationHours}h, inactive for: ${inactivityMinutes}m`);
                 }
             }
-        }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL); // Check every minute
+        }, SESSION_CONFIG.ACTIVITY_CHECK_INTERVAL);
     }
 
     function stopSessionMonitoring() {
@@ -1101,8 +1115,8 @@
         document.documentElement.style.setProperty('--initial-home-display', 'block');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
         
-        sessionStorage.setItem("HomeLoginTime", new Date().getTime());
-        sessionStorage.removeItem("DisguiseLoginTime");
+        localStorage.setItem("HomeLoginTime", new Date().getTime());
+        localStorage.removeItem("DisguiseLoginTime");
         
         // Initialize Home Player after login
         if (typeof initializeHomePlayer === 'function') {
@@ -1127,8 +1141,8 @@
         document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'block');
         
-        sessionStorage.setItem("DisguiseLoginTime", new Date().getTime());
-        sessionStorage.removeItem("HomeLoginTime");
+        localStorage.setItem("DisguiseLoginTime", new Date().getTime());
+        localStorage.removeItem("HomeLoginTime");
         
         // Initialize Disguise Player after login
         if (typeof initializeDisguisePlayer === 'function') {
@@ -1193,13 +1207,13 @@
             if (response.success) {
                 accessToken = response.data.accessToken;
                 
-                // Extend session with new token
+                // Update token with new expiration
                 const now = Date.now();
                 const newExpiration = now + SESSION_CONFIG.BASE_TOKEN_DURATION;
                 
-                sessionStorage.setItem('accessToken', accessToken);
-                sessionStorage.setItem('tokenTimestamp', now.toString());
-                sessionStorage.setItem('tokenExpiration', newExpiration.toString());
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('tokenTimestamp', now.toString());
+                localStorage.setItem('tokenExpiration', newExpiration.toString());
                 
                 // Record activity to potentially extend session further
                 sessionManager.recordActivity();
@@ -1243,7 +1257,7 @@
         // Check every 5 minutes if token needs refreshing
         setInterval(async () => {
             if (accessToken && refreshToken && sessionManager.isSessionActive()) {
-                const expiration = sessionStorage.getItem('tokenExpiration');
+                const expiration = localStorage.getItem('tokenExpiration');
                 const timeUntilExpiry = expiration ? parseInt(expiration) - Date.now() : 0;
                 
                 // Proactively refresh if less than refresh threshold remaining
@@ -1253,6 +1267,19 @@
                 }
             }
         }, 5 * 60 * 1000); // Check every 5 minutes
+    }
+
+    // Send periodic heartbeats to maintain server-side session
+    function startHeartbeat() {
+        setInterval(async () => {
+            if (accessToken && sessionManager.isSessionActive()) {
+                try {
+                    await SecureAPI.sendHeartbeat();
+                } catch (error) {
+                    console.warn('Heartbeat failed:', error);
+                }
+            }
+        }, 10 * 60 * 1000); // Send heartbeat every 10 minutes
     }
 
     // App initialization with rolling session support
@@ -1297,8 +1324,7 @@
                 Duration: ${sessionHours} hours
                 Inactive for: ${inactiveMinutes} minutes
                 Token expires in: ${expiryMinutes} minutes
-                Active: ${info.isActive}
-                Can extend: ${info.canExtend}`);
+                Active: ${info.isActive}`);
             
             showMessage(`SESSION: ${sessionHours}H ACTIVE, EXPIRES IN ${expiryMinutes}M`, true);
         } else {
@@ -1318,6 +1344,7 @@
         // Start session monitoring and token refresh scheduler
         startSessionMonitoring();
         startTokenRefreshScheduler();
+        startHeartbeat();
         
         // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
