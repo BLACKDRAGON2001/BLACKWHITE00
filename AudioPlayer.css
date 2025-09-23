@@ -649,7 +649,7 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   .progress-bar::before {
     height: 16px;
     width: 16px;
-    right: -7.5px;
+    right: -7px;
     margin-right: 0;
   }
   
