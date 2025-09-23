@@ -1100,8 +1100,30 @@ let allMusic = [
 
     {
         name: "E.T.",
-        artist: "Katy Perry",
+        artist: "Katy Perry And Kanye West",
         src: "ET",
+        coverType: "Images",
+        type: "gif"
+    },
+
+    {
+        name: "I Kissed A Girl",
+        artist: "Katy Perry",
+        src: "IKissedAGirl",
+        coverType: "Images",
+    },
+
+    {
+        name: "Bon Appetit",
+        artist: "Katy Perry And The Migos",
+        src: "BonAppetit",
+        coverType: "Images",
+    },
+
+    {
+        name: "Hot N Cold",
+        artist: "Katy Perry",
+        src: "HotNCold",
         coverType: "Images",
         type: "gif"
     },
@@ -2353,6 +2375,13 @@ let allMusic = [
     },
 
     {
+        name: "Make U Cum",
+        artist: "Ayesha Erotica",
+        src: "MakeUCum",
+        coverType: "Images"
+    },
+
+    {
         name: "Suck",
         artist: "COBRAH",
         src: "Suck",
@@ -2461,13 +2490,6 @@ let allMusic = [
         name: "Sixteen",
         artist: "Ayesha Erotica",
         src: "Sixteen",
-        coverType: "Images"
-    },
-
-    {
-        name: "Make U Cum",
-        artist: "Ayesha Erotica",
-        src: "MakeUCum",
         coverType: "Images"
     },
 
