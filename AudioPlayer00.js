@@ -149,6 +149,8 @@ class MusicPlayer {
     this.isMuted = false;
     this.isInitializing = true;
 
+    this.isDragging = false;
+
     this.searchField = this.wrapper.querySelector('.search-field');
     this.isSearching = false;
     this.filteredMusic = [];
@@ -227,8 +229,10 @@ class MusicPlayer {
     this.populateMusicList(this.originalOrder);
     this.updatePlayingSong();
     this.setupResizeObserver();
-    // Initialize search optimization
     this.initializeSearchOptimization();
+    
+    // Add enhanced progress bar functionality
+    this.initializeEnhancedProgressBar();
     
     // Test autoplay capability on mobile
     //this.testAutoplaySupport();
@@ -266,6 +270,23 @@ class MusicPlayer {
         this.borderBox.style.display = "none";
       }
     });
+  }
+
+  initializeEnhancedProgressBar() {
+    // Set up dragging functionality
+    this.setupProgressBarDragging();
+    
+    // Add hover effects for better UX
+    this.progressArea.addEventListener('mouseenter', () => {
+      this.progressBar.style.transition = 'width 0.1s ease';
+    });
+    
+    this.progressArea.addEventListener('mouseleave', () => {
+      this.progressBar.style.transition = 'width 0.05s ease';
+    });
+    
+    // Improve click handling
+    this.progressArea.addEventListener("click", (e) => this.handleProgressClick(e));
   }
 
   updateBorderBoxDisplay() {
@@ -934,24 +955,139 @@ class MusicPlayer {
   }
 
   handleProgressClick(e) {
-    const clickedOffsetX = e.offsetX;
+    const rect = this.progressArea.getBoundingClientRect();
+    const clickedOffsetX = e.clientX - rect.left;
     const songDuration = this.mainAudio.duration;
-    this.mainAudio.currentTime = (clickedOffsetX / this.progressArea.clientWidth) * songDuration;
-    this.playMusic();
+    
+    if (!isNaN(songDuration) && songDuration > 0) {
+      const newTime = (clickedOffsetX / rect.width) * songDuration;
+      this.mainAudio.currentTime = Math.max(0, Math.min(newTime, songDuration));
+      
+      // Update progress bar immediately for responsive feedback
+      this.updateProgressBar(newTime, songDuration);
+    }
+  }
+
+  setupProgressBarDragging() {
+    let isDragging = false;
+    let wasPlaying = false;
+    
+    const startDrag = (e) => {
+      isDragging = true;
+      wasPlaying = !this.isMusicPaused;
+      
+      // Pause audio while dragging for smoother experience
+      if (wasPlaying) {
+        this.mainAudio.pause();
+      }
+      
+      // Prevent text selection during drag
+      document.body.style.userSelect = 'none';
+      
+      // Handle initial position
+      this.handleDrag(e);
+    };
+    
+    const handleDrag = (e) => {
+      if (!isDragging) return;
+      
+      e.preventDefault();
+      const rect = this.progressArea.getBoundingClientRect();
+      const offsetX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const songDuration = this.mainAudio.duration;
+      
+      if (!isNaN(songDuration) && songDuration > 0) {
+        const newTime = (offsetX / rect.width) * songDuration;
+        
+        // Update audio time and progress bar
+        this.mainAudio.currentTime = Math.max(0, Math.min(newTime, songDuration));
+        this.updateProgressBar(newTime, songDuration);
+        
+        // Update time display immediately
+        this.updateTimeDisplay(newTime, songDuration);
+      }
+    };
+    
+    const endDrag = () => {
+      if (!isDragging) return;
+      
+      isDragging = false;
+      document.body.style.userSelect = '';
+      
+      // Resume playback if it was playing before drag
+      if (wasPlaying) {
+        this.mainAudio.play().catch(error => {
+          console.warn("Failed to resume playback after drag:", error);
+        });
+      }
+    };
+    
+    // Mouse events
+    this.progressArea.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', handleDrag);
+    document.addEventListener('mouseup', endDrag);
+    
+    // Touch events for mobile support
+    this.progressArea.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startDrag({
+        clientX: touch.clientX,
+        preventDefault: () => e.preventDefault()
+      });
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      handleDrag({
+        clientX: touch.clientX,
+        preventDefault: () => e.preventDefault()
+      });
+    }, { passive: false });
+    
+    document.addEventListener('touchend', endDrag);
+  }
+  
+  // Enhanced progress bar update method
+  updateProgressBar(currentTime, duration) {
+    if (isNaN(duration) || duration <= 0) return;
+    
+    const percentage = Math.max(0, Math.min((currentTime / duration) * 100, 100));
+    
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      this.progressBar.style.width = `${percentage}%`;
+    });
+  }
+  
+  // Enhanced time display update method
+  updateTimeDisplay(currentTime, duration) {
+    const currentMin = Math.floor(currentTime / 60);
+    const currentSec = Math.floor(currentTime % 60).toString().padStart(2, "0");
+    
+    const currentTimeElement = this.wrapper.querySelector(".current-time");
+    if (currentTimeElement) {
+      currentTimeElement.textContent = `${currentMin}:${currentSec}`;
+    }
+    
+    if (!isNaN(duration)) {
+      const totalMin = Math.floor(duration / 60);
+      const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
+      
+      const maxDurationElement = this.wrapper.querySelector(".max-duration");
+      if (maxDurationElement) {
+        maxDurationElement.textContent = `${totalMin}:${totalSec}`;
+      }
+    }
   }
 
   updateProgress(e) {
     const { currentTime, duration } = e.target;
-    this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
-
-    const currentMin = Math.floor(currentTime / 60);
-    const currentSec = Math.floor(currentTime % 60).toString().padStart(2, "0");
-    this.wrapper.querySelector(".current-time").textContent = `${currentMin}:${currentSec}`;
-
-    if (!isNaN(duration)) {
-      const totalMin = Math.floor(duration / 60);
-      const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
-      this.wrapper.querySelector(".max-duration").textContent = `${totalMin}:${totalSec}`;
+    
+    // Only update if we're not currently dragging
+    if (!this.isDragging) {
+      this.updateProgressBar(currentTime, duration);
+      this.updateTimeDisplay(currentTime, duration);
     }
   }
 
