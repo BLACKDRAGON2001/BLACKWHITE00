@@ -599,7 +599,7 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   width: 15px;
   border-radius: 50%;
   top: 50%;
-  right: -7.5px;
+  right: -7px;
   z-index: 2;
   pointer-events: none;
   transform: translateY(-50%);
