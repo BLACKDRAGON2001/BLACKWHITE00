@@ -644,13 +644,12 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
 @media (hover: none) and (pointer: coarse) {
   .progress-area {
     height: 8px; /* Slightly larger on mobile */
-    padding: 8px 0; /* Increase touch target */
   }
   
   .progress-bar::before {
     height: 16px;
     width: 16px;
-    right: -8px;
+    right: -7.5px;
     margin-right: 0;
   }
   
