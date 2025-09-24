@@ -699,6 +699,8 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   .progress-bar::before {
     transition: none !important;
     transform: none !important;
+    height: 12px;
+    width: 12px;
   }
   
   .progress-area:hover {

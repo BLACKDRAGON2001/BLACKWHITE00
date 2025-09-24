@@ -4610,1580 +4610,1483 @@ let allMusic = [
   ];
 
 let ReducedMusic = [
-    {
-        name: "Amaterasu",
-        artist: "ACE",
-        src: "Amaterasu",
-        coverType: "Images",
-    },
-
-    {
-        name: "Die For You",
-        artist: "The Weeknd and Ariana Grande",
-        src: "DieForYou",
-        coverType: "Images",
-    },
-
-    {
-        name: "Expresso Double Shot Version",
-        artist: "Sabrina Carpenter",
-        src: "ExpressoDoubleShotVersion",
-        coverType: "Images"
-    },
-
-    {
-        name: "One Dance",
-        artist: "Drake",
-        src: "OneDance",
-        coverType: "Images"
-    },
-
-    {
-        name: "Unravel",
-        artist: "TK from 凛として時雨",
-        src: "Unravel",
-        coverType: "Images"
-    },
-
-    {
-        name: "London View",
-        artist: "OTP",
-        src: "LondonView",
-        coverType: "Images"
-    },
-
-    {
-        name: "Wahran",
-        artist: "Serfun",
-        src: "Wahran",
-        coverType: "Images"
-    },
-
-    {
-        name: "See You Again",
-        artist: "Wiz Khalifa And Charlie Puth",
-        src: "SeeYouAgain",
-        coverType: "Images"
-    },
-
-    {
-        name: "We Own It",
-        artist: "Wiz Khalifa and Two Chainz",
-        src: "WeOwnIt",
-        coverType: "Images"
-    },
-
-    {
-        name: "Go Hard or Go Home",
-        artist: "Wiz Khalifa and Iggy Azelea",
-        src: "GoHardOrGoHome",
-        coverType: "Images"
-    },
-
-    {
-        name: "In2",
-        artist: "WSTRN",
-        src: "In2",
-        coverType: "Images"
-    },
-
-    {
-        name: "Swim",
-        artist: "Chase Atlantic",
-        src: "Swim",
-        coverType: "Images"
-    },
-
-    {
-        name: "Blackout",
-        artist: "Emilia",
-        src: "Blackout",
-        coverType: "Images"
-    },
-
-    {
-        name: "Despacito",
-        artist: "Justin Beiber and Louis Fonsi",
-        src: "Despacito",
-        coverType: "Images"
-    },
-
-    {
-        name: "Slava Funk",
-        artist: "MVSTERIOUS",
-        src: "SlavaFunk",
-        coverType: "Images"
-    },
-
-    {
-        name: "Slide Da Treme Melodica V2",
-        artist: "DJ FNK",
-        src: "SlidedaTremeMelodica",
-        coverType: "Images"
-    },
-
-    {
-        name: "Matushka",
-        artist: "Satirin",
-        src: "Matushka",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dare",
-        artist: "DJ",
-        src: "Dare",
-        coverType: "Images"
-    },
-
-    {
-        name: "Blah",
-        artist: "VN",
-        src: "Blah",
-        coverType: "Images"
-    },
-
-    {
-        name: "Montagem Xonada",
-        artist: "MXZI",
-        src: "MontagemXonada",
-        coverType: "Images"
-    },
-
-    {
-        name: "Montagem Bandido",
-        artist: "Jmilton",
-        src: "MontagemBandido",
-        coverType: "Images"
-    },
-
-    {
-        name: "Funk Criminal",
-        artist: "Icedmane",
-        src: "FunkCriminal",
-        coverType: "Images"
-    },
-
-    {
-        name: "Montagem Bueno",
-        artist: "WhxteSxde",
-        src: "MontagemBueno",
-        coverType: "Images"
-    },
-
-    {
-        name: "Montagem Bibi Game",
-        artist: "LXNGVX",
-        src: "MontagemBibiGame",
-        coverType: "Images"
-    },
-
-    {
-        name: "Montagem Fortuna",
-        artist: "Glichery",
-        src: "MontagemFortuna",
-        coverType: "Images"
-    },
-
-    {
-        name: "Maestro",
-        artist: "Cjbeards",
-        src: "Maestro",
-        coverType: "Images"
-    },
-
-    {
-        name: "Breath",
-        artist: "N1VALL",
-        src: "Breath",
-        coverType: "Images"
-    },
-
-    {
-        name: "Mande Mande",
-        artist: "CHASHKAKEFIRA",
-        src: "MandeMande",
-        coverType: "Images"
-    },
-
-    {
-        name: "Momento",
-        artist: "N1VALL",
-        src: "Momento",
-        coverType: "Images"
-    },
-
-    {
-        name: "Del Amor",
-        artist: "SEKIMANE",
-        src: "DelAmor",
-        coverType: "Images"
-    },
-
-    {
-        name: "Baila Contigo",
-        artist: "MVTRIIIX",
-        src: "BailaContigo",
-        coverType: "Images"
-    },
-
-    {
-        name: "Slay Rock",
-        artist: "Eternxlkz",
-        src: "SlayRock",
-        coverType: "Images"
-    },
-
-    {
-        name: "Montagem Amarte",
-        artist: "Vlxdimir",
-        src: "MontagemAmarte",
-        coverType: "Images"
-    },
-
-    {
-        name: "Baila Loca",
-        artist: "Yb Wasg'ood",
-        src: "BailaLoca",
-        coverType: "Images"
-    },
-
-    {
-        name: "Chronosphere Two",
-        artist: "Sxdboy",
-        src: "ChronosphereTwo",
-        coverType: "Images"
-    },
-
-    {
-        name: "Canta La",
-        artist: "TRXSHBXY",
-        src: "CantaLa",
-        coverType: "Images"
-    },
-
-    {
-        name: "Funk Love Again",
-        artist: "SCRXXCH",
-        src: "FunkLoveAgain",
-        coverType: "Images"
-    },
-
-    {
-        name: "Nevoa",
-        artist: "Zhanbxqq",
-        src: "Nevoa",
-        coverType: "Images"
-    },
-
-    {
-        name: "Pasos De Fuego",
-        artist: "Flame Runner",
-        src: "PasosDeFuego",
-        coverType: "Images"
-    },
-
-    {
-        name: "Violento",
-        artist: "Kobe Mane",
-        src: "Violento",
-        coverType: "Images"
-    },
-
-    {
-        name: "To Aqui",
-        artist: "Punic",
-        src: "ToAqui",
-        coverType: "Images"
-    },
-
-    {
-        name: "Safado No Bailao",
-        artist: "DJ FKU",
-        src: "SafadoNoBailao",
-        coverType: "Images"
-    },
-
-    {
-        name: "Con La Luz",
-        artist: "Luc Wall",
-        src: "ConLaLuz",
-        coverType: "Images"
-    },
-
-    {
-        name: "Sin Control",
-        artist: "ICEDMANE",
-        src: "SinControl",
-        coverType: "Images"
-    },
-
-    {
-        name: "Impacta",
-        artist: "Marian And Sean",
-        src: "Impacta",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dale Dale",
-        artist: "SHIPU",
-        src: "DaleDale",
-        coverType: "Images"
-    },
-
-    {
-        name: "Nada Nada",
-        artist: "Jmilton",
-        src: "NadaNada",
-        coverType: "Images"
-    },
-
-    {
-        name: "No Fear",
-        artist: "Andromeda",
-        src: "NoFear",
-        coverType: "Images"
-    },
-
-    {
-        name: "Los Voltaje",
-        artist: "Sayfalse",
-        src: "LosVoltaje",
-        coverType: "Images"
-    },
-
-    {
-        name: "Los Voltaje Violin",
-        artist: "Amanda Sze",
-        src: "LosVoltajeViolin",
-        coverType: "Images"
-    },
-
-    {
-        name: "Carol Of The Bells",
-        artist: "Lindsey Stirling",
-        src: "CarolOfTheBells",
-        coverType: "Images"
-    },
-
-    {
-        name: "Akuma No Ko",
-        artist: "Ai Higuchi",
-        src: "AkumaNoKo",
-        coverType: "Images"
-    },
-
-    {
-        name: "Ichirin No Hana",
-        artist: "High and Mighty Color",
-        src: "IchirinNoHana",
-        coverType: "Images"
-    },
-
-    {
-        name: "Gamushara",
-        artist: "Miyuna",
-        src: "Gamushara",
-        coverType: "Images"
-    },
-
-    {
-        name: "Shinzou Wo Sasageo",
-        artist: "Linked Horizon",
-        src: "ShinzouWoSasageo",
-        coverType: "Images"
-    },
-
-    {
-        name: "Vogel Im Kafig",
-        artist: "YOUSEEBIGGIRL",
-        src: "VogelImKafig",
-        coverType: "Images"
-    },
-
-    {
-        name: "Glassy Sky",
-        artist: "東京喰種 -トーキョーグール-",
-        src: "GlassySky",
-        coverType: "Images"
-    },
-
-    {
-        name: "Seasons Die One After Another",
-        artist: "Amazarashi",
-        src: "SeasonsDieOneAfterAnother",
-        coverType: "Images"
-    },
-
-    {
-        name: "Nakama",
-        artist: "Zedd And AI",
-        src: "Nakama",
-        coverType: "Images"
-    },
-
-    {
-        name: "Heavy Love",
-        artist: "Odetari",
-        src: "HeavyLove",
-        coverType: "Images"
-    },
-
-    {
-        name: "Keep Up",
-        artist: "Odetari",
-        src: "KeepUp",
-        coverType: "Images"
-    },
-
-    {
-        name: "Wet Dreams",
-        artist: "Odetari And Nimstarr",
-        src: "WetDreams",
-        coverType: "Images"
-    },
-
-    {
-        name: "SMB",
-        artist: "Odetari And Hongjoong Of ATEEZ",
-        src: "Smb",
-        coverType: "Images"
-    },
-
-    {
-        name: "Good Loyal Thots",
-        artist: "Odetari",
-        src: "GoodLoyalThots",
-        coverType: "Images"
-    },
-
-    {
-        name: "Your're Too Slow",
-        artist: "Odetari",
-        src: "YourAreTooSlow",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hypnotic Data",
-        artist: "Odetari",
-        src: "HypnoticData",
-        coverType: "Images"
-    },
-
-    {
-        name: "Don't Touch It",
-        artist: "Odetari And Cade Clair",
-        src: "DontTouchIt",
-        coverType: "Images"
-    },
-
-    {
-        name: "Gmfu",
-        artist: "Odetari And 6arelyhuman",
-        src: "Gmfu",
-        coverType: "Images"
-    },
-
-    {
-        name: "Coldest Winter",
-        artist: "Odetari",
-        src: "ColdestWinter",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dice And Roll",
-        artist: "Odetari",
-        src: "DiceAndRoll",
-        coverType: "Images"
-    },
-
-    {
-        name: "Double Trouble",
-        artist: "Odetari",
-        src: "DoubleTrouble",
-        coverType: "Images"
-    },
-
-    {
-        name: "Me N U Date",
-        artist: "Odetari",
-        src: "MeNUDate",
-        coverType: "Images"
-    },
-
-    {
-        name: "Break A Neck",
-        artist: "Odetari And Ayesha Erotica",
-        src: "BreakANeck",
-        coverType: "Images"
-    },
-
-    {
-        name: "Avangard",
-        artist: "Lonown",
-        src: "Avangard",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Lost Soul Down X Lost Soul",
-        artist: "NBSPLV",
-        src: "TheLostSoulDownXLostSoul",
-        coverType: "Images"
-    },
-
-    {
-        name: "Love On Me X Prince Of Egypt",
-        artist: "Rex",
-        src: "LoveOnMeXPrinceOfEgypt",
-        coverType: "Images"
-    },
-
-    {
-        name: "Ecstasy",
-        artist: "Suicidal-Idol",
-        src: "Ecstasy",
-        coverType: "Images"
-    },
-
-    {
-        name: "Funk Universo",
-        artist: "Irokz",
-        src: "FunkUniverso",
-        coverType: "Images"
-    },
-
-    {
-        name: "New Jeans Jersey Remix",
-        artist: "Jiandro And Dxrkaii",
-        src: "NewJeansJerseyRemix",
-        coverType: "Images"
-    },
-
-    {
-        name: "Never See",
-        artist: "SPYRAL",
-        src: "NeverSee",
-        coverType: "Images"
-    },
-
-    {
-        name: "Eeyuh X Fluxxwave",
-        artist: "Clovis Reyes",
-        src: "EeyuhXFluxxwave",
-        coverType: "Images"
-    },
-
-    {
-        name: "Islands",
-        artist: "Opoem And Tomo",
-        src: "Islands",
-        coverType: "Images"
-    },
-
-    {
-        name: "Love Me Back",
-        artist: "Trinidad Cardona",
-        src: "LoveMeBack",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bruxo Psycho",
-        artist: "LVGHTER",
-        src: "BruxoPsycho",
-        coverType: "Images"
-    },
-
-    {
-        name: "Slay",
-        artist: "Eternxlkz",
-        src: "Slay",
-        coverType: "Images"
-    },
-
-    {
-        name: "Empire",
-        artist: "Ogryzek",
-        src: "Empire",
-        coverType: "Images"
-    },
-
-    {
-        name: "Glory",
-        artist: "Ogryzek",
-        src: "Glory",
-        coverType: "Images"
-    },
-
-    {
-        name: "Aura",
-        artist: "Ogryzek",
-        src: "Aura",
-        coverType: "Images"
-    },
-
-    {
-        name: "Mercy",
-        artist: "Ogryzek",
-        src: "Mercy",
-        coverType: "Images"
-    },
-
-    {
-        name: "Vibe",
-        artist: "Ogryzek",
-        src: "Vibe",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lost Astronaut",
-        artist: "Pinky Smash",
-        src: "LostAstronaut",
-        coverType: "Images"
-    },
-
-    {
-        name: "Where We Started",
-        artist: "NCS",
-        src: "WhereWeStarted",
-        coverType: "Images"
-    },
-
-    {
-        name: "Shape Of You",
-        artist: "Ed Sheeran",
-        src: "ShapeOfYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Diamonds",
-        artist: "Rihanna",
-        src: "Diamonds",
-        coverType: "Images"
-    },
-
-    {
-        name: "All The Stars",
-        artist: "SZA And Kendrick Lamar",
-        src: "AllTheStars",
-        coverType: "Images"
-    },
-
-    {
-        name: "Greatest",
-        artist: "Sia",
-        src: "Greatest",
-        coverType: "Images"
-    },
-
-    {
-        name: "Let Me Love You",
-        artist: "Justin Beiber and DJ Snake",
-        src: "LetMeLoveYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Story Of My Life",
-        artist: "One Direction",
-        src: "StoryOfMyLife",
-        coverType: "Images"
-    },
-
-    {
-        name: "Steal My Girl",
-        artist: "One Direction",
-        src: "StealMyGirl",
-        coverType: "Images"
-    },
-
-    {
-        name: "Night Changes",
-        artist: "One Direction",
-        src: "NightChanges",
-        coverType: "Images"
-    },
-
-    {
-        name: "Girls Like You",
-        artist: "Maroon 5 And Rihanna",
-        src: "GirlsLikeYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Cold",
-        artist: "Maroon 5",
-        src: "Cold",
-        coverType: "Images"
-    },
-
-    {
-        name: "Swalla",
-        artist: "Jason Derulo Niki Minaj And Ty Dolla Sign",
-        src: "Swalla",
-        coverType: "Images"
-    },
-
-    {
-        name: "Locked Away",
-        artist: "R. City And Adam Levine",
-        src: "LockedAway",
-        coverType: "Images"
-    },
-
-    {
-        name: "Beautiful Mistakes",
-        artist: "Maroon 5 And Megan Thee Stallion",
-        src: "BeautifulMistakes",
-        coverType: "Images"
-    },
-
-    {
-        name: "Love Nwantiti",
-        artist: "CKay",
-        src: "LoveNwantiti",
-        coverType: "Images"
-    },
-
-    {
-        name: "Animals",
-        artist: "Maroon 5",
-        src: "Animals",
-        coverType: "Images"
-    },
-
-    {
-        name: "Moves Like Jagger",
-        artist: "Maroon 5 And Christina Aguilera",
-        src: "MovesLikeJagger",
-        coverType: "Images"
-    },
-
-    {
-        name: "One Last Time",
-        artist: "Ariana Grande",
-        src: "OneLastTime",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bye",
-        artist: "Ariana Grande",
-        src: "Bye",
-        coverType: "Images"
-    },
-
-    {
-        name: "Centuries",
-        artist: "Fall Out Boy",
-        src: "Centuries",
-        coverType: "Images"
-    },
-
-    {
-        name: "Counting Stars",
-        artist: "OneRepublic",
-        src: "CountingStars",
-        coverType: "Images"
-    },
-
-    {
-        name: "Demons",
-        artist: "Imagine Dragons",
-        src: "Demons",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hymm For The Weekend",
-        artist: "Coldplay",
-        src: "HymmForTheWeekend",
-        coverType: "Images"
-    },
-
-    {
-        name: "Starboy",
-        artist: "The Weeknd",
-        src: "Starboy",
-        coverType: "Images"
-    },
-
-    {
-        name: "Down Like That",
-        artist: "KSI S-X Lil Baby And Rick Ross",
-        src: "DownLikeThat",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dirty",
-        artist: "KSI and Billie Eilish",
-        src: "Dirtyy",
-        coverType: "Images"
-    },
-
-    {
-        name: "If We Being Real",
-        artist: "Yeat Music",
-        src: "IfWeBeingReal",
-        coverType: "Images"
-    },
-
-    {
-        name: "Mask Off",
-        artist: "Future",
-        src: "MaskOff",
-        coverType: "Images"
-    },
-
-    {
-        name: "Trap Queen",
-        artist: "Harlem Fetty",
-        src: "TrapQueen",
-        coverType: "Images"
-    },
-
-    {
-        name: "Goosebumps",
-        artist: "Travis Scott",
-        src: "Goosebumps",
-        coverType: "Images"
-    },
-
-    {
-        name: "FEIN",
-        artist: "Travis Scott",
-        src: "Fein",
-        coverType: "Images"
-    },
-
-    {
-        name: "Timeless",
-        artist: "The Weeknd And Playboi Carti",
-        src: "Timeless",
-        coverType: "Images"
-    },
-
-    {
-        name: "Timeless Remix",
-        artist: "The Weeknd Playboi Carti And Doechii",
-        src: "Timeless2",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lose My Mind",
-        artist: "Don Toliver And Doja Cat",
-        src: "LoseMyMind",
-        coverType: "Images"
-    },
-
-    {
-        name: "33 Max Verstappen",
-        artist: "Carte Blanq Nils Van Zandt And Maxx Power",
-        src: "MVSong",
-        coverType: "Images"
-    },
-
-    {
-        name: "Too Many Nights",
-        artist: "Metro Boomin Future And Don Toliver",
-        src: "TooManyNights",
-        coverType: "Images"
-    },
-
-    {
-        name: "Panini",
-        artist: "Lil Nas X",
-        src: "Panini",
-        coverType: "Images"
-    },
-
-    {
-        name: "Overseas",
-        artist: "D-Block Europe And Central Cee",
-        src: "Overseas",
-        coverType: "Images"
-    },
-
-    {
-        name: "Take Me Back To London",
-        artist: "Stormzy And Ed Sheeran",
-        src: "TakeMeBackToLondon",
-        coverType: "Images"
-    },
-
-    {
-        name: "Clean Up",
-        artist: "Chunkz",
-        src: "CleanUp",
-        coverType: "Images"
-    },
-
-    {
-        name: "Turn Me On",
-        artist: "Kevin Lyttle",
-        src: "TurnMeOn",
-        coverType: "Images"
-    },
-
-    {
-        name: "Get Lucky",
-        artist: "Pharell Williams",
-        src: "GetLucky",
-        coverType: "Images"
-    },
-
-    {
-        name: "Meri Teri",
-        artist: "Fateh and Shreya",
-        src: "MeriTeri",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bom Diggy Diggy",
-        artist: "Zack Knight And Jasmin Walia",
-        src: "BomDiggy",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dum De Dum",
-        artist: "Zack Knight And Jasmin Walia",
-        src: "DumDeDum",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bewafa",
-        artist: "Imran Khan",
-        src: "Bewafa",
-        coverType: "Images"
-    },
-
-    {
-        name: "Starboy Slowed",
-        artist: "Weeknd",
-        src: "StarboySlowed",
-        coverType: "Images"
-    },
-
-    {
-        name: "Blinding Lights",
-        artist: "Weeknd",
-        src: "BlindingLights",
-        coverType: "Images"
-    },
-
-    {
-        name: "II Padrino",
-        artist: "DJ Dark",
-        src: "IIPadrino",
-        coverType: "Images"
-    },
-
-    {
-        name: "Gold Rush",
-        artist: "Laudividni",
-        src: "GoldRush",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hiserim",
-        artist: "Serhat Dumas",
-        src: "Hislerim",
-        coverType: "Images"
-    },
-
-    {
-        name: "Wahran",
-        artist: "Randall",
-        src: "Wahran2",
-        coverType: "Images"
-    },
-
-    {
-        name: "Choix De Vie",
-        artist: "Anas x Randall",
-        src: "ChoixDeVie",
-        coverType: "Images"
-    },
-
-    {
-        name: "Plevne",
-        artist: "CVRTOON",
-        src: "Plevne",
-        coverType: "Images"
-    },
-
-    {
-        name: "Impossible",
-        artist: "James Arthur",
-        src: "Impossible",
-        coverType: "Images"
-    },
-
-    {
-        name: "Another Love",
-        artist: "Tom Odell",
-        src: "AnotherLove",
-        coverType: "Images"
-    },
-
-    {
-        name: "Its My Life",
-        artist: "Bon Jovi",
-        src: "ItsMyLife",
-        coverType: "Images"
-    },
-
-    {
-        name: "Livin On A Prayer",
-        artist: "Bon Jovi",
-        src: "LivinOnAPrayer",
-        coverType: "Images"
-    },
-
-    {
-        name: "Written In The Stars",
-        artist: "Tinie Tempah And Eric Turner",
-        src: "WrittenInTheStars",
-        coverType: "Images"
-    },
-
-    {
-        name: "Rewrite The Stars",
-        artist: "Zac Efron and Zendaya",
-        src: "RewriteTheStars",
-        coverType: "Images"
-    },
-
-    {
-        name: "Middle Of The Night",
-        artist: "Elley Duhe",
-        src: "MiddleOfTheNight",
-        coverType: "Images"
-    },
-
-    {
-        name: "Let the World Burn",
-        artist: "Chris Grey",
-        src: "LetTheWorldBurn",
-        coverType: "Images"
-    },
-
-    {
-        name: "Prada And Versace",
-        artist: "Chris Grey",
-        src: "PradaAndVersace",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bring Me Back To Life",
-        artist: "Chris Grey And Allegra Jordyn",
-        src: "BringMeBackToLife",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Machine",
-        artist: "Reed Wonder and Aurora Olivas",
-        src: "TheMachine",
-        coverType: "Images"
-    },
-
-    {
-        name: "Gemini",
-        artist: "Chris Grey",
-        src: "Gemini",
-        coverType: "Images"
-    },
-
-    {
-        name: "Us Against The World",
-        artist: "Chris Grey",
-        src: "UsAgainstTheWorld",
-        coverType: "Images"
-    },
-
-    {
-        name: "Always Been You",
-        artist: "Chris Grey",
-        src: "AlwaysBeenYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Haunted",
-        artist: "Chris Grey",
-        src: "Haunted",
-        coverType: "Images"
-    },
-
-    {
-        name: "Give Me Your Love",
-        artist: "Chris Grey",
-        src: "GiveMeYourLove",
-        coverType: "Images"
-    },
-
-    {
-        name: "Makeup",
-        artist: "Chris Grey",
-        src: "Makeup",
-        coverType: "Images"
-    },
-
-    {
-        name: "Wrong",
-        artist: "Chris Grey",
-        src: "Wrong",
-        coverType: "Images"
-    },
-
-    {
-        name: "Funhouse",
-        artist: "Chris Grey",
-        src: "Funhouse",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lifetime",
-        artist: "Chris Grey",
-        src: "Lifetime",
-        coverType: "Images"
-    },
-
-    {
-        name: "Make The Angels Cry",
-        artist: "Chris Grey",
-        src: "MakeTheAngelsCry",
-        coverType: "Images"
-    },
-
-    {
-        name: "If I Had You",
-        artist: "Chris Grey",
-        src: "IfIHadYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Castle",
-        artist: "Chris Grey",
-        src: "TheCastle",
-        coverType: "Images"
-    },
-
-    {
-        name: "The Shadows",
-        artist: "Chris Grey",
-        src: "TheShadows",
-        coverType: "Images"
-    },
-
-    {
-        name: "Mine",
-        artist: "Allegra Jordyn",
-        src: "Mine",
-        coverType: "Images"
-    },
-
-    {
-        name: "Last Love",
-        artist: "Allegra Jordyn",
-        src: "LastLove",
-        coverType: "Images"
-    },
-
-    {
-        name: "Corpse Bride",
-        artist: "Allegra Jordyn",
-        src: "CorpseBride",
-        coverType: "Images"
-    },
-
-    {
-        name: "Eternally",
-        artist: "Allegra Jordyn",
-        src: "Eternally",
-        coverType: "Images"
-    },
-
-    {
-        name: "Somebody Else",
-        artist: "Allegra Jordyn",
-        src: "SomebodyElse",
-        coverType: "Images"
-    },
-
-    {
-        name: "Leave The Light On",
-        artist: "Allegra Jordyn",
-        src: "LeaveTheLightOn",
-        coverType: "Images"
-    },
-
-    {
-        name: "Poltergeist",
-        artist: "Allegra Jordyn",
-        src: "Poltergeist",
-        coverType: "Images"
-    },
-
-    {
-        name: "Bruised",
-        artist: "Allegra Jordyn",
-        src: "Bruised",
-        coverType: "Images"
-    },
-
-    {
-        name: "Taste Of The Divine",
-        artist: "Shaker",
-        src: "TasteOfTheDivine",
-        coverType: "Images"
-    },
-
-    {
-        name: "Fatal Attraction",
-        artist: "Reed Wonder",
-        src: "FatalAttraction",
-        coverType: "Images"
-    },
-
-    {
-        name: "Fantasy",
-        artist: "Brazzi",
-        src: "Fantasy",
-        coverType: "Images"
-    },
-
-    {
-        name: "My Name",
-        artist: "Reed Wonder",
-        src: "MyName",
-        coverType: "Images"
-    },
-
-    {
-        name: "One Of The Girls",
-        artist: "The Weeknd JENNIE And Lily Depp Rose",
-        src: "OneOfTheGirls",
-        coverType: "Images"
-    },
-
-    {
-        name: "Born To Die",
-        artist: "Lana Del Rey",
-        src: "BornToDie",
-        coverType: "Images"
-    },
-
-    {
-        name: "Infected",
-        artist: "Sickick",
-        src: "Infected",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dont Mind",
-        artist: "Sickick",
-        src: "DontMind",
-        coverType: "Images"
-    },
-
-    {
-        name: "Shape Of You",
-        artist: "Sickick",
-        src: "ShapeOfYou2",
-        coverType: "Images"
-    },
-
-    {
-        name: "Snapchat Beat",
-        artist: "Sickick",
-        src: "SnapchatBeat",
-        coverType: "Images"
-    },
-
-    {
-        name: "Killa Killa",
-        artist: "KSI and Aiyana",
-        src: "KillaKilla",
-        coverType: "Images"
-    },
-
-    {
-        name: "Kick Down The Door",
-        artist: "HJ And AJ Jung",
-        src: "KickDownTheDoor",
-        coverType: "Images"
-    },
-
-    {
-        name: "Paro",
-        artist: "NEJ",
-        src: "Paro",
-        coverType: "Images"
-    },
-
-    {
-        name: "Tourner Dans Le Vide",
-        artist: "Indila",
-        src: "TournerDansLeVide",
-        coverType: "Images"
-    },
-
-    {
-        name: "Habibi",
-        artist: "Richy Rich",
-        src: "Habibi",
-        coverType: "Images"
-    },
-
-    {
-        name: "KAMNH",
-        artist: "Emin and Jony",
-        src: "Kamnh",
-        coverType: "Images"
-    },
-
-    {
-        name: "KAMNH Long Version",
-        artist: "Emin and Jony",
-        src: "KamnhLongVer",
-        coverType: "Images"
-    },
-
-    {
-        name: "Ninao",
-        artist: "GIMS",
-        src: "Ninao",
-        coverType: "Images"
-    },
-
-    {
-        name: "Air Force Blanche",
-        artist: "GIMS And Jul",
-        src: "AirForceBlanche",
-        coverType: "Images"
-    },
-
-    {
-        name: "Spider",
-        artist: "GIMS And DYSTINCT",
-        src: "Spider",
-        coverType: "Images"
-    },
-
-    {
-        name: "Touche",
-        artist: "GIMS And KEBLACK",
-        src: "Touche",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hola Senorita",
-        artist: "Maluma Ana GIMS",
-        src: "HolaSenorita",
-        coverType: "Images"
-    },
-
-    {
-        name: "Da Da Da",
-        artist: "Tanir and Tyomcha Jarico Remix",
-        src: "DaDaDa",
-        coverType: "Images"
-    },
-
-    {
-        name: "Often",
-        artist: "The Weeknd",
-        src: "Often",
-        coverType: "Images"
-    },
-
-    {
-        name: "Moth To A Flame",
-        artist: "The Weeknd",
-        src: "MothToAFlame",
-        coverType: "Images"
-    },
-
-    {
-        name: "Renegade",
-        artist: "Aaryan Shah",
-        src: "Renegade",
-        coverType: "Images"
-    },
-
-    {
-        name: "Fairytale",
-        artist: "Alexander Ryback",
-        src: "Fairytale",
-        coverType: "Images"
-    },
-
-    {
-        name: "Cheap Thrills",
-        artist: "SIA",
-        src: "CheapThrills",
-        coverType: "Images"
-    },
-
-    {
-        name: "Dynamite",
-        artist: "Taio Cruz",
-        src: "Dynamite",
-        coverType: "Images"
-    },
-
-    {
-        name: "Give Me Everything",
-        artist: "Pitbull Ne-Yo And Afrojack",
-        src: "GiveMeEverything",
-        coverType: "Images"
-    },
-
-    {
-        name: "Feel This Moment",
-        artist: "Pitbull and Christina Aguilera",
-        src: "FeelThisMoment",
-        coverType: "Images"
-    },
-
-    {
-        name: "Never Enough",
-        artist: "Loren Allred",
-        src: "NeverEnough",
-        coverType: "Images"
-    },
-
-    {
-        name: "Chandelier",
-        artist: "Sia",
-        src: "Chandelier",
-        coverType: "Images"
-    },
-
-    {
-        name: "Unstoppable",
-        artist: "Sia",
-        src: "Unstoppable",
-        coverType: "Images"
-    },
-
-    {
-        name: "Hello",
-        artist: "Adele",
-        src: "Hello",
-        coverType: "Images"
-    },
-
-    {
-        name: "Skyfall",
-        artist: "Adele",
-        src: "Skyfall",
-        coverType: "Images"
-    },
-
-    {
-        name: "Set Fire To The Rain",
-        artist: "Adele",
-        src: "SetFireToTheRain",
-        coverType: "Images"
-    },
-
-    {
-        name: "Arms Around You",
-        artist: "Lil Pump and Maluma",
-        src: "ArmsAroundYou",
-        coverType: "Images"
-    },
-
-    {
-        name: "Lovely",
-        artist: "Billie Eilish And Khalid",
-        src: "Lovely",
-        coverType: "Images"
-    },
-
-    {
-        name: "Arcade",
-        artist: "Duncan Laurence",
-        src: "Arcade",
-        coverType: "Images"
-    },
-
-    {
-        name: "Someone You Loved",
-        artist: "Louis Capaldi",
-        src: "SomeoneYouLoved",
-        coverType: "Images"
-    },
-
-    {
-        name: "Seven Years",
-        artist: "Lucas Graham",
-        src: "SevenYears",
-        coverType: "Images"
-    },
-
-    {
-        name: "You Are The Reason",
-        artist: "Calum Scott",
-        src: "YouAreTheReason",
-        coverType: "Images"
-    },
-
-    {
-        name: "All Of Me",
-        artist: "John Legend",
-        src: "AllOfMe",
-        coverType: "Images"
-    },
-
-    {
-        name: "After Dark x Sweater Weather",
-        artist: "Mr. Kitty And The Neighbourhood",
-        src: "AfterDarkXSweaterWeather",
-        coverType: "Images"
-    },
-
-    {
-        name: "After Dark x Sweater Weather Slowed",
-        artist: "Mr. Kitty And The Neighbourhood",
-        src: "AfterDarkXSweaterWeatherSlowed",
-        coverType: "Images"
-    },
-
-    {
-        name: "Living Life in the Night",
-        artist: "Cheriimoya and Sierra",
-        src: "LivingLifeInTheNight",
-        coverType: "Images"
-    },
-
-    {
-        name: "Derniere Danse",
-        artist: "Indila",
-        src: "DerniereDanse",
-        coverType: "Images"
-    },
+        {
+            name: "Amaterasu",
+            artist: "ACE",
+            src: "Amaterasu",
+            coverType: "Images",
+        },
+    
+        {
+            name: "Die For You",
+            artist: "The Weeknd and Ariana Grande",
+            src: "DieForYou",
+            coverType: "Images",
+        },
+    
+        {
+            name: "Expresso Double Shot Version",
+            artist: "Sabrina Carpenter",
+            src: "ExpressoDoubleShotVersion",
+            coverType: "Images"
+        },
+    
+        {
+            name: "One Dance",
+            artist: "Drake",
+            src: "OneDance",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Unravel",
+            artist: "TK from 凛として時雨",
+            src: "Unravel",
+            coverType: "Images"
+        },
+    
+        {
+            name: "London View",
+            artist: "OTP",
+            src: "LondonView",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Wahran",
+            artist: "Serfun",
+            src: "Wahran",
+            coverType: "Images"
+        },
+    
+        {
+            name: "See You Again",
+            artist: "Wiz Khalifa And Charlie Puth",
+            src: "SeeYouAgain",
+            coverType: "Images"
+        },
+    
+        {
+            name: "We Own It",
+            artist: "Wiz Khalifa and Two Chainz",
+            src: "WeOwnIt",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Go Hard or Go Home",
+            artist: "Wiz Khalifa and Iggy Azelea",
+            src: "GoHardOrGoHome",
+            coverType: "Images"
+        },
+    
+        {
+            name: "In2",
+            artist: "WSTRN",
+            src: "In2",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Despacito",
+            artist: "Justin Beiber and Louis Fonsi",
+            src: "Despacito",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Slava Funk",
+            artist: "MVSTERIOUS",
+            src: "SlavaFunk",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Slide Da Treme Melodica V2",
+            artist: "DJ FNK",
+            src: "SlidedaTremeMelodica",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Matushka",
+            artist: "Satirin",
+            src: "Matushka",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Dare",
+            artist: "DJ",
+            src: "Dare",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Blah",
+            artist: "VN",
+            src: "Blah",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Montagem Xonada",
+            artist: "MXZI",
+            src: "MontagemXonada",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Montagem Direcao",
+            artist: "DJ FKU And Farofinat",
+            src: "MontagemDirecao",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Lsd-Genius",
+            artist: "Sia Diplo And Labrinth",
+            src: "LsdGenius",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Montagem Bandido",
+            artist: "Jmilton",
+            src: "MontagemBandido",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Funk Criminal",
+            artist: "Icedmane",
+            src: "FunkCriminal",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Montagem Bueno",
+            artist: "WhxteSxde",
+            src: "MontagemBueno",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Montagem Fortuna",
+            artist: "Glichery",
+            src: "MontagemFortuna",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Maestro",
+            artist: "Cjbeards",
+            src: "Maestro",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Breath",
+            artist: "N1VALL",
+            src: "Breath",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Mande Mande",
+            artist: "CHASHKAKEFIRA",
+            src: "MandeMande",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Momento",
+            artist: "N1VALL",
+            src: "Momento",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Del Amor",
+            artist: "SEKIMANE",
+            src: "DelAmor",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Baila Contigo",
+            artist: "MVTRIIIX",
+            src: "BailaContigo",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Slay Rock",
+            artist: "Eternxlkz",
+            src: "SlayRock",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Montagem Amarte",
+            artist: "Vlxdimir",
+            src: "MontagemAmarte",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Baila Loca",
+            artist: "Yb Wasg'ood",
+            src: "BailaLoca",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Chronosphere Two",
+            artist: "Sxdboy",
+            src: "ChronosphereTwo",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Canta La",
+            artist: "TRXSHBXY",
+            src: "CantaLa",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Funk Love Again",
+            artist: "SCRXXCH",
+            src: "FunkLoveAgain",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Nevoa",
+            artist: "Zhanbxqq",
+            src: "Nevoa",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Pasos De Fuego",
+            artist: "Flame Runner",
+            src: "PasosDeFuego",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Violento",
+            artist: "Kobe Mane",
+            src: "Violento",
+            coverType: "Images"
+        },
+    
+        {
+            name: "To Aqui",
+            artist: "Punic",
+            src: "ToAqui",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Safado No Bailao",
+            artist: "DJ FKU",
+            src: "SafadoNoBailao",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Con La Luz",
+            artist: "Luc Wall",
+            src: "ConLaLuz",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Sin Control",
+            artist: "ICEDMANE",
+            src: "SinControl",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Impacta",
+            artist: "Marian And Sean",
+            src: "Impacta",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Dale Dale",
+            artist: "SHIPU",
+            src: "DaleDale",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Nada Nada",
+            artist: "Jmilton",
+            src: "NadaNada",
+            coverType: "Images"
+        },
+    
+        {
+            name: "No Fear",
+            artist: "Andromeda",
+            src: "NoFear",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Los Voltaje",
+            artist: "Sayfalse",
+            src: "LosVoltaje",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Los Voltaje Violin",
+            artist: "Amanda Sze",
+            src: "LosVoltajeViolin",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Carol Of The Bells",
+            artist: "Lindsey Stirling",
+            src: "CarolOfTheBells",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Akuma No Ko",
+            artist: "Ai Higuchi",
+            src: "AkumaNoKo",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Shinzou Wo Sasageo",
+            artist: "Linked Horizon",
+            src: "ShinzouWoSasageo",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Vogel Im Kafig",
+            artist: "YOUSEEBIGGIRL",
+            src: "VogelImKafig",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Glassy Sky",
+            artist: "東京喰種 -トーキョーグール-",
+            src: "GlassySky",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Seasons Die One After Another",
+            artist: "Amazarashi",
+            src: "SeasonsDieOneAfterAnother",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Heavy Love",
+            artist: "Odetari",
+            src: "HeavyLove",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Keep Up",
+            artist: "Odetari",
+            src: "KeepUp",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Wet Dreams",
+            artist: "Odetari And Nimstarr",
+            src: "WetDreams",
+            coverType: "Images"
+        },
+    
+        {
+            name: "SMB",
+            artist: "Odetari And Hongjoong Of ATEEZ",
+            src: "Smb",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Your're Too Slow",
+            artist: "Odetari",
+            src: "YourAreTooSlow",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Hypnotic Data",
+            artist: "Odetari",
+            src: "HypnoticData",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Don't Touch It",
+            artist: "Odetari And Cade Clair",
+            src: "DontTouchIt",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Gmfu",
+            artist: "Odetari And 6arelyhuman",
+            src: "Gmfu",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Coldest Winter",
+            artist: "Odetari",
+            src: "ColdestWinter",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Dice And Roll",
+            artist: "Odetari",
+            src: "DiceAndRoll",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Double Trouble",
+            artist: "Odetari",
+            src: "DoubleTrouble",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Love On Me X Prince Of Egypt",
+            artist: "Rex",
+            src: "LoveOnMeXPrinceOfEgypt",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Never See",
+            artist: "SPYRAL",
+            src: "NeverSee",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Islands",
+            artist: "Opoem And Tomo",
+            src: "Islands",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Love Me Back",
+            artist: "Trinidad Cardona",
+            src: "LoveMeBack",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Faster N Harder",
+            artist: "Asteria And 6arelyhuman",
+            src: "FasterNHarder",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Party Addict",
+            artist: "Kets4eki And Nosgov",
+            src: "PartyAddict",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Slay",
+            artist: "Eternxlkz",
+            src: "Slay",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Empire",
+            artist: "Ogryzek",
+            src: "Empire",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Glory",
+            artist: "Ogryzek",
+            src: "Glory",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Aura",
+            artist: "Ogryzek",
+            src: "Aura",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Mercy",
+            artist: "Ogryzek",
+            src: "Mercy",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Vibe",
+            artist: "Ogryzek",
+            src: "Vibe",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Lost Astronaut",
+            artist: "Pinky Smash",
+            src: "LostAstronaut",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Where We Started",
+            artist: "NCS",
+            src: "WhereWeStarted",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Shape Of You",
+            artist: "Ed Sheeran",
+            src: "ShapeOfYou",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Diamonds",
+            artist: "Rihanna",
+            src: "Diamonds",
+            coverType: "Images"
+        },
+    
+        {
+            name: "All The Stars",
+            artist: "SZA And Kendrick Lamar",
+            src: "AllTheStars",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Greatest",
+            artist: "Sia",
+            src: "Greatest",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Let Me Love You",
+            artist: "Justin Beiber and DJ Snake",
+            src: "LetMeLoveYou",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Story Of My Life",
+            artist: "One Direction",
+            src: "StoryOfMyLife",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Steal My Girl",
+            artist: "One Direction",
+            src: "StealMyGirl",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Night Changes",
+            artist: "One Direction",
+            src: "NightChanges",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Locked Away",
+            artist: "R. City And Adam Levine",
+            src: "LockedAway",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Love Nwantiti",
+            artist: "CKay",
+            src: "LoveNwantiti",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Animals",
+            artist: "Maroon 5",
+            src: "Animals",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Moves Like Jagger",
+            artist: "Maroon 5 And Christina Aguilera",
+            src: "MovesLikeJagger",
+            coverType: "Images"
+        },
+    
+        {
+            name: "One Last Time",
+            artist: "Ariana Grande",
+            src: "OneLastTime",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Bye",
+            artist: "Ariana Grande",
+            src: "Bye",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Centuries",
+            artist: "Fall Out Boy",
+            src: "Centuries",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Demons",
+            artist: "Imagine Dragons",
+            src: "Demons",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Closer",
+            artist: "Chainsmokers And Halsey",
+            src: "Closer",
+            coverType: "Images"
+        },
+    
+        {
+            name: "E.T.",
+            artist: "Katy Perry And Kanye West",
+            src: "ET",
+            coverType: "Images",
+            type: "gif"
+        },
+    
+        {
+            name: "Firework",
+            artist: "Katy Perry",
+            src: "Firework",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Starboy",
+            artist: "The Weeknd",
+            src: "Starboy",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Down Like That",
+            artist: "KSI S-X Lil Baby And Rick Ross",
+            src: "DownLikeThat",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Dirty",
+            artist: "KSI and Billie Eilish",
+            src: "Dirtyy",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Liar Liar",
+            artist: "MoStack",
+            src: "LiarLiar",
+            coverType: "Images"
+        },
+    
+        {
+            name: "If We Being Real",
+            artist: "Yeat Music",
+            src: "IfWeBeingReal",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Mask Off",
+            artist: "Future",
+            src: "MaskOff",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Trap Queen",
+            artist: "Harlem Fetty",
+            src: "TrapQueen",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Goosebumps",
+            artist: "Travis Scott",
+            src: "Goosebumps",
+            coverType: "Images"
+        },
+    
+        {
+            name: "FEIN",
+            artist: "Travis Scott",
+            src: "Fein",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Timeless",
+            artist: "The Weeknd And Playboi Carti",
+            src: "Timeless",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Timeless Remix",
+            artist: "The Weeknd Playboi Carti And Doechii",
+            src: "Timeless2",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Lose My Mind",
+            artist: "Don Toliver And Doja Cat",
+            src: "LoseMyMind",
+            coverType: "Images"
+        },
+    
+        {
+            name: "33 Max Verstappen",
+            artist: "Carte Blanq Nils Van Zandt And Maxx Power",
+            src: "MVSong",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Just Keep Watching",
+            artist: "Tate McRae",
+            src: "JustKeepWatching",
+            coverType: "Images"
+        },
+    
+        {
+            name: "All At Once",
+            artist: "Madison Beer",
+            src: "AllAtOnce",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Messy",
+            artist: "ROSÉ",
+            src: "Messy",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Drive",
+            artist: "Ed Sheeran",
+            src: "Drive",
+            coverType: "Images"
+        },
+    
+        {
+            name: "No Room For A Saint",
+            artist: "Dom Dolla And Nathan Nicholson",
+            src: "NoRoomForASaint",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Too Many Nights",
+            artist: "Metro Boomin Future And Don Toliver",
+            src: "TooManyNights",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Panini",
+            artist: "Lil Nas X",
+            src: "Panini",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Overseas",
+            artist: "D-Block Europe And Central Cee",
+            src: "Overseas",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Take Me Back To London",
+            artist: "Stormzy And Ed Sheeran",
+            src: "TakeMeBackToLondon",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Clean Up",
+            artist: "Chunkz",
+            src: "CleanUp",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Come Get Her",
+            artist: "Rae Sremmurd",
+            src: "ComeGetHer",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Lush Life",
+            artist: "Zara Larsson",
+            src: "LushLife",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Turn Me On",
+            artist: "Kevin Lyttle",
+            src: "TurnMeOn",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Candy",
+            artist: "Doja Cat",
+            src: "Candy2",
+            coverType: "Images"
+        },
+    
+        {
+            name: "II Padrino",
+            artist: "DJ Dark",
+            src: "IIPadrino",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Hiserim",
+            artist: "Serhat Dumas",
+            src: "Hislerim",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Wahran",
+            artist: "Randall",
+            src: "Wahran2",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Choix De Vie",
+            artist: "Anas x Randall",
+            src: "ChoixDeVie",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Plevne",
+            artist: "CVRTOON",
+            src: "Plevne",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Impossible",
+            artist: "James Arthur",
+            src: "Impossible",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Another Love",
+            artist: "Tom Odell",
+            src: "AnotherLove",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Its My Life",
+            artist: "Bon Jovi",
+            src: "ItsMyLife",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Livin On A Prayer",
+            artist: "Bon Jovi",
+            src: "LivinOnAPrayer",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Rewrite The Stars",
+            artist: "Zac Efron and Zendaya",
+            src: "RewriteTheStars",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Let The World Burn",
+            artist: "Chris Grey",
+            src: "LetTheWorldBurn",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Let The World Burn Remix",
+            artist: "Chris Grey G-Eazy And Ari",
+            src: "LetTheWorldBurnRemix",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Bring Me Back To Life",
+            artist: "Chris Grey And Allegra Jordyn",
+            src: "BringMeBackToLife",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Gemini",
+            artist: "Chris Grey",
+            src: "Gemini",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Us Against The World",
+            artist: "Chris Grey",
+            src: "UsAgainstTheWorld",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Always Been You",
+            artist: "Chris Grey",
+            src: "AlwaysBeenYou",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Haunted",
+            artist: "Chris Grey",
+            src: "Haunted",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Give Me Your Love",
+            artist: "Chris Grey",
+            src: "GiveMeYourLove",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Makeup",
+            artist: "Chris Grey",
+            src: "Makeup",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Wrong",
+            artist: "Chris Grey",
+            src: "Wrong",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Funhouse",
+            artist: "Chris Grey",
+            src: "Funhouse",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Lifetime",
+            artist: "Chris Grey",
+            src: "Lifetime",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Make The Angels Cry",
+            artist: "Chris Grey",
+            src: "MakeTheAngelsCry",
+            coverType: "Images"
+        },
+    
+        {
+            name: "If I Had You",
+            artist: "Chris Grey",
+            src: "IfIHadYou",
+            coverType: "Images"
+        },
+    
+        {
+            name: "The Castle",
+            artist: "Chris Grey",
+            src: "TheCastle",
+            coverType: "Images"
+        },
+    
+        {
+            name: "The Shadows",
+            artist: "Chris Grey",
+            src: "TheShadows",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Ride",
+            artist: "Chris Grey",
+            src: "Ride",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Mine",
+            artist: "Allegra Jordyn",
+            src: "Mine",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Last Love",
+            artist: "Allegra Jordyn",
+            src: "LastLove",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Corpse Bride",
+            artist: "Allegra Jordyn",
+            src: "CorpseBride",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Eternally",
+            artist: "Allegra Jordyn",
+            src: "Eternally",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Somebody Else",
+            artist: "Allegra Jordyn",
+            src: "SomebodyElse",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Leave The Light On",
+            artist: "Allegra Jordyn",
+            src: "LeaveTheLightOn",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Poltergeist",
+            artist: "Allegra Jordyn",
+            src: "Poltergeist",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Bruised",
+            artist: "Allegra Jordyn",
+            src: "Bruised",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Until I Found You",
+            artist: "Stephen Sanchez",
+            src: "UntilIFoundYou",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Viva La Vida",
+            artist: "Coldplay",
+            src: "VivaLaVida",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Life For Rent",
+            artist: "Dido",
+            src: "LifeForRent",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Thank You",
+            artist: "Dido",
+            src: "ThankYou",
+            coverType: "Images"
+        },
+    
+        {
+            name: "White Flag",
+            artist: "Dido",
+            src: "WhiteFlag",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Here With Me",
+            artist: "Dido",
+            src: "HereWithMe",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Somewhere Only We Know",
+            artist: "Keane",
+            src: "SomewhereOnlyWeKnow",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Shameless",
+            artist: "Camilla Cabello",
+            src: "Shameless",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Infected",
+            artist: "Sickick",
+            src: "Infected",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Dont Mind",
+            artist: "Sickick",
+            src: "DontMind",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Shape Of You",
+            artist: "Sickick",
+            src: "ShapeOfYou2",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Snapchat Beat",
+            artist: "Sickick",
+            src: "SnapchatBeat",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Killa Killa",
+            artist: "KSI and Aiyana",
+            src: "KillaKilla",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Kick Down The Door",
+            artist: "HJ And AJ Jung",
+            src: "KickDownTheDoor",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Paro",
+            artist: "NEJ",
+            src: "Paro",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Habibi",
+            artist: "Richy Rich",
+            src: "Habibi",
+            coverType: "Images"
+        },
+    
+        {
+            name: "KAMNH",
+            artist: "Emin and Jony",
+            src: "Kamnh",
+            coverType: "Images"
+        },
+    
+        {
+            name: "KAMNH Long Version",
+            artist: "Emin and Jony",
+            src: "KamnhLongVer",
+            coverType: "Images"
+        },
+    
+        {
+            name: "The Drum",
+            artist: "Alan Walker",
+            src: "TheDrum",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Ninao",
+            artist: "GIMS",
+            src: "Ninao",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Air Force Blanche",
+            artist: "GIMS And Jul",
+            src: "AirForceBlanche",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Spider",
+            artist: "GIMS And DYSTINCT",
+            src: "Spider",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Touche",
+            artist: "GIMS And KEBLACK",
+            src: "Touche",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Hola Senorita",
+            artist: "Maluma Ana GIMS",
+            src: "HolaSenorita",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Da Da Da",
+            artist: "Tanir and Tyomcha Jarico Remix",
+            src: "DaDaDa",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Often",
+            artist: "The Weeknd",
+            src: "Often",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Moth To A Flame",
+            artist: "The Weeknd",
+            src: "MothToAFlame",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Renegade",
+            artist: "Aaryan Shah",
+            src: "Renegade",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Fairytale",
+            artist: "Alexander Ryback",
+            src: "Fairytale",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Love Me Like You Do",
+            artist: "Ellie Golding",
+            src: "LoveMeLikeYouDo",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Cheap Thrills",
+            artist: "SIA",
+            src: "CheapThrills",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Give Me Everything",
+            artist: "Pitbull Ne-Yo And Afrojack",
+            src: "GiveMeEverything",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Feel This Moment",
+            artist: "Pitbull and Christina Aguilera",
+            src: "FeelThisMoment",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Never Enough",
+            artist: "Loren Allred",
+            src: "NeverEnough",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Chandelier",
+            artist: "Sia",
+            src: "Chandelier",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Unstoppable",
+            artist: "Sia",
+            src: "Unstoppable",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Hello",
+            artist: "Adele",
+            src: "Hello",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Skyfall",
+            artist: "Adele",
+            src: "Skyfall",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Set Fire To The Rain",
+            artist: "Adele",
+            src: "SetFireToTheRain",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Lovely",
+            artist: "Billie Eilish And Khalid",
+            src: "Lovely",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Arcade",
+            artist: "Duncan Laurence",
+            src: "Arcade",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Someone You Loved",
+            artist: "Louis Capaldi",
+            src: "SomeoneYouLoved",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Seven Years",
+            artist: "Lucas Graham",
+            src: "SevenYears",
+            coverType: "Images"
+        },
+    
+        {
+            name: "You Are The Reason",
+            artist: "Calum Scott",
+            src: "YouAreTheReason",
+            coverType: "Images"
+        },
+    
+        {
+            name: "All Of Me",
+            artist: "John Legend",
+            src: "AllOfMe",
+            coverType: "Images"
+        },
+    
+        {
+            name: "A Thousand Years",
+            artist: "Christina Perri",
+            src: "AThousandYears",
+            coverType: "Images"
+        },
+    
+        {
+            name: "After Dark x Sweater Weather",
+            artist: "Mr. Kitty And The Neighbourhood",
+            src: "AfterDarkXSweaterWeather",
+            coverType: "Images"
+        },
+    
+        {
+            name: "After Dark x Sweater Weather Slowed",
+            artist: "Mr. Kitty And The Neighbourhood",
+            src: "AfterDarkXSweaterWeatherSlowed",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Living Life in the Night",
+            artist: "Cheriimoya and Sierra",
+            src: "LivingLifeInTheNight",
+            coverType: "Images"
+        },
+    
+        {
+            name: "Derniere Danse",
+            artist: "Indila",
+            src: "DerniereDanse",
+            coverType: "Images"
+        },
   ];
 
 window.allMusic = allMusic;
