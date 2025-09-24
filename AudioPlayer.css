@@ -599,8 +599,8 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
 .progress-bar::before {
   content: "";
   position: absolute;
-  height: 12px;
-  width: 12px;
+  height: 13px;
+  width: 13px;
   border-radius: 50%;
   top: 50%;
   right: -7px;
@@ -664,8 +664,8 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   }
   
   .progress-bar::before {
-    height: 12px;
-    width: 12px;
+    height: 13px;
+    width: 13px;
     right: -7.5px;
     margin-right: 0;
     /* Simpler transitions on mobile */
@@ -699,8 +699,8 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   .progress-bar::before {
     transition: none !important;
     transform: none !important;
-    height: 12px;
-    width: 12px;
+    height: 13px;
+    width: 13px;
   }
   
   .progress-area:hover {
