@@ -149,6 +149,13 @@ class MusicPlayer {
     this.isMuted = false;
     this.isInitializing = true;
 
+    this.lastProgressUpdate = 0;
+    this.progressThrottle = 16; // ~60fps max
+    this.progressRAF = null;
+    this.lastProgressValue = -1;
+
+    this.isDragging = false;
+
     this.searchField = this.wrapper.querySelector('.search-field');
     this.isSearching = false;
     this.filteredMusic = [];
@@ -183,6 +190,11 @@ class MusicPlayer {
 
     this.controlsToggledManually = false;
     this.videoOverride = false;
+
+    this.cachedProgressRect = null;
+    this.lastRectCache = 0;
+    this.lastTimeUpdate = 0;
+    this.timeUpdateThrottle = 200; 
     
     // Only set up border box styles for Player 2
     if (suffix === '2') {
@@ -227,8 +239,10 @@ class MusicPlayer {
     this.populateMusicList(this.originalOrder);
     this.updatePlayingSong();
     this.setupResizeObserver();
-    // Initialize search optimization
     this.initializeSearchOptimization();
+    
+    // Add enhanced progress bar functionality
+    this.initializeEnhancedProgressBar();
     
     // Test autoplay capability on mobile
     //this.testAutoplaySupport();
@@ -266,6 +280,43 @@ class MusicPlayer {
         this.borderBox.style.display = "none";
       }
     });
+  }
+
+  initializeEnhancedProgressBar() {
+    // Set up dragging functionality with optimized event handling
+    this.setupProgressBarDragging();
+    
+    // Use passive event listeners where possible
+    this.progressArea.addEventListener('mouseenter', this.handleProgressHover.bind(this), { passive: true });
+    this.progressArea.addEventListener('mouseleave', this.handleProgressLeave.bind(this), { passive: true });
+    
+    // Optimized click handling with throttling
+    this.progressArea.addEventListener("click", this.handleProgressClickThrottled.bind(this));
+  }
+
+  handleProgressHover() {
+    // Cache the transition style to avoid repeated style calculations
+    if (!this.progressBarHoverStyle) {
+      this.progressBarHoverStyle = 'width 0.1s ease';
+    }
+    this.progressBar.style.transition = this.progressBarHoverStyle;
+  }
+
+  handleProgressLeave() {
+    // Cache the transition style
+    if (!this.progressBarLeaveStyle) {
+      this.progressBarLeaveStyle = 'width 0.05s ease';
+    }
+    this.progressBar.style.transition = this.progressBarLeaveStyle;
+  }
+
+  handleProgressClickThrottled(e) {
+    // Throttle click events to prevent rapid firing
+    const now = performance.now();
+    if (now - this.lastProgressUpdate < 50) return; // Max 20 clicks per second
+    
+    this.lastProgressUpdate = now;
+    this.handleProgressClick(e);
   }
 
   updateBorderBoxDisplay() {
@@ -934,25 +985,226 @@ class MusicPlayer {
   }
 
   handleProgressClick(e) {
-    const clickedOffsetX = e.offsetX;
+    // Cache getBoundingClientRect result since it's expensive
+    const rect = this.progressArea.getBoundingClientRect();
+    const clickedOffsetX = e.clientX - rect.left;
     const songDuration = this.mainAudio.duration;
-    this.mainAudio.currentTime = (clickedOffsetX / this.progressArea.clientWidth) * songDuration;
-    this.playMusic();
+    
+    if (!isNaN(songDuration) && songDuration > 0) {
+      const newTime = Math.max(0, Math.min((clickedOffsetX / rect.width) * songDuration, songDuration));
+      
+      // Set audio time directly without intermediate updates
+      this.mainAudio.currentTime = newTime;
+      
+      // Update progress bar immediately with cached calculation
+      this.updateProgressBarImmediate(newTime, songDuration);
+    }
+  }
+
+  updateProgressBarImmediate(currentTime, duration) {
+    if (isNaN(duration) || duration <= 0) return;
+    
+    const percentage = Math.max(0, Math.min((currentTime / duration) * 100, 100));
+    
+    // Only update if the percentage actually changed significantly
+    if (Math.abs(percentage - this.lastProgressValue) < 0.1) return;
+    
+    this.lastProgressValue = percentage;
+    
+    // Direct style update without RAF for immediate feedback
+    this.progressBar.style.width = `${percentage.toFixed(1)}%`;
+  }
+
+  setupProgressBarDragging() {
+    let isDragging = false;
+    let wasPlaying = false;
+    let dragRAF = null;
+    
+    const startDrag = (e) => {
+      isDragging = true;
+      wasPlaying = !this.isMusicPaused;
+      
+      // Pause audio while dragging
+      if (wasPlaying) {
+        this.mainAudio.pause();
+      }
+      
+      // Prevent text selection - cache the style
+      document.body.style.userSelect = 'none';
+      
+      // Handle initial position
+      this.handleDragOptimized(e);
+    };
+    
+    const handleDragOptimized = (e) => {
+      if (!isDragging) return;
+      
+      // Cancel any pending RAF to avoid stacking
+      if (dragRAF) {
+        cancelAnimationFrame(dragRAF);
+      }
+      
+      // Use RAF for smooth dragging
+      dragRAF = requestAnimationFrame(() => {
+        e.preventDefault();
+        
+        // Cache rect calculation - only recalculate if needed
+        if (!this.cachedProgressRect || performance.now() - this.lastRectCache > 100) {
+          this.cachedProgressRect = this.progressArea.getBoundingClientRect();
+          this.lastRectCache = performance.now();
+        }
+        
+        const offsetX = Math.max(0, Math.min(e.clientX - this.cachedProgressRect.left, this.cachedProgressRect.width));
+        const songDuration = this.mainAudio.duration;
+        
+        if (!isNaN(songDuration) && songDuration > 0) {
+          const newTime = (offsetX / this.cachedProgressRect.width) * songDuration;
+          const clampedTime = Math.max(0, Math.min(newTime, songDuration));
+          
+          // Update audio time and progress bar efficiently
+          this.mainAudio.currentTime = clampedTime;
+          this.updateProgressBarImmediate(clampedTime, songDuration);
+          
+          // Throttled time display update
+          const now = performance.now();
+          if (now - this.lastTimeUpdate > this.timeUpdateThrottle) {
+            this.updateTimeDisplayOptimized(clampedTime, songDuration);
+            this.lastTimeUpdate = now;
+          }
+        }
+        
+        dragRAF = null;
+      });
+    };
+    
+    const endDrag = () => {
+      if (!isDragging) return;
+      
+      isDragging = false;
+      document.body.style.userSelect = '';
+      
+      // Clear cached rect
+      this.cachedProgressRect = null;
+      
+      // Cancel any pending RAF
+      if (dragRAF) {
+        cancelAnimationFrame(dragRAF);
+        dragRAF = null;
+      }
+      
+      // Resume playback if it was playing before drag
+      if (wasPlaying) {
+        this.mainAudio.play().catch(error => {
+          console.warn("Failed to resume playback after drag:", error);
+        });
+      }
+    };
+    
+    // Use optimized event handlers
+    this.progressArea.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', handleDragOptimized);
+    document.addEventListener('mouseup', endDrag);
+    
+    // Optimized touch events
+    this.progressArea.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startDrag({
+        clientX: touch.clientX,
+        preventDefault: () => e.preventDefault()
+      });
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      handleDragOptimized({
+        clientX: touch.clientX,
+        preventDefault: () => e.preventDefault()
+      });
+    }, { passive: false });
+    
+    document.addEventListener('touchend', endDrag, { passive: true });
+  }
+  
+  // Enhanced progress bar update method
+  updateProgressBar(currentTime, duration) {
+    if (isNaN(duration) || duration <= 0) return;
+    
+    const now = performance.now();
+    
+    // Throttle updates during regular playback
+    if (now - this.lastProgressUpdate < this.progressThrottle) return;
+    
+    this.lastProgressUpdate = now;
+    
+    const percentage = Math.max(0, Math.min((currentTime / duration) * 100, 100));
+    
+    // Skip update if change is minimal
+    if (Math.abs(percentage - this.lastProgressValue) < 0.1) return;
+    
+    this.lastProgressValue = percentage;
+    
+    // Use RAF for smooth updates during playback
+    if (this.progressRAF) {
+      cancelAnimationFrame(this.progressRAF);
+    }
+    
+    this.progressRAF = requestAnimationFrame(() => {
+      this.progressBar.style.width = `${percentage.toFixed(1)}%`;
+      this.progressRAF = null;
+    });
+  }
+  
+  // Enhanced time display update method
+  updateTimeDisplayOptimized(currentTime, duration) {
+    const currentMin = Math.floor(currentTime / 60);
+    const currentSec = Math.floor(currentTime % 60);
+    
+    // Use cached time strings to avoid repeated string operations
+    const currentTimeStr = `${currentMin}:${currentSec.toString().padStart(2, "0")}`;
+    
+    const currentTimeElement = this.wrapper.querySelector(".current-time");
+    if (currentTimeElement && currentTimeElement.textContent !== currentTimeStr) {
+      currentTimeElement.textContent = currentTimeStr;
+    }
+    
+    if (!isNaN(duration)) {
+      const totalMin = Math.floor(duration / 60);
+      const totalSec = Math.floor(duration % 60);
+      const durationStr = `${totalMin}:${totalSec.toString().padStart(2, "0")}`;
+      
+      const maxDurationElement = this.wrapper.querySelector(".max-duration");
+      if (maxDurationElement && maxDurationElement.textContent !== durationStr) {
+        maxDurationElement.textContent = durationStr;
+      }
+    }
   }
 
   updateProgress(e) {
     const { currentTime, duration } = e.target;
-    this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
-
-    const currentMin = Math.floor(currentTime / 60);
-    const currentSec = Math.floor(currentTime % 60).toString().padStart(2, "0");
-    this.wrapper.querySelector(".current-time").textContent = `${currentMin}:${currentSec}`;
-
-    if (!isNaN(duration)) {
-      const totalMin = Math.floor(duration / 60);
-      const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
-      this.wrapper.querySelector(".max-duration").textContent = `${totalMin}:${totalSec}`;
+    
+    // Only update if we're not currently dragging
+    if (!this.isDragging) {
+      this.updateProgressBar(currentTime, duration);
+      
+      // Throttled time display updates
+      const now = performance.now();
+      if (now - this.lastTimeUpdate > this.timeUpdateThrottle) {
+        this.updateTimeDisplayOptimized(currentTime, duration);
+        this.lastTimeUpdate = now;
+      }
     }
+  }
+
+  cleanupProgressBar() {
+    if (this.progressRAF) {
+      cancelAnimationFrame(this.progressRAF);
+      this.progressRAF = null;
+    }
+    
+    // Clear cached values
+    this.cachedProgressRect = null;
+    this.lastProgressValue = -1;
   }
 
   handleRepeat() {
@@ -1710,6 +1962,47 @@ class MusicPlayer {
     return results;
   }
 
+  handleDragOptimized = (e) => {
+    if (!isDragging) return;
+    
+    // Cancel any pending RAF to avoid stacking
+    if (dragRAF) {
+      cancelAnimationFrame(dragRAF);
+    }
+    
+    // Use RAF for smooth dragging
+    dragRAF = requestAnimationFrame(() => {
+      e.preventDefault();
+      
+      // Cache rect calculation - only recalculate if needed
+      if (!this.cachedProgressRect || performance.now() - this.lastRectCache > 100) {
+        this.cachedProgressRect = this.progressArea.getBoundingClientRect();
+        this.lastRectCache = performance.now();
+      }
+      
+      const offsetX = Math.max(0, Math.min(e.clientX - this.cachedProgressRect.left, this.cachedProgressRect.width));
+      const songDuration = this.mainAudio.duration;
+      
+      if (!isNaN(songDuration) && songDuration > 0) {
+        const newTime = (offsetX / this.cachedProgressRect.width) * songDuration;
+        const clampedTime = Math.max(0, Math.min(newTime, songDuration));
+        
+        // Update audio time and progress bar efficiently
+        this.mainAudio.currentTime = clampedTime;
+        this.updateProgressBarImmediate(clampedTime, songDuration);
+        
+        // Throttled time display update
+        const now = performance.now();
+        if (now - this.lastTimeUpdate > this.timeUpdateThrottle) {
+          this.updateTimeDisplayOptimized(clampedTime, songDuration);
+          this.lastTimeUpdate = now;
+        }
+      }
+      
+      dragRAF = null;
+    });
+  };
+
   handleSearch(e) {
     const query = e.target.value.trim();
     
@@ -2050,6 +2343,7 @@ class MusicPlayer {
 }
 
 function handleSize() {
+  console.log("hello");
   // Only handle video element for player 1 (no video interaction for player 2)
   const sizer = document.getElementById("video");
   
@@ -2153,6 +2447,11 @@ function cleanupPlayers() {
       cancelAnimationFrame(window.homePlayer.renderFrame);
     }
     
+    // NEW: Clean up progress bar resources
+    if (window.homePlayer.cleanupProgressBar) {
+      window.homePlayer.cleanupProgressBar();
+    }
+    
     console.log('Home player deinitialized');
     window.homePlayer = null;
   }
@@ -2185,6 +2484,11 @@ function cleanupPlayers() {
     }
     if (window.disguisePlayer.renderFrame) {
       cancelAnimationFrame(window.disguisePlayer.renderFrame);
+    }
+    
+    // NEW: Clean up progress bar resources
+    if (window.disguisePlayer.cleanupProgressBar) {
+      window.disguisePlayer.cleanupProgressBar();
     }
     
     console.log('Disguise player deinitialized');
