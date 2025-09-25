@@ -195,6 +195,10 @@ class MusicPlayer {
     this.lastRectCache = 0;
     this.lastTimeUpdate = 0;
     this.timeUpdateThrottle = 200; 
+
+    this.userScrolling = false;
+    this.scrollTimeout = null;
+    this.lastAutoScrollTime = 0;
     
     // Only set up border box styles for Player 2
     if (suffix === '2') {
@@ -355,6 +359,22 @@ class MusicPlayer {
     // Virtualized scroll event
     this.ulTag.addEventListener("scroll", () => this.handleVirtualizedScroll(), { passive: true });
 
+    // Add this after the existing virtualized scroll event listener in setupEventListeners
+    this.ulTag.addEventListener("scroll", () => {
+      // Detect user scrolling vs programmatic scrolling
+      this.userScrolling = true;
+      
+      // Clear existing timeout
+      if (this.scrollTimeout) {
+        clearTimeout(this.scrollTimeout);
+      }
+      
+      // Reset user scrolling flag after they stop scrolling
+      this.scrollTimeout = setTimeout(() => {
+        this.userScrolling = false;
+      }, 1500); // Allow auto-scroll again after 1.5 seconds of no manual scrolling
+    }, { passive: true });
+
     const seeVideoBtn = document.querySelector('.seeVideo');
     if (seeVideoBtn) {
       seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
@@ -421,15 +441,22 @@ class MusicPlayer {
     
     this.videoAd.style.display = "block";
     
-    const videoSize = 280;
-    const containerSize = 370;
-    const videoOffset = (containerSize - videoSize) / 2;
-    
-    Object.assign(this.videoAd.style, {
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
-    });
+    // Check if video is in bigger mode
+    if (this.videoAd.classList.contains('bigger-video')) {
+      // Full size video positioning (don't change position)
+      Object.assign(this.videoAd.style, {
+        top: '0px',
+        left: '0px',
+        transform: 'translate(0, 0)'
+      });
+    } else {
+      // Overlay size video positioning (centered)
+      Object.assign(this.videoAd.style, {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+      });
+    }
     
     // Set video mute state based on audio playing state
     this.videoAd.muted = !this.isMusicPaused;
@@ -478,13 +505,23 @@ class MusicPlayer {
   }
 
   toggleVideoControls() {
-    if (!this.videoAd.classList.contains("bigger-video")) return;
+    // Only allow control toggling when video is in bigger mode
+    if (!this.videoAd.classList.contains("bigger-video")) {
+      // Force controls off for smaller video mode
+      this.videoAd.controls = false;
+      this.controlsToggledManually = false;
+      return;
+    }
   
+    // Toggle controls only in bigger video mode
     this.controlsToggledManually = !this.controlsToggledManually;
     this.videoAd.controls = this.controlsToggledManually;
   
+    // If controls are turned off and audio is paused, resume video playback
     if (!this.controlsToggledManually && this.mainAudio.paused) {
-      this.videoAd.play()
+      this.videoAd.play().catch(error => {
+        console.warn("Failed to resume video playback:", error);
+      });
     }
   }
 
@@ -548,6 +585,12 @@ class MusicPlayer {
     // Only update border box for Player 2
     if (this.suffix === '2' && !this.isInitializing) {
       this.updateBorderBoxDisplay();
+    }
+
+    if (this.musicList.classList.contains("show")) {
+      setTimeout(() => {
+        this.scrollToCurrentSong();
+      }, 200);
     }
   }
 
@@ -864,6 +907,24 @@ class MusicPlayer {
           this.showVideoOverride();
         } else {
           this.toggleVideoDisplay(false);
+          
+          // NEW: Auto-resize video to smaller/overlay mode when music starts playing
+          // Only for player 1 (no video for player 2)
+          if (this.suffix !== '2' && this.videoAd.classList.contains("bigger-video")) {
+            this.videoAd.classList.remove("bigger-video");
+            this.videoAd.classList.add("overlay-video");
+            
+            // Reset controls when switching to overlay mode
+            this.videoAd.controls = false;
+            this.controlsToggledManually = false;
+            
+            // Update video positioning for overlay mode
+            Object.assign(this.videoAd.style, {
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)'
+            });
+          }
         }
         
         this.resetVideoSize();
@@ -915,12 +976,24 @@ class MusicPlayer {
     }
   }
 
+  
   resetVideoSize() {
-    this.videoAd.classList.remove("bigger-video");
-    this.videoAd.classList.add("overlay-video");
+    // Always reset controls and loop settings
     this.videoAd.controls = false;
     this.controlsToggledManually = false;
     this.videoAd.loop = true;
+    
+    // If no size class is set at all, default to overlay
+    if (!this.videoAd.classList.contains("bigger-video") && 
+        !this.videoAd.classList.contains("overlay-video")) {
+      this.videoAd.classList.add("overlay-video");
+    }
+    
+    // Ensure controls are disabled for overlay mode
+    if (this.videoAd.classList.contains("overlay-video")) {
+      this.videoAd.controls = false;
+      this.controlsToggledManually = false;
+    }
   }
   
   toggleVideoDisplay(show) {
@@ -966,6 +1039,37 @@ class MusicPlayer {
     this.videoAd.muted = true;
   }
 
+  scrollToCurrentSong() {
+    // Don't auto-scroll in shuffle mode
+    if (this.isShuffleMode) return;
+    
+    // Don't scroll if searching
+    if (this.isSearching) return;
+    
+    // Don't auto-scroll if user is currently scrolling
+    if (this.userScrolling) return;
+    
+    // Prevent rapid auto-scrolls
+    const now = performance.now();
+    if (now - this.lastAutoScrollTime < 1000) return;
+    
+    this.lastAutoScrollTime = now;
+    
+    // Calculate the position of the current song
+    const currentIndex = this.musicIndex - 1; // Convert to 0-based index
+    const targetScrollTop = currentIndex * this.ROW_HEIGHT;
+    
+    // Get viewport height to center the current song
+    const viewportHeight = this.ulTag.clientHeight;
+    const centeredScrollTop = Math.max(0, targetScrollTop - (viewportHeight / 2) + (this.ROW_HEIGHT / 2));
+    
+    // Smooth scroll to the current song
+    this.ulTag.scrollTo({
+      top: centeredScrollTop,
+      behavior: 'smooth'
+    });
+  }
+
   changeMusic(direction) {
     const currentArray = this.isShuffleMode ? this.shuffledOrder : this.musicSource;
     const arrayLength = currentArray.length;
@@ -982,6 +1086,12 @@ class MusicPlayer {
     this.loadMusic(this.musicIndex);
     this.playMusic();
     this.resetVideoSize();
+
+    if (this.musicList.classList.contains("show")) {
+      setTimeout(() => {
+        this.scrollToCurrentSong();
+      }, 200);
+    }
   }
 
   handleProgressClick(e) {
@@ -1281,6 +1391,17 @@ class MusicPlayer {
 
   toggleMusicList() {
     this.musicList.classList.toggle("show");
+    
+    // Auto-scroll to current song when opening the list (but not in shuffle mode)
+    if (this.musicList.classList.contains("show")) {
+      // Reset user scrolling state when opening
+      this.userScrolling = false;
+      
+      // Small delay to ensure the list is fully rendered before scrolling
+      setTimeout(() => {
+        this.scrollToCurrentSong();
+      }, 150);
+    }
   }
 
   closeMusicList() {
@@ -2353,34 +2474,60 @@ function handleSize() {
     sizer.classList.add("overlay-video");
   }
 
-  sizer.addEventListener("click", () => {
+  // Remove existing click listeners without cloning (which breaks references)
+  sizer.removeEventListener("click", sizer.clickHandler);
+
+  // Create the click handler function
+  const clickHandler = () => {
     const player = window.homePlayer;
     
-    // Prevent size toggle if controls are shown by user
+    // Prevent size toggle if controls are shown by user AND video is currently in bigger mode
     if (sizer.classList.contains("bigger-video") && player && player.controlsToggledManually) return;
-
+  
     sizer.classList.toggle("overlay-video");
     sizer.classList.toggle("bigger-video");
     
-    // Update video positioning based on new size
-    if (player && sizer.style.display !== "none") {
-      if (sizer.classList.contains('bigger-video')) {
-        // Full size video positioning
-        sizer.style.top = '0px';
-        sizer.style.left = '0px';
-        sizer.style.transform = 'translate(0, 0)';
-      } else {
-        // Overlay size video positioning (centered)
-        const videoSize = 280;
-        const containerSize = 370;
-        const videoOffset = (containerSize - videoSize) / 2;
-        
-        sizer.style.top = '50%';
-        sizer.style.left = '50%';
-        sizer.style.transform = 'translate(-50%, -50%)';
+    // Handle controls based on new size
+    if (sizer.classList.contains("bigger-video")) {
+      // Bigger video: controls can be toggled by user
+      // Don't automatically enable controls - let user toggle them via song title
+      sizer.controls = false;
+      if (player) {
+        player.controlsToggledManually = false;
+      }
+    } else {
+      // Overlay video: force controls off and reset toggle state
+      sizer.controls = false;
+      if (player) {
+        player.controlsToggledManually = false;
       }
     }
-  });
+    
+    // Update video positioning based on new size
+    if (player && sizer.style.display !== "none") {
+      if (player.videoOverride) {
+        // If override is active, let showVideoOverride handle positioning
+        player.showVideoOverride();
+      } else {
+        // Normal positioning logic
+        if (sizer.classList.contains('bigger-video')) {
+          sizer.style.top = '0px';
+          sizer.style.left = '0px';
+          sizer.style.transform = 'translate(0, 0)';
+        } else {
+          sizer.style.top = '50%';
+          sizer.style.left = '50%';
+          sizer.style.transform = 'translate(-50%, -50%)';
+        }
+      }
+    }
+  };
+
+  // Store reference to handler for future removal
+  sizer.clickHandler = clickHandler;
+  
+  // Add the new click listener
+  sizer.addEventListener("click", clickHandler);
 }
 
 // Initialize players when DOM loads

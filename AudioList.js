@@ -2361,6 +2361,13 @@ let allMusic = [
     },
 
     {
+        name: "Cum",
+        artist: "Brooke Candy",
+        src: "Cum",
+        coverType: "Images"
+    },
+
+    {
         name: "CUM Remix",
         artist: "Brooke Candy And SOPHIE",
         src: "CUMRemix",
@@ -3078,6 +3085,41 @@ let allMusic = [
         name: "MDMA",
         artist: "S3RL And Little Sis Nora",
         src: "MDMA",
+        coverType: "Images"
+    },
+
+    {
+        name: "Bad At Love",
+        artist: "Halsey",
+        src: "BadAtLove",
+        coverType: "Images"
+    },
+
+    {
+        name: "Forbidden Fruit",
+        artist: "Tommee Profitt x Sam Tinnesz x Brooke",
+        src: "ForbiddenFruit",
+        coverType: "Images"
+    },
+
+    {
+        name: "Callin U",
+        artist: "Elyanna",
+        src: "CallinU",
+        coverType: "Images"
+    },
+
+    {
+        name: "I Hate That It's True",
+        artist: "Dean Lewis",
+        src: "IHateThatItsTrue",
+        coverType: "Images"
+    },
+
+    {
+        name: "Be Alright",
+        artist: "Dean Lewis",
+        src: "BeAlright",
         coverType: "Images"
     },
 
