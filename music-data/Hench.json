@@ -404,12 +404,6 @@
       "coverType": "Images"
     },
     {
-      "name": "Come Get Her",
-      "artist": "Rae Sremmurd",
-      "src": "ComeGetHer",
-      "coverType": "Images"
-    },
-    {
       "name": "Turn Me On",
       "artist": "Kevin Lyttle",
       "src": "TurnMeOn",
@@ -500,63 +494,9 @@
       "coverType": "Images"
     },
     {
-      "name": "Haunted",
-      "artist": "Chris Grey",
-      "src": "Haunted",
-      "coverType": "Images"
-    },
-    {
-      "name": "Give Me Your Love",
-      "artist": "Chris Grey",
-      "src": "GiveMeYourLove",
-      "coverType": "Images"
-    },
-    {
       "name": "Makeup",
       "artist": "Chris Grey",
       "src": "Makeup",
-      "coverType": "Images"
-    },
-    {
-      "name": "Wrong",
-      "artist": "Chris Grey",
-      "src": "Wrong",
-      "coverType": "Images"
-    },
-    {
-      "name": "Funhouse",
-      "artist": "Chris Grey",
-      "src": "Funhouse",
-      "coverType": "Images"
-    },
-    {
-      "name": "Lifetime",
-      "artist": "Chris Grey",
-      "src": "Lifetime",
-      "coverType": "Images"
-    },
-    {
-      "name": "Make The Angels Cry",
-      "artist": "Chris Grey",
-      "src": "MakeTheAngelsCry",
-      "coverType": "Images"
-    },
-    {
-      "name": "If I Had You",
-      "artist": "Chris Grey",
-      "src": "IfIHadYou",
-      "coverType": "Images"
-    },
-    {
-      "name": "The Castle",
-      "artist": "Chris Grey",
-      "src": "TheCastle",
-      "coverType": "Images"
-    },
-    {
-      "name": "The Shadows",
-      "artist": "Chris Grey",
-      "src": "TheShadows",
       "coverType": "Images"
     },
     {
@@ -587,12 +527,6 @@
       "name": "Habibi",
       "artist": "Richy Rich",
       "src": "Habibi",
-      "coverType": "Images"
-    },
-    {
-      "name": "Renegade",
-      "artist": "Aaryan Shah",
-      "src": "Renegade",
       "coverType": "Images"
     },
     {
@@ -656,12 +590,6 @@
       "coverType": "Images"
     },
     {
-      "name": "Call Out My Name",
-      "artist": "Weeknd",
-      "src": "CallOutMyName",
-      "coverType": "Images"
-    },
-    {
       "name": "Lovely",
       "artist": "Billie Eilish And Khalid",
       "src": "Lovely",
@@ -695,12 +623,6 @@
       "name": "All Of Me",
       "artist": "John Legend",
       "src": "AllOfMe",
-      "coverType": "Images"
-    },
-    {
-      "name": "A Thousand Years",
-      "artist": "Christina Perri",
-      "src": "AThousandYears",
       "coverType": "Images"
     },
     {
