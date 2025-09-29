@@ -318,7 +318,7 @@
       font-size: 15px;
       font-family: monospace;
       cursor: pointer;
-      margin-top: auto;
+      /*margin-top: auto;*/
       transition: all 0.2s ease-in-out;
     }
 
@@ -450,7 +450,7 @@
             </p>
           </div>
         </div>
-        <div class="information">
+        <div id="infoCon" class="information" style="display: none;">
 
         </div>
       </div>
@@ -3229,6 +3229,7 @@ class ManagerMessageSystem {
     }
 
     showMessage(text, type = 'info', duration = 5000) {
+        this.messageContainer.style.display = "block";
         if (!this.messageContainer) {
             console.warn('Message container not found, creating...');
             this.createMessageContainer();
@@ -3259,6 +3260,7 @@ class ManagerMessageSystem {
         if (duration > 0 && type !== 'loading') {
             this.autoHideTimeout = setTimeout(() => {
                 this.clearMessage();
+                this.messageContainer.style.display = "none";
             }, duration);
         }
 

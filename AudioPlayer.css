@@ -717,6 +717,7 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 5px;
 }
 
 .manager-message {
