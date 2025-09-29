@@ -78,11 +78,13 @@
       if (isTokenValid) {
         // Hide login page immediately if we have valid tokens
         document.documentElement.style.setProperty('--initial-login-display', 'none');
-        document.documentElement.style.setProperty('--initial-home-display', 'block');
+        document.documentElement.style.setProperty('--initial-manager-display', 'block');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
       } else {
         // Show login page if no valid tokens - ensure white background
         document.documentElement.style.setProperty('--initial-login-display', 'block');
+        document.documentElement.style.setProperty('--initial-manager-display', 'none');
         document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
         document.body.style.backgroundColor = "white";
@@ -101,12 +103,13 @@
     }
     
     /* Hide all content initially to prevent unstyled flash */
-    .login-box, .home-box {
+    .login-box, .manager-box, .home-box {
       opacity: 0;
     }
     
     /* Show content when styles are loaded */
     .styles-loaded .login-box,
+    .styles-loaded .manager-box,
     .styles-loaded .home-box {
       opacity: 1;
     }
@@ -114,6 +117,7 @@
     /* Use CSS variables to prevent flicker */
     :root {
       --initial-login-display: block;
+      --initial-manager-display: none;
       --initial-home-display: none;
       --initial-disguise-display: none;
     }
@@ -143,12 +147,200 @@
       display: var(--initial-login-display) !important;
     }
     
+    #ManagerPage {
+      display: var(--initial-manager-display) !important;
+    }
+    
     #HomePage {
       display: var(--initial-home-display) !important;
     }
     
     #DisguisePage {
       display: var(--initial-disguise-display) !important;
+    }
+
+    /* Manager Page Styles */
+    .manager-box {
+      background: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      font-family: monospace;
+    }
+
+    .manager-container {
+      background-color: white;
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .manager-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .manager-header header {
+      color: black;
+      font-size: 20px;
+      font-weight: bold;
+      font-family: roboto, monospace;
+    }
+
+    .section {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: black;
+      font-family: monospace;
+      text-align: center;
+    }
+
+    /* File input styled in black & white */
+    input[type="file"] {
+      width: 100%;
+      height: 56px;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 3px solid black;
+      outline: none;
+      font-family: monospace;
+      font-weight: bold;
+      background: white;
+      color: black;
+      margin-bottom: 10px;
+      cursor: pointer;
+      padding-top: 11px;
+      box-sizing: border-box;
+    }
+
+    input[type="file"]::-webkit-file-upload-button,
+    input[type="file"]::file-selector-button {
+      background: white;
+      color: black;
+      border: 2px solid black;
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .file-list {
+      width: 100%;
+      border: 3px solid black;
+      border-radius: 5px;
+      padding: 10px;
+      background: white;
+      color: black;
+      font-family: monospace;
+      font-size: 14px;
+      max-height: 150px;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    /* Custom black & white radio buttons */
+    input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid black;
+      border-radius: 50%;
+      margin-right: 8px;
+      cursor: pointer;
+      background: white;
+      position: relative;
+    }
+
+    input[type="radio"]:checked::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: black;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+    }
+
+    /* Custom black & white checkboxes */
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid black;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 8px;
+      cursor: pointer;
+      background: white;
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: "";
+      width: 4px;
+      height: 8px;
+      border: solid black;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .continue-btn {
+      width: 100%;
+      height: 50px;
+      background: black;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      font-family: monospace;
+      cursor: pointer;
+      margin-top: auto;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      font-family: monospace;
+      font-style: italic;
+    }
+
+    .error {
+      text-align: center;
+      color: #cc0000;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .quick-logout-info p {
+        font-family: monospace;
+        color: black;
+        text-align: center;
+        line-height: 1.4;
     }
     
     /* Force white background when login page is showing */
@@ -166,6 +358,10 @@
       display: block !important;
     }
     
+    #ManagerPage[style*="display: block"] {
+      display: block !important;
+    }
+    
     #HomePage[style*="display: block"] {
       display: block !important;
     }
@@ -175,6 +371,10 @@
     }
     
     #LoginPage[style*="display: none"] {
+      display: none !important;
+    }
+    
+    #ManagerPage[style*="display: none"] {
       display: none !important;
     }
     
@@ -208,6 +408,54 @@
     </div>
     <div class="input-submit">
         <button class="submit-btn" id="signinBtn">SIGN IN</button>
+    </div>
+  </div>
+
+  <div id="ManagerPage" class="manager-box">
+    <div class="manager-container">
+      <div class="manager-header">
+        <header>BLACKWHITE MANAGER</header>
+      </div>
+
+      <!-- Playlists Section -->
+      <div class="section">
+        <h2>PLAYLISTS</h2>
+        <input type="file" id="playlistUpload" accept=".json">
+        <div id="playlistList" class="file-list">
+          <div class="loading">Loading playlists...</div>
+        </div>
+      </div>
+
+      <!-- Scripts Section -->
+      <div class="section">
+        <h2>SCRIPTS</h2>
+        <div id="scriptList" class="file-list">
+          <div class="loading">Loading scripts...</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>QUICK LOGOUT</h2>
+        <div class="file-list">
+          <div class="file-item">
+            <label>
+              <input type="checkbox" id="quickLogoutToggle">
+              Enable Quick Logout (Click title to logout directly)
+            </label>
+          </div>
+          <div class="quick-logout-info">
+            <p style="font-size: 12px; margin: 10px 0; opacity: 0.8;">
+              When enabled: Click player title → Logout directly<br>
+              When disabled: Click player title → Return to manager → Click header to logout
+            </p>
+          </div>
+        </div>
+        <div class="information">
+
+        </div>
+      </div>
+
+      <button class="continue-btn" id="continueBtn">Continue</button>
     </div>
   </div>
 
@@ -275,9 +523,6 @@
           <!-- here li list are coming from js -->
         </ul>
       </div>
-      <div class="PABox">
-        <button id="voiceBtn" class="PABoxButton">START VOICE CONTROL</button>
-      </div>
     </div>
   </div>
 
@@ -337,9 +582,6 @@
         <ul>
           <!-- here li list are coming from js -->
         </ul>
-      </div>
-      <div class="PABox">
-        <button id="voiceBtn2" class="PABoxButton">START VOICE CONTROL</button>
       </div>
     </div>
   </div>
@@ -708,6 +950,19 @@
     let sessionCheckInterval = null;
     let serverConnectionEstablished = false;
 
+    // Manager state
+    let availablePlaylists = [];
+    let selectedPlaylist = null;
+    let uploadedPlaylist = null;
+    let selectedScripts = [];
+    let dynamicScriptElements = [];
+
+    let intentionalManagerNavigation = false;
+
+    // API endpoints
+    const WORKER_BASE_URL = 'https://manager-worker.mcvities755.workers.dev';
+    const PLAYLISTS_ENDPOINT = `${WORKER_BASE_URL}/playlists`;
+
     // Enhanced API Helper functions
     const SecureAPI = {
         async request(endpoint, options = {}) {
@@ -804,6 +1059,34 @@
                 }
             }
             return false;
+        }
+    };
+
+    // Manager functionality
+    const ManagerAPI = {
+        async loadAvailablePlaylists() {
+            try {
+                const response = await fetch(PLAYLISTS_ENDPOINT);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                return data.files || [];
+            } catch (error) {
+                console.error('Error loading playlists:', error);
+                throw error;
+            }
+        },
+
+        async loadPlaylistFromR2(playlistName) {
+            try {
+                const response = await fetch(`${WORKER_BASE_URL}/playlists/${playlistName}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error loading playlist from R2:', error);
+                throw error;
+            }
         }
     };
 
@@ -926,6 +1209,16 @@
         accessToken = null;
         refreshToken = null;
         currentUser = null;
+
+        if (window.homeMediaManager && typeof window.homeMediaManager.cleanup === 'function') {
+            window.homeMediaManager.cleanup();
+            window.homeMediaManager = null;
+        }
+        
+        if (window.disguiseMediaManager && typeof window.disguiseMediaManager.cleanup === 'function') {
+            window.disguiseMediaManager.cleanup();
+            window.disguiseMediaManager = null;
+        }
         
         // Clear all session data
         localStorage.removeItem('accessToken');
@@ -934,6 +1227,27 @@
         localStorage.removeItem('tokenExpiration');
         localStorage.removeItem('HomeLoginTime');
         localStorage.removeItem('DisguiseLoginTime');
+        
+        // Clear manager configuration and playlist data
+        localStorage.removeItem('managerConfig');
+        localStorage.removeItem('loadedScripts');
+        localStorage.removeItem('currentPlaylistName');
+        localStorage.removeItem('currentPlaylistType');
+        
+        // Clear immediate save data
+        clearSavedSelections();
+        
+        // Clear any other cached playlist data
+        localStorage.removeItem('uploadedPlaylistData');
+        localStorage.removeItem('playlistCache');
+        localStorage.removeItem('selectedPlaylistData');
+        
+        // Clear stored page state
+        clearStoredPageState();
+        
+        // Clear music data from memory
+        if (window.allMusic) window.allMusic = [];
+        if (window.ReducedMusic) window.ReducedMusic = [];
         
         // End rolling session
         sessionManager.endSession();
@@ -960,6 +1274,12 @@
                     console.log('Session inactive during monitoring');
                     handleLogout(true, 'Session ended');
                     return;
+                }
+                
+                // Only check auth aggressively if we're on login page
+                const currentPage = getCurrentActivePage();
+                if (currentPage === 'login') {
+                    return; // Don't do anything on login page
                 }
                 
                 // Try to refresh if approaching expiration
@@ -990,7 +1310,7 @@
         }
     }
 
-    // Updated handleSecureLogin function with rolling session initialization
+    // Updated handleSecureLogin function with manager navigation
     async function handleSecureLogin() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
@@ -1045,17 +1365,10 @@
                 // Start rolling session
                 sessionManager.startSession();
                 
-                // Navigate based on user role
-                if (currentUser.role === 'home') {
-                    showHomePage();
-                } else if (currentUser.role === 'disguise') {
-                    showDisguisePage();
-                } else {
-                    console.warn('Unknown user role:', currentUser.role);
-                    showHomePage();
-                }
+                // Navigate to manager page instead of directly to player
+                showManagerPage();
                 
-                showMessage("LOGIN SUCCESSFUL - SESSION WILL EXTEND WITH ACTIVITY", true);
+                showMessage("LOGIN SUCCESSFUL - PLEASE CONFIGURE YOUR SESSION", true);
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -1082,9 +1395,10 @@
         }
     }
 
-    // Page navigation functions with rolling session monitoring
+    // Page navigation functions
     function showLoginPage() {
         document.getElementById("LoginPage").style.display = "block";
+        document.getElementById("ManagerPage").style.display = "none";
         document.getElementById("HomePage").style.display = "none";
         document.getElementById("DisguisePage").style.display = "none";
         
@@ -1094,15 +1408,104 @@
         
         // Update CSS variables to reflect current state
         document.documentElement.style.setProperty('--initial-login-display', 'block');
+        document.documentElement.style.setProperty('--initial-manager-display', 'none');
         document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
         
         // Stop monitoring when showing login page
         stopSessionMonitoring();
+        
+        // **ADD THIS: Check if coming from a player page and reload if so**
+        const comingFromPlayer = localStorage.getItem('wasOnPlayerPage') === 'true';
+        if (comingFromPlayer) {
+            console.log('Coming from player page - reloading login...');
+            localStorage.removeItem('wasOnPlayerPage');
+            
+            // Use a small delay to ensure cleanup completes
+            setTimeout(() => {
+            window.location.reload();
+            }, 100);
+            return;
+        }
+    }
+
+    function showManagerPage() {
+        // Reset intentional navigation flag when actually showing manager
+        intentionalManagerNavigation = false;
+        
+        document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("ManagerPage").style.display = "block";
+        document.getElementById("HomePage").style.display = "none";
+        document.getElementById("DisguisePage").style.display = "none";
+        
+        // Keep white background for manager page
+        document.body.style.backgroundColor = "white";
+        document.body.classList.add("login-active");
+        
+        // Update CSS variables to reflect current state
+        document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-manager-display', 'block');
+        document.documentElement.style.setProperty('--initial-home-display', 'none');
+        document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        
+        // Don't save manager page state - we want refreshes to go through auth check
+        // But clear any stored player state to prevent auto-return
+        clearStoredPageState();
+        
+        // **ADD THIS: Check if coming from a player page and reload if so**
+        const comingFromPlayer = localStorage.getItem('wasOnPlayerPage') === 'true';
+        if (comingFromPlayer) {
+            console.log('Coming from player page - reloading manager...');
+            localStorage.removeItem('wasOnPlayerPage');
+            
+            // Use a small delay to ensure cleanup completes
+            setTimeout(() => {
+            window.location.reload();
+            }, 100);
+            return;
+        }
+        
+        // Initialize manager
+        initializeManager();
+        
+        // Setup manager header logout
+        setupManagerHeaderLogout();
+        
+        // Start monitoring when logged in
+        startSessionMonitoring();
+    }
+
+    function setupManagerHeaderLogout() {
+        const managerHeader = document.querySelector('.manager-header header');
+        if (managerHeader) {
+            // Remove any existing listeners first
+            managerHeader.replaceWith(managerHeader.cloneNode(true));
+            const newManagerHeader = document.querySelector('.manager-header header');
+            
+            newManagerHeader.style.cursor = "pointer";
+            newManagerHeader.title = "Click to logout";
+            
+            newManagerHeader.addEventListener("click", async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Add visual feedback
+                this.style.opacity = "0.7";
+                setTimeout(() => {
+                    this.style.opacity = "1";
+                }, 150);
+                
+                console.log('Manager header clicked - logging out...');
+                
+                // Perform logout
+                await handleLogout(true, 'Manager logout');
+            });
+        }
     }
 
     function showHomePage() {
         document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("ManagerPage").style.display = "none";
         document.getElementById("HomePage").style.display = "block";
         document.getElementById("DisguisePage").style.display = "none";
         
@@ -1112,23 +1515,28 @@
         
         // Update CSS variables to reflect current state
         document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-manager-display', 'none');
         document.documentElement.style.setProperty('--initial-home-display', 'block');
         document.documentElement.style.setProperty('--initial-disguise-display', 'none');
+        
+        // Save page state for refresh recovery
+        saveCurrentPageState();
         
         localStorage.setItem("HomeLoginTime", new Date().getTime());
         localStorage.removeItem("DisguiseLoginTime");
         
-        // Initialize Home Player after login
+        // Initialize Home Player after manager configuration
         if (typeof initializeHomePlayer === 'function') {
             initializeHomePlayer();
         }
         
-        // Start monitoring when logged in
+        // Continue monitoring
         startSessionMonitoring();
     }
 
     function showDisguisePage() {
         document.getElementById("LoginPage").style.display = "none";
+        document.getElementById("ManagerPage").style.display = "none";
         document.getElementById("HomePage").style.display = "none";
         document.getElementById("DisguisePage").style.display = "block";
         
@@ -1138,25 +1546,880 @@
         
         // Update CSS variables to reflect current state
         document.documentElement.style.setProperty('--initial-login-display', 'none');
+        document.documentElement.style.setProperty('--initial-manager-display', 'none');
         document.documentElement.style.setProperty('--initial-home-display', 'none');
         document.documentElement.style.setProperty('--initial-disguise-display', 'block');
+        
+        // Save page state for refresh recovery
+        saveCurrentPageState();
         
         localStorage.setItem("DisguiseLoginTime", new Date().getTime());
         localStorage.removeItem("HomeLoginTime");
         
-        // Initialize Disguise Player after login
+        // Initialize Disguise Player after manager configuration
         if (typeof initializeDisguisePlayer === 'function') {
             initializeDisguisePlayer();
         }
         
-        // Start monitoring when logged in
+        // Continue monitoring
         startSessionMonitoring();
     }
 
-    // Enhanced auth status check with rolling session validation
+    // Manager initialization and functionality
+    async function initializeManager() {
+        console.log('Initializing manager...');
+        
+        // Load saved selections first
+        loadSavedSelections();
+        
+        // Load available playlists
+        await loadAvailablePlaylists();
+        
+        // Setup scripts list (this will now show saved selections as checked)
+        renderScripts();
+        
+        // Setup event listeners
+        setupManagerEventListeners();
+        
+        // Restore quick logout checkbox state
+        const quickLogoutToggle = document.getElementById('quickLogoutToggle');
+        const savedQuickLogout = localStorage.getItem('quickLogoutEnabled') === 'true';
+        if (quickLogoutToggle) {
+            quickLogoutToggle.checked = savedQuickLogout;
+        }
+    }
+
+    async function loadAvailablePlaylists() {
+        const playlistList = document.getElementById('playlistList');
+        
+        try {
+            playlistList.innerHTML = '<div class="loading">Loading playlists...</div>';
+            
+            availablePlaylists = await ManagerAPI.loadAvailablePlaylists();
+            renderPlaylists();
+        } catch (error) {
+            console.error('Error loading playlists:', error);
+            playlistList.innerHTML = '<div class="error">Failed to load playlists from R2</div>';
+        }
+    }
+
+    function renderPlaylists() {
+        const playlistList = document.getElementById('playlistList');
+        playlistList.innerHTML = "";
+        
+        // Add uploaded playlist if exists
+        if (uploadedPlaylist) {
+            const isSelected = selectedPlaylist && 
+                            selectedPlaylist.name === uploadedPlaylist.name && 
+                            selectedPlaylist.type === 'uploaded';
+            const div = document.createElement("div");
+            div.className = "file-item";
+            div.innerHTML = `
+                <label>
+                    <input type="radio" name="playlist" value="${uploadedPlaylist.name}" data-type="uploaded" ${isSelected ? 'checked' : ''}>
+                    ${uploadedPlaylist.name} (uploaded)
+                </label>
+            `;
+            playlistList.appendChild(div);
+        }
+        
+        // Add available playlists from R2
+        availablePlaylists.forEach(playlist => {
+            const isSelected = selectedPlaylist && 
+                            selectedPlaylist.name === playlist && 
+                            selectedPlaylist.type === 'r2';
+            const div = document.createElement("div");
+            div.className = "file-item";
+            div.innerHTML = `
+                <label>
+                    <input type="radio" name="playlist" value="${playlist}" data-type="r2" ${isSelected ? 'checked' : ''}>
+                    ${playlist}
+                </label>
+            `;
+            playlistList.appendChild(div);
+        });
+
+        // Add event listeners with immediate saving
+        playlistList.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedPlaylist = {
+                        name: e.target.value,
+                        type: e.target.dataset.type
+                    };
+                    savePlaylistSelection(selectedPlaylist);
+                }
+            });
+        });
+
+        if (!uploadedPlaylist && availablePlaylists.length === 0) {
+            playlistList.innerHTML = '<div class="error">No playlists available</div>';
+        }
+    }
+
+    function renderScripts() {
+        const scriptList = document.getElementById('scriptList');
+        
+        const optionalScripts = [
+            { name: "MediaManager.js", path: "MediaManager.js" },
+            { name: "VoiceControl.js", path: "VoiceControl.js" }
+        ];
+        
+        scriptList.innerHTML = "";
+
+        optionalScripts.forEach(script => {
+            const isSelected = selectedScripts.some(s => s.path === script.path);
+            const div = document.createElement("div");
+            div.className = "file-item";
+            div.innerHTML = `
+                <label>
+                    <input type="checkbox" data-name="${script.name}" data-path="${script.path}" ${isSelected ? 'checked' : ''}>
+                    ${script.name}
+                </label>
+            `;
+            scriptList.appendChild(div);
+        });
+
+        scriptList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const scriptInfo = {
+                    name: e.target.dataset.name,
+                    path: e.target.dataset.path
+                };
+                if (e.target.checked) {
+                    selectedScripts.push(scriptInfo);
+                } else {
+                    selectedScripts = selectedScripts.filter(s => s.path !== scriptInfo.path);
+                }
+                saveScriptSelection(selectedScripts);
+            });
+        });
+
+        if (optionalScripts.length === 0) {
+            scriptList.innerHTML = '<div class="error">No optional scripts available</div>';
+        }
+    }
+
+    function saveManagerConfiguration() {
+        const config = {
+            selectedPlaylist: selectedPlaylist,
+            selectedScripts: selectedScripts,
+            uploadedPlaylist: uploadedPlaylist,
+            quickLogoutEnabled: localStorage.getItem('quickLogoutEnabled') === 'true',
+            timestamp: Date.now()
+        };
+        
+        localStorage.setItem('managerConfig', JSON.stringify(config));
+        console.log('Manager configuration saved:', config);
+    }
+
+    function loadManagerConfiguration() {
+        try {
+            const saved = localStorage.getItem('managerConfig');
+            if (!saved) return null;
+            
+            const config = JSON.parse(saved);
+            
+            // Check if config is recent (within last 24 hours)
+            if (!config.timestamp || (Date.now() - config.timestamp) > 24 * 60 * 60 * 1000) {
+                localStorage.removeItem('managerConfig');
+                return null;
+            }
+            
+            return config;
+        } catch (error) {
+            console.warn('Failed to load manager configuration:', error);
+            localStorage.removeItem('managerConfig');
+            return null;
+        }
+    }
+
+    function restoreManagerConfiguration(config) {
+        if (!config) return false;
+        
+        console.log('Restoring manager configuration:', config);
+        
+        try {
+            selectedPlaylist = config.selectedPlaylist;
+            selectedScripts = config.selectedScripts || [];
+            uploadedPlaylist = config.uploadedPlaylist;
+            
+            // Restore quick logout setting
+            if (config.quickLogoutEnabled !== undefined) {
+                localStorage.setItem('quickLogoutEnabled', config.quickLogoutEnabled);
+            }
+            
+            return true;
+        } catch (error) {
+            console.warn('Failed to restore manager configuration:', error);
+            return false;
+        }
+    }
+
+    function setupManagerEventListeners() {
+        // File upload handler
+        const playlistUpload = document.getElementById('playlistUpload');
+        playlistUpload.addEventListener('change', handlePlaylistUpload);
+        
+        // Continue button handler
+        const continueBtn = document.getElementById('continueBtn');
+        continueBtn.addEventListener('click', handleManagerContinue);
+        
+        // Quick logout toggle handler
+        const quickLogoutToggle = document.getElementById('quickLogoutToggle');
+        const savedQuickLogout = localStorage.getItem('quickLogoutEnabled') === 'true';
+        quickLogoutToggle.checked = savedQuickLogout;
+        
+        quickLogoutToggle.addEventListener('change', (e) => {
+            localStorage.setItem('quickLogoutEnabled', e.target.checked);
+            console.log('Quick logout', e.target.checked ? 'enabled' : 'disabled');
+            
+            // Update title tooltips immediately
+            ["title", "title2"].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.title = e.target.checked ? "Click to logout" : "Click to return to manager";
+                }
+            });
+        });
+    }
+
+    function handlePlaylistUpload(e) {
+        const file = e.target.files[0];
+        if (file && file.type === "application/json") {
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const json = JSON.parse(reader.result);
+                    uploadedPlaylist = { name: file.name, data: json, type: 'uploaded' };
+                    
+                    // Save immediately
+                    saveUploadedPlaylist(uploadedPlaylist);
+                    
+                    renderPlaylists();
+
+                    if (managerMessages) {
+                        managerMessages.showSuccess(`Playlist "${file.name}" uploaded and saved!`);
+                    }
+                } catch {
+                    if (managerMessages) {
+                        managerMessages.showError(`${file.name} is not a valid JSON file.`);
+                    }
+                }
+            };
+            reader.readAsText(file);
+        } else if (file) {
+            if (managerMessages) {
+                managerMessages.showError(`${file.name} is not a valid playlist file.`);
+            }
+        }
+    }
+
+    async function handleManagerContinue() {
+        if (!selectedPlaylist) {
+            if (managerMessages) {
+                managerMessages.showWarning("Please select a playlist before continuing.");
+            }
+            return;
+        }
+    
+    console.log('Loading playlist and initializing player...');
+    
+    // Show loading state
+    const continueBtn = document.getElementById('continueBtn');
+    const originalText = continueBtn.textContent;
+    continueBtn.disabled = true;
+    continueBtn.textContent = 'Loading...';
+
+    if (managerMessages) {
+        managerMessages.showLoading('Loading playlist and initializing player...');
+    }
+    
+    try {
+        // Save manager configuration FIRST
+        saveManagerConfiguration();
+        
+        // Load the selected playlist data
+        let playlistData;
+        
+        if (selectedPlaylist.type === 'uploaded' && uploadedPlaylist) {
+            playlistData = uploadedPlaylist.data;
+            console.log('Using uploaded playlist data');
+        } else if (selectedPlaylist.type === 'r2') {
+            console.log(`Loading playlist from R2: ${selectedPlaylist.name}`);
+            try {
+                playlistData = await ManagerAPI.loadPlaylistFromR2(selectedPlaylist.name);
+            } catch (r2Error) {
+                console.warn(`Failed to load from R2: ${selectedPlaylist.name}`, r2Error);
+                
+                // Fallback: try to load from default JSON files
+                console.log('Attempting fallback to default JSON files...');
+                try {
+                    const fallbackOptions = [
+                        `music-data/${selectedPlaylist.name}`,
+                        'music-data/allMusic.json',
+                        'music-data/ReducedMusic.json'
+                    ];
+                    
+                    for (const fallbackPath of fallbackOptions) {
+                        try {
+                            console.log(`Trying fallback: ${fallbackPath}`);
+                            const response = await fetch(fallbackPath);
+                            if (response.ok) {
+                                playlistData = await response.json();
+                                console.log(`Successfully loaded from ${fallbackPath}`);
+                                break;
+                            }
+                        } catch (individualError) {
+                            console.warn(`Failed to load ${fallbackPath}:`, individualError);
+                        }
+                    }
+                    
+                    if (!playlistData) {
+                        console.warn('All fallback attempts failed, creating minimal playlist');
+                        playlistData = [
+                            {
+                                name: "Default Song",
+                                artist: "Please upload a valid playlist",
+                                src: "default",
+                                coverType: "Images"
+                            }
+                        ];
+                        if (managerMessages) {
+                            managerMessages.showWarning(`Could not load "${selectedPlaylist.name}". Using default playlist. Please upload a valid playlist file or check your connection.`);
+                        }
+                    }
+                } catch (fallbackError) {
+                    console.error('Fallback loading failed:', fallbackError);
+                    playlistData = [
+                        {
+                            name: "Error Loading Music",
+                            artist: "Please check your playlist files",
+                            src: "error",
+                            coverType: "Images"
+                        }
+                    ];
+                    if (managerMessages) {
+                        managerMessages.showError(`Unable to load any playlist data. Using emergency fallback. Please check your playlist files and try again.`);
+                    }
+                }
+            }
+        }
+        
+        if (!playlistData) {
+            throw new Error('Failed to load playlist data');
+        }
+        
+        // Validate playlist data before proceeding
+        let validationPassed = true;
+        try {
+            const validation = validatePlaylistData(playlistData);
+            if (!validation.valid) {
+                console.warn(`Playlist validation failed: ${validation.errors.join(', ')}`);
+                validationPassed = false;
+            }
+            
+            if (validation.warnings && validation.warnings.length > 0 && validationPassed) {
+                console.warn(`Playlist validation warnings for "${selectedPlaylist.name}":`, validation.warnings);
+                
+                const continueWithWarnings = await new Promise((resolve) => {
+                if (managerMessages) {
+                    const warningMessage = 
+                        `Playlist "${selectedPlaylist.name}" has some issues:\n\n` +
+                        validation.warnings.slice(0, 3).join('\n') +
+                        (validation.warnings.length > 3 ? `\n... and ${validation.warnings.length - 3} more issues.` : '') +
+                        `\n\nFound ${validation.validTrackCount} valid tracks out of ${validation.totalTracks} total.\n\n` +
+                        'Do you want to continue anyway?';
+                    
+                    managerMessages.showConfirm(
+                        warningMessage,
+                        () => resolve(true),
+                        () => resolve(false),
+                        'CONTINUE',
+                        'CANCEL'
+                    );
+                } else {
+                    resolve(true); // fallback
+                }
+            });
+                
+                if (!continueWithWarnings) {
+                    continueBtn.disabled = false;
+                    continueBtn.textContent = originalText;
+                    return;
+                }
+            }
+        } catch (validationError) {
+            console.warn('Validation function error, continuing anyway:', validationError);
+            validationPassed = false;
+        }
+        
+        // Load selected scripts dynamically
+        console.log('Loading selected scripts...');
+        try {
+            await loadSelectedScripts();
+        } catch (scriptError) {
+            console.warn('Script loading failed, continuing with basic functionality:', scriptError);
+        }
+        
+        // Set the music data globally using the new system
+        console.log('Setting music data from loaded playlist...');
+        try {
+            setMusicDataFromManager(playlistData);
+        } catch (setDataError) {
+            console.warn('Error setting music data, using direct assignment:', setDataError);
+            window.allMusic = Array.isArray(playlistData) ? playlistData : (playlistData.allMusic || []);
+            window.ReducedMusic = Array.isArray(playlistData) ? [...playlistData] : (playlistData.ReducedMusic || window.allMusic || []);
+        }
+        
+        console.log(`Successfully loaded playlist: ${selectedPlaylist.name}`);
+        console.log(`Main playlist: ${window.allMusic?.length || 0} tracks`);
+        console.log(`Reduced playlist: ${window.ReducedMusic?.length || 0} tracks`);
+        
+        // Store playlist info for reference
+        localStorage.setItem('currentPlaylistName', selectedPlaylist.name);
+        localStorage.setItem('currentPlaylistType', selectedPlaylist.type);
+
+        if (managerMessages) {
+            managerMessages.showSuccess(`Successfully loaded playlist: ${selectedPlaylist.name}`, 2000);
+        }
+        
+        // Reset button state before navigation
+        continueBtn.disabled = false;
+        continueBtn.textContent = originalText;
+        
+        // Navigate based on user role
+        if (currentUser && currentUser.username === 'Morningstar00') {
+            showHomePage();
+        } else if (currentUser && currentUser.username === 'Valentinean00') {
+            showDisguisePage();
+        } else {
+            console.warn('Unknown user role:', currentUser?.username);
+            showHomePage();
+        }
+        
+    } catch (error) {
+        console.error('Error loading playlist or scripts:', error);
+        
+        continueBtn.disabled = false;
+        continueBtn.textContent = originalText;
+        
+        let errorMessage = 'Failed to load playlist or scripts.';
+        if (error.message.includes('Invalid playlist')) {
+            errorMessage = `Playlist Error: ${error.message}`;
+        } else if (error.message.includes('Failed to load playlist')) {
+            errorMessage = 'Could not download the selected playlist. Please check your connection and try again.';
+        } else if (error.message.includes('Unable to load playlist')) {
+            errorMessage = error.message;
+        } else if (error.message.includes('script')) {
+            errorMessage = 'Some optional scripts failed to load, but you can continue with basic functionality.';
+            
+            const continueAnyway = await new Promise((resolve) => {
+                if (managerMessages) {
+                    managerMessages.showConfirm(
+                        errorMessage + '\n\nDo you want to continue anyway?',
+                        () => resolve(true),
+                        () => resolve(false),
+                        'CONTINUE',
+                        'CANCEL'
+                    );
+                } else {
+                    resolve(false);
+                }
+            });
+            if (continueAnyway) {
+                selectedScripts = [];
+                setTimeout(() => handleManagerContinue(), 100);
+                return;
+            }
+        } else {
+            errorMessage = `An error occurred: ${error.message}`;
+        }
+        
+        if (managerMessages) {
+            // Determine message type based on error content
+            if (errorMessage.includes('Script') || errorMessage.includes('continue')) {
+                managerMessages.showWarning(errorMessage);
+            } else {
+                managerMessages.showError(errorMessage);
+            }
+        }
+    }
+}
+
+    async function loadSelectedScripts() {
+        // Important scripts that are always loaded (already in HTML)
+        const importantScripts = [
+            { name: "AudioList.js", path: "AudioList.js" },
+            { name: "AudioPlayer00.js", path: "AudioPlayer00.js" }, 
+            { name: "ServiceWorker.js", path: "ServiceWorker.js" },
+            { name: "FontAwesome", path: "https://kit.fontawesome.com/3c627968c9.js" }
+        ];
+        
+        // Clean up any previously loaded dynamic scripts
+        cleanupDynamicScripts();
+        
+        // Load selected optional scripts
+        const scriptLoadPromises = selectedScripts.map(script => loadScript(script.path));
+        
+        try {
+            await Promise.all(scriptLoadPromises);
+            console.log('All selected scripts loaded successfully:', selectedScripts.map(s => s.name));
+            
+            // Save which scripts were loaded
+            localStorage.setItem('loadedScripts', JSON.stringify(selectedScripts));
+            
+            // Initialize loaded scripts
+            await initializeLoadedScripts();
+            
+        } catch (error) {
+            console.warn('Some scripts failed to load:', error);
+            // Continue anyway - the app should still work with core functionality
+        }
+    }
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            // Check if script is already loaded
+            const existingScript = document.querySelector(`script[src="${src}"]`);
+            if (existingScript) {
+                resolve();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+            
+            // Add to head and track for cleanup
+            document.head.appendChild(script);
+            dynamicScriptElements.push(script);
+        });
+    }
+
+    async function initializeLoadedScripts() {
+        // Initialize VoiceControl if it was loaded
+        if (selectedScripts.some(s => s.name === 'VoiceControl.js')) {
+            if (typeof VoiceControlSystem !== 'undefined' && !window.voiceControl) {
+                console.log('Initializing VoiceControl...');
+                window.voiceControl = new VoiceControlSystem();
+            }
+        }
+        
+        // Initialize MediaManager if it was loaded
+        if (selectedScripts.some(s => s.name === 'MediaManager.js')) {
+            if (typeof MediaManager !== 'undefined' && !window.mediaManager) {
+                console.log('Initializing MediaManager...');
+                window.mediaManager = new MediaManager();
+            }
+        }
+        
+        // Add other script initializations as needed
+    }
+
+    function cleanupDynamicScripts(forceCleanup = false) {
+        console.log('Cleaning up dynamic scripts...', forceCleanup ? '(forced)' : '');
+
+        if (forceCleanup) {
+            forceRemoveMediaManagerAssets();
+            
+            if (window.homeMediaManager && typeof window.homeMediaManager.cleanup === 'function') {
+            console.log('Force cleaning up home MediaManager');
+            window.homeMediaManager.cleanup();
+            window.homeMediaManager = null;
+            }
+            
+            if (window.disguiseMediaManager && typeof window.disguiseMediaManager.cleanup === 'function') {
+            console.log('Force cleaning up disguise MediaManager');
+            window.disguiseMediaManager.cleanup();
+            window.disguiseMediaManager = null;
+            }
+        }
+        
+        // Clean up music players first (this calls their existing cleanup methods)
+        if (typeof cleanupPlayers === 'function') {
+            cleanupPlayers();
+        }
+        
+        // Clean up VoiceControl if it exists
+        if (window.voiceControl) {
+            console.log('Cleaning up VoiceControl...');
+            
+            // Try multiple cleanup methods
+            try {
+                // Method 1: Call destroy if it exists
+                if (typeof window.voiceControl.destroy === 'function') {
+                    window.voiceControl.destroy();
+                }
+                
+                // Method 2: Call cleanup if it exists
+                if (typeof window.voiceControl.cleanup === 'function') {
+                    window.voiceControl.cleanup();
+                }
+                
+                // Method 3: Stop recognition if it exists
+                if (window.voiceControl.recognition) {
+                    if (typeof window.voiceControl.recognition.stop === 'function') {
+                        window.voiceControl.recognition.stop();
+                    }
+                    if (typeof window.voiceControl.recognition.abort === 'function') {
+                        window.voiceControl.recognition.abort();
+                    }
+                }
+                
+                // Method 4: Remove event listeners if they exist
+                if (window.voiceControl.removeEventListeners && typeof window.voiceControl.removeEventListeners === 'function') {
+                    window.voiceControl.removeEventListeners();
+                }
+                
+                // Method 5: Clean up voice control UI elements - ACTUALLY REMOVE THEM
+                console.log('Removing voice control DOM elements...');
+                
+                // Remove PABox containers (main voice control containers)
+                const paBoxes = document.querySelectorAll('.PABox');
+                paBoxes.forEach(paBox => {
+                    console.log('Removing PABox container');
+                    if (paBox.parentNode) {
+                        paBox.parentNode.removeChild(paBox);
+                    }
+                });
+                
+                // Remove individual voice control buttons (in case they exist outside PABox)
+                const voiceButtons = document.querySelectorAll('.PABoxButton, #voiceBtn, #voiceBtn2');
+                voiceButtons.forEach(btn => {
+                    console.log('Removing voice control button:', btn.id || btn.className);
+                    if (btn.parentNode) {
+                        btn.parentNode.removeChild(btn);
+                    }
+                });
+                
+                // Remove any voice control styles injected into document head
+                const voiceStyles = document.querySelectorAll('style');
+                voiceStyles.forEach(style => {
+                    if (style.textContent && style.textContent.includes('.PABox')) {
+                        console.log('Removing voice control styles');
+                        if (style.parentNode) {
+                            style.parentNode.removeChild(style);
+                        }
+                    }
+                });
+                
+                console.log('VoiceControl cleanup completed');
+            } catch (error) {
+                console.warn('Error during VoiceControl cleanup:', error);
+            }
+            
+            // Always nullify the reference
+            window.voiceControl = null;
+        }
+        
+        // Clean up MediaManager if it exists
+        if (window.mediaManager) {
+            console.log('Cleaning up MediaManager...');
+            try {
+                if (typeof window.mediaManager.destroy === 'function') {
+                    window.mediaManager.destroy();
+                }
+                if (typeof window.mediaManager.cleanup === 'function') {
+                    window.mediaManager.cleanup();
+                }
+            } catch (error) {
+                console.warn('Error during MediaManager cleanup:', error);
+            }
+            window.mediaManager = null;
+        }
+        
+        // Clean up script elements when logging out or when forced
+        if (forceCleanup) {
+            console.log('Removing dynamic script elements...');
+            dynamicScriptElements.forEach(script => {
+                try {
+                    if (script.parentNode) {
+                        console.log('Removing script:', script.src);
+                        script.parentNode.removeChild(script);
+                    }
+                } catch (error) {
+                    console.warn('Error removing script element:', error);
+                }
+            });
+            dynamicScriptElements = [];
+        }
+        
+        // Additional cleanup for voice recognition
+        try {
+            // Stop any active speech recognition
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                // Find and stop any active recognition instances
+                document.querySelectorAll('[data-recognition-active="true"]').forEach(el => {
+                    el.removeAttribute('data-recognition-active');
+                });
+            }
+        } catch (error) {
+            console.warn('Error cleaning up speech recognition:', error);
+        }
+        
+        console.log('Dynamic scripts cleanup completed');
+    }
+
+    function forceRemoveMediaManagerAssets() {
+        console.log('Force removing MediaManager DOM assets...');
+        
+        // Remove all media containers and their contents
+        ['', '2'].forEach(suffix => {
+            const mediaContainer = document.getElementById(`media-container${suffix}`);
+            if (mediaContainer) {
+            console.log(`Clearing media container${suffix}`);
+            mediaContainer.innerHTML = '';
+            }
+            
+            const videoBorderBox = document.getElementById(`video-border-box${suffix}`);
+            if (videoBorderBox) {
+            videoBorderBox.style.display = 'none';
+            }
+            
+            const videoElement = document.getElementById(`video${suffix}`);
+            if (videoElement) {
+            videoElement.pause();
+            videoElement.src = '';
+            videoElement.load();
+            videoElement.style.display = 'none';
+            }
+            
+            // Remove any dynamically created media elements
+            const wrapper = document.getElementById(`wrapper${suffix}`);
+            if (wrapper) {
+            const imgArea = wrapper.querySelector('.img-area');
+            if (imgArea) {
+                // Remove all img and video elements
+                imgArea.querySelectorAll('img, video').forEach(el => {
+                if (el.src) {
+                    el.src = '';
+                }
+                el.remove();
+                });
+            }
+            }
+        });
+        
+        console.log('MediaManager DOM assets removed');
+    }
+
+    function cleanupPlayersOnly() {
+        console.log('Cleaning up players only (keeping session active)...');
+        
+        // **STEP 1: Force remove all MediaManager DOM assets FIRST**
+        forceRemoveMediaManagerAssets();
+        
+        // **STEP 2: Clean up MediaManager instances**
+        if (window.homeMediaManager && typeof window.homeMediaManager.cleanup === 'function') {
+            console.log('Force cleaning up home MediaManager');
+            window.homeMediaManager.cleanup();
+            window.homeMediaManager = null;
+        }
+        
+        if (window.disguiseMediaManager && typeof window.disguiseMediaManager.cleanup === 'function') {
+            console.log('Force cleaning up disguise MediaManager');
+            window.disguiseMediaManager.cleanup();
+            window.disguiseMediaManager = null;
+        }
+        
+        // **STEP 3: Clean up music players**
+        if (typeof cleanupPlayers === 'function') {
+            cleanupPlayers();
+        }
+        
+        // **STEP 4: Clean up dynamic scripts but don't remove them from DOM**
+        cleanupDynamicScripts(false);
+        
+        // **STEP 5: Stop all media**
+        stopAllMedia();
+        
+        console.log('Player cleanup completed');
+    }
+
+    function saveCurrentPageState() {
+        const currentPage = getCurrentActivePage();
+        if (currentPage !== 'login' && currentPage !== 'manager') {
+            localStorage.setItem('lastActivePage', currentPage);
+            localStorage.setItem('lastActiveTime', Date.now().toString());
+        }
+    }
+
+    function getStoredPageState() {
+        const lastPage = localStorage.getItem('lastActivePage');
+        const lastTime = localStorage.getItem('lastActiveTime');
+        
+        // Only restore if it was within the last 5 minutes (to avoid stale states)
+        if (lastPage && lastTime && (Date.now() - parseInt(lastTime)) < 5 * 60 * 1000) {
+            return lastPage;
+        }
+        
+        return null;
+    }
+
+    function savePlaylistSelection(playlist) {
+        localStorage.setItem('selectedPlaylist', JSON.stringify(playlist));
+        console.log('Playlist selection saved immediately:', playlist.name);
+    }
+
+    function saveScriptSelection(scripts) {
+        localStorage.setItem('selectedScripts', JSON.stringify(scripts));
+        console.log('Script selection saved immediately:', scripts.map(s => s.name));
+    }
+
+    function saveUploadedPlaylist(uploadedData) {
+        localStorage.setItem('uploadedPlaylist', JSON.stringify(uploadedData));
+        console.log('Uploaded playlist saved immediately:', uploadedData.name);
+    }
+
+    function loadSavedSelections() {
+        try {
+            // Load playlist selection
+            const savedPlaylist = localStorage.getItem('selectedPlaylist');
+            if (savedPlaylist) {
+                selectedPlaylist = JSON.parse(savedPlaylist);
+                console.log('Loaded saved playlist selection:', selectedPlaylist.name);
+            }
+            
+            // Load script selections
+            const savedScripts = localStorage.getItem('selectedScripts');
+            if (savedScripts) {
+                selectedScripts = JSON.parse(savedScripts);
+                console.log('Loaded saved script selections:', selectedScripts.map(s => s.name));
+            }
+            
+            // Load uploaded playlist
+            const savedUploadedPlaylist = localStorage.getItem('uploadedPlaylist');
+            if (savedUploadedPlaylist) {
+                uploadedPlaylist = JSON.parse(savedUploadedPlaylist);
+                console.log('Loaded saved uploaded playlist:', uploadedPlaylist.name);
+            }
+            
+            return true;
+        } catch (error) {
+            console.warn('Failed to load saved selections:', error);
+            return false;
+        }
+    }
+
+    function clearSavedSelections() {
+        localStorage.removeItem('selectedPlaylist');
+        localStorage.removeItem('selectedScripts');
+        localStorage.removeItem('uploadedPlaylist');
+        console.log('Cleared all saved manager selections');
+    }
+
+    function clearStoredPageState() {
+        localStorage.removeItem('lastActivePage');
+        localStorage.removeItem('lastActiveTime');
+    }
+
+    // Enhanced auth status check
     async function checkAuthStatus() {
         if (!loadTokens()) {
             console.log('No valid tokens found, showing login');
+            clearStoredPageState();
             showLoginPage();
             return;
         }
@@ -1169,11 +2432,86 @@
                 // Extend session on successful API call
                 sessionManager.recordActivity();
                 
-                if (currentUser.role === 'home') {
-                    showHomePage();
-                } else if (currentUser.role === 'disguise') {
-                    showDisguisePage();
+                // Check if this was an intentional navigation to manager
+                if (intentionalManagerNavigation) {
+                    console.log('Intentional manager navigation detected, staying on manager page');
+                    intentionalManagerNavigation = false; // Reset flag
+                    showManagerPage();
+                    return; // Don't restore anything - force user to reconfigure
                 }
+                
+                // Load saved selections (immediate save data)
+                const hasSelections = loadSavedSelections();
+                
+                if (hasSelections && selectedPlaylist) {
+                    console.log('Found saved selections, attempting to restore session...');
+                    
+                    try {
+                        // Load selected scripts if any were saved
+                        if (selectedScripts && selectedScripts.length > 0) {
+                            console.log('Reloading previously selected scripts...');
+                            await loadSelectedScripts();
+                        }
+                        
+                        // Load playlist data
+                        let playlistData;
+                        if (selectedPlaylist.type === 'uploaded' && uploadedPlaylist) {
+                            playlistData = uploadedPlaylist.data;
+                            console.log('Using saved uploaded playlist data');
+                        } else if (selectedPlaylist.type === 'r2') {
+                            console.log(`Loading playlist from R2: ${selectedPlaylist.name}`);
+                            try {
+                                playlistData = await ManagerAPI.loadPlaylistFromR2(selectedPlaylist.name);
+                            } catch (error) {
+                                console.warn('Failed to reload playlist from R2, will show manager');
+                                showManagerPage();
+                                return;
+                            }
+                        }
+                        
+                        if (playlistData) {
+                            setMusicDataFromManager(playlistData);
+                            console.log('Session restored from saved selections');
+                            
+                            // Store playlist info for reference
+                            localStorage.setItem('currentPlaylistName', selectedPlaylist.name);
+                            localStorage.setItem('currentPlaylistType', selectedPlaylist.type);
+                            
+                            // Check if user was previously on a player page
+                            const storedPage = getStoredPageState();
+                            
+                            if (storedPage === 'home' && currentUser.username === 'Morningstar00') {
+                                console.log('Restoring home player page with saved selections');
+                                showHomePage();
+                                return;
+                            } else if (storedPage === 'disguise' && currentUser.username === 'Valentinean00') {
+                                console.log('Restoring disguise player page with saved selections');
+                                showDisguisePage();
+                                return;
+                            } else {
+                                // Navigate based on user role if no stored page
+                                if (currentUser.username === 'Morningstar00') {
+                                    console.log('No stored page, navigating to home player');
+                                    showHomePage();
+                                    return;
+                                } else if (currentUser.username === 'Valentinean00') {
+                                    console.log('No stored page, navigating to disguise player');
+                                    showDisguisePage();
+                                    return;
+                                }
+                            }
+                        } else {
+                            console.log('No playlist data available, showing manager');
+                        }
+                    } catch (error) {
+                        console.warn('Failed to restore from saved selections:', error);
+                    }
+                } else {
+                    console.log('No saved selections found, showing manager page');
+                }
+                
+                // Default to manager page
+                showManagerPage();
             }
         } catch (error) {
             console.error('Auth check failed:', error);
@@ -1182,6 +2520,7 @@
             const refreshed = await refreshTokenIfNeeded();
             if (!refreshed) {
                 console.log('Token refresh failed, ending session');
+                clearStoredPageState();
                 handleLogout(true, 'Authentication failed');
             }
         }
@@ -1234,13 +2573,26 @@
         
         try {
             if (accessToken) {
+                console.log('Calling logout API...');
                 await SecureAPI.logout();
+                console.log('Logout API call successful');
+            } else {
+                console.log('No access token, skipping API call');
             }
         } catch (error) {
             console.error('Logout API error:', error);
+            // Continue with cleanup even if API fails
         } finally {
+            console.log('Performing cleanup...');
+            
+            // Force cleanup of dynamic scripts (including voice control)
+            cleanupDynamicScripts(true);
+            
+            // Clear tokens and session
             clearTokens();
             clearInputFields();
+            
+            console.log('Showing login page...');
             showLoginPage();
             
             if (showMessageFlag) {
@@ -1249,6 +2601,8 @@
                     : `SESSION ENDED - ${reason.toUpperCase()} - PLEASE LOG IN AGAIN`;
                 showMessage(message, reason === 'Manual logout');
             }
+            
+            console.log('Logout complete');
         }
     }
 
@@ -1333,13 +2687,21 @@
         }
     }
 
+    function getCurrentActivePage() {
+        if (document.getElementById("LoginPage").style.display !== "none") return 'login';
+        if (document.getElementById("ManagerPage").style.display !== "none") return 'manager';
+        if (document.getElementById("HomePage").style.display !== "none") return 'home';
+        if (document.getElementById("DisguisePage").style.display !== "none") return 'disguise';
+        return 'unknown';
+    }
+
     // Event listeners
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         // Add styles-loaded class to prevent FOUC
         document.body.classList.add('styles-loaded');
         
-        // Initialize immediately
-        initializeApp();
+        // Initialize immediately with async handling
+        await initializeApp();
         
         // Start session monitoring and token refresh scheduler
         startSessionMonitoring();
@@ -1349,15 +2711,43 @@
         // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && accessToken) {
-                // Page became visible, record activity and check session
+                // Page became visible, record activity but don't recheck auth if intentionally on manager
                 sessionManager.recordActivity();
-                checkAuthStatus();
+                
+                // Only check auth if we're on login page or if session is actually expired
+                // BUT NOT if we intentionally navigated to manager
+                const currentPage = getCurrentActivePage();
+                if (currentPage === 'login') {
+                    checkAuthStatus();
+                } else if (currentPage === 'manager' && intentionalManagerNavigation) {
+                    // Don't check auth if we're intentionally on manager page
+                    console.log('Intentional manager navigation - skipping auth check');
+                } else {
+                    // Just extend session without full auth check for player pages
+                    const expiration = localStorage.getItem('tokenExpiration');
+                    if (expiration && Date.now() > parseInt(expiration)) {
+                        // Only then do we need to check auth
+                        checkAuthStatus();
+                    }
+                }
             }
+        });
+
+        // Add this to your DOMContentLoaded event listener
+        window.addEventListener('beforeunload', function() {
+            // Save current page state before unload
+            if (accessToken) {
+                saveCurrentPageState();
+            }
+            
+            stopSessionMonitoring();
+            cleanupDynamicScripts();
         });
         
         // Handle page unload - cleanup
         window.addEventListener('beforeunload', function() {
             stopSessionMonitoring();
+            cleanupDynamicScripts();
         });
         
         // Sign in button
@@ -1369,26 +2759,86 @@
             });
         }
 
-        // Title logout functionality
+        // Title logout functionality for both players
+        // Title logout functionality for both players
+        // Title logout functionality for both players
+        // Update your title click handlers (both title and title2) in your authentication script:
+        // Update your title click handlers (both title and title2) in your authentication script:
+        // Updated title click handler to clear immediate save data
         ["title", "title2"].forEach(id => {
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener("click", function() {
-                    // Add visual feedback
-                    this.style.opacity = "0.7";
-                    setTimeout(() => {
-                        this.style.opacity = "1";
-                    }, 150);
+                // Add visual feedback
+                this.style.opacity = "0.7";
+                setTimeout(() => {
+                    this.style.opacity = "1";
+                }, 150);
+                
+                // Check quick logout setting
+                const quickLogoutEnabled = localStorage.getItem('quickLogoutEnabled') === 'true';
+                
+                if (quickLogoutEnabled) {
+                    // **ADD THIS: Mark that we're coming from a player**
+                    localStorage.setItem('wasOnPlayerPage', 'true');
                     
-                    // Perform logout
-                    handleLogout(true, 'Manual logout');
+                    // Direct logout with full cleanup
+                    handleLogout(true, 'Quick logout');
+                } else {
+                    // Return to manager page - clear immediate save data
+                    const currentPage = getCurrentActivePage();
+                    if (currentPage === 'home' || currentPage === 'disguise') {
+                    console.log('Title clicked - cleaning up and returning to manager');
+                    
+                    // **ADD THIS: Mark that we're coming from a player**
+                    localStorage.setItem('wasOnPlayerPage', 'true');
+                    
+                    // Clean up players and dynamic scripts
+                    cleanupPlayersOnly();
+                    
+                    // Clear player-specific state
+                    if (currentPage === 'home') {
+                        localStorage.removeItem("musicIndex");
+                        localStorage.removeItem("isMusicPaused");
+                    } else {
+                        localStorage.removeItem("musicIndex2");
+                        localStorage.removeItem("isMusicPaused2");
+                    }
+                    
+                    // Clear immediate save selections (forces reconfiguration)
+                    clearSavedSelections();
+                    
+                    // Clear music data from memory
+                    if (window.allMusic) window.allMusic = [];
+                    if (window.ReducedMusic) window.ReducedMusic = [];
+                    
+                    // Reset manager variables
+                    selectedPlaylist = null;
+                    selectedScripts = [];
+                    uploadedPlaylist = null;
+                    
+                    // Clear the stored page state to prevent auto-return
+                    clearStoredPageState();
+                    
+                    // Set flag for intentional navigation to manager
+                    intentionalManagerNavigation = true;
+                    
+                    // Go back to manager (will trigger reload)
+                    showManagerPage();
+                    }
+                }
                 });
                 
-                // Add hover effect to indicate it's clickable
+                // Add hover effect and dynamic title
                 element.style.cursor = "pointer";
-                element.title = "Click to logout";
+                const updateTitle = () => {
+                const quickLogoutEnabled = localStorage.getItem('quickLogoutEnabled') === 'true';
+                element.title = quickLogoutEnabled ? "Click to logout" : "Click to return to manager";
+                };
+                updateTitle();
+                window.addEventListener('storage', updateTitle);
             }
-        });
+            });
 
         // Keyboard support
         const usernameField = document.getElementById("username");
@@ -1460,6 +2910,7 @@
     window.assetManager = assetManager;
     window.sessionManager = sessionManager;
     window.showSessionInfo = showSessionInfo;
+    window.intentionalManagerNavigation = intentionalManagerNavigation;
     
     // Legacy compatibility functions
     window.changeText = function(isSuccessful) {
@@ -1469,10 +2920,531 @@
     window.clearInputFields = clearInputFields;
   </script>
 
-  <!-- Your existing scripts in original order -->
-  <script src="AudioList.js"></script>
+  <!-- Dynamic script loading placeholder - selected scripts will be loaded here -->
+  
+  <!-- Core scripts that are always included -->
+  <script>
+    // Global variables to store loaded music data
+    let allMusic = [];
+    let ReducedMusic = [];
+
+    // Enhanced music data loading system that works with manager-selected playlists
+    async function loadMusicData() {
+        try {
+            console.log('Loading music data...');
+            
+            // Check if data was already loaded by manager
+            if (window.allMusic && window.allMusic.length > 0) {
+                allMusic = window.allMusic;
+                ReducedMusic = window.ReducedMusic || [...allMusic];
+                console.log(`Using manager-loaded playlist: ${allMusic.length} main tracks, ${ReducedMusic.length} reduced tracks`);
+                return true;
+            }
+            
+            // Fallback: try to load from default JSON files if manager hasn't loaded anything
+            console.log('No manager-loaded data found, attempting to load default JSON files...');
+            
+            try {
+                // Load main music list
+                const allMusicResponse = await fetch('music-data/allMusic.json');
+                if (allMusicResponse.ok) {
+                    allMusic = await allMusicResponse.json();
+                    console.log(`Loaded ${allMusic.length} songs from allMusic.json`);
+                } else {
+                    console.warn('Could not load allMusic.json:', allMusicResponse.status);
+                }
+                
+                // Load reduced music list
+                const reducedMusicResponse = await fetch('music-data/ReducedMusic.json');
+                if (reducedMusicResponse.ok) {
+                    ReducedMusic = await reducedMusicResponse.json();
+                    console.log(`Loaded ${ReducedMusic.length} songs from ReducedMusic.json`);
+                } else {
+                    console.warn('Could not load ReducedMusic.json:', reducedMusicResponse.status);
+                    // If reduced music fails to load, use main music as fallback
+                    ReducedMusic = [...allMusic];
+                }
+                
+            } catch (error) {
+                console.warn('Failed to load default JSON files:', error);
+                
+                // Final fallback: create minimal music arrays to prevent crashes
+                if (allMusic.length === 0) {
+                    allMusic = [{
+                        name: "No Music Available",
+                        artist: "Please select a playlist",
+                        src: "default",
+                        coverType: "Images"
+                    }];
+                }
+                
+                if (ReducedMusic.length === 0) {
+                    ReducedMusic = [...allMusic];
+                }
+                
+                console.log('Using fallback music data to prevent crashes');
+            }
+            
+            // Validate loaded data
+            if (!Array.isArray(allMusic) || allMusic.length === 0) {
+                throw new Error('No valid music data available');
+            }
+            
+            if (!Array.isArray(ReducedMusic) || ReducedMusic.length === 0) {
+                ReducedMusic = [...allMusic];
+            }
+            
+            // Set global references
+            window.allMusic = allMusic;
+            window.ReducedMusic = ReducedMusic;
+            
+            console.log(`Music data loaded successfully: ${allMusic.length} main tracks, ${ReducedMusic.length} reduced tracks`);
+            return true;
+            
+        } catch (error) {
+            console.error('Critical error loading music data:', error);
+            
+            // Emergency fallback to prevent complete app failure
+            allMusic = [{
+                name: "Error Loading Music",
+                artist: "Please check your playlist",
+                src: "error",
+                coverType: "Images"
+            }];
+            ReducedMusic = [...allMusic];
+            
+            window.allMusic = allMusic;
+            window.ReducedMusic = ReducedMusic;
+            
+            return false;
+        }
+    }
+
+    // Function to set music data from manager (called by manager after loading playlist)
+    function setMusicDataFromManager(playlistData) {
+        try {
+            console.log('Setting music data from manager...');
+            
+            // Validate playlist data structure
+            if (!playlistData || typeof playlistData !== 'object') {
+                throw new Error('Invalid playlist data structure');
+            }
+            
+            // Extract music arrays from playlist data
+            let mainMusic = [];
+            let reducedMusic = [];
+            
+            // Handle different playlist data structures
+            if (playlistData.allMusic && Array.isArray(playlistData.allMusic)) {
+                mainMusic = playlistData.allMusic;
+            } else if (Array.isArray(playlistData)) {
+                // If the playlist data is directly an array
+                mainMusic = playlistData;
+            } else if (playlistData.tracks && Array.isArray(playlistData.tracks)) {
+                // Alternative structure
+                mainMusic = playlistData.tracks;
+            }
+            
+            if (playlistData.ReducedMusic && Array.isArray(playlistData.ReducedMusic)) {
+                reducedMusic = playlistData.ReducedMusic;
+            } else {
+                // Use main music as reduced music if not specified
+                reducedMusic = [...mainMusic];
+            }
+            
+            // Validate that we have at least some music
+            if (mainMusic.length === 0) {
+                throw new Error('Playlist contains no tracks');
+            }
+            
+            // Validate music data structure
+            const requiredFields = ['name', 'artist', 'src'];
+            const invalidTracks = mainMusic.filter(track => 
+                !track || typeof track !== 'object' || 
+                !requiredFields.every(field => track[field])
+            );
+            
+            if (invalidTracks.length > 0) {
+                console.warn(`Found ${invalidTracks.length} invalid tracks in playlist`);
+                // Filter out invalid tracks
+                mainMusic = mainMusic.filter(track => 
+                    track && typeof track === 'object' && 
+                    requiredFields.every(field => track[field])
+                );
+                
+                if (mainMusic.length === 0) {
+                    throw new Error('No valid tracks found in playlist');
+                }
+            }
+            
+            // Set the global variables
+            allMusic = mainMusic;
+            ReducedMusic = reducedMusic.filter(track => 
+                track && typeof track === 'object' && 
+                requiredFields.every(field => track[field])
+            );
+            
+            // If reduced music filtering resulted in empty array, use main music
+            if (ReducedMusic.length === 0) {
+                ReducedMusic = [...allMusic];
+            }
+            
+            // Update global references
+            window.allMusic = allMusic;
+            window.ReducedMusic = ReducedMusic;
+            
+            console.log(`Manager playlist loaded: ${allMusic.length} main tracks, ${ReducedMusic.length} reduced tracks`);
+            return true;
+            
+        } catch (error) {
+            console.error('Error setting music data from manager:', error);
+            throw error;
+        }
+    }
+
+    // Function to validate playlist before loading
+    function validatePlaylistData(playlistData) {
+        const errors = [];
+        
+        if (!playlistData || typeof playlistData !== 'object') {
+            errors.push('Playlist data must be an object');
+            return { valid: false, errors };
+        }
+        
+        let tracksToValidate = [];
+        
+        // Determine where the tracks are
+        if (playlistData.allMusic && Array.isArray(playlistData.allMusic)) {
+            tracksToValidate = playlistData.allMusic;
+        } else if (Array.isArray(playlistData)) {
+            tracksToValidate = playlistData;
+        } else if (playlistData.tracks && Array.isArray(playlistData.tracks)) {
+            tracksToValidate = playlistData.tracks;
+        } else {
+            errors.push('No valid track array found (expected allMusic, tracks, or direct array)');
+            return { valid: false, errors };
+        }
+        
+        if (tracksToValidate.length === 0) {
+            errors.push('Playlist contains no tracks');
+            return { valid: false, errors };
+        }
+        
+        // Validate individual tracks
+        const requiredFields = ['name', 'artist', 'src'];
+        const warnings = [];
+        let validTrackCount = 0;
+        
+        tracksToValidate.forEach((track, index) => {
+            if (!track || typeof track !== 'object') {
+                warnings.push(`Track ${index + 1}: Invalid track object`);
+                return;
+            }
+            
+            const missingFields = requiredFields.filter(field => !track[field]);
+            if (missingFields.length > 0) {
+                warnings.push(`Track ${index + 1}: Missing fields: ${missingFields.join(', ')}`);
+                return;
+            }
+            
+            validTrackCount++;
+        });
+        
+        if (validTrackCount === 0) {
+            errors.push('No valid tracks found in playlist');
+            return { valid: false, errors, warnings };
+        }
+        
+        if (warnings.length > 0) {
+            console.warn('Playlist validation warnings:', warnings);
+        }
+        
+        return { 
+            valid: true, 
+            errors: [], 
+            warnings, 
+            validTrackCount,
+            totalTracks: tracksToValidate.length 
+        };
+    }
+
+    // Initialize empty music data to prevent crashes
+    window.allMusic = allMusic;
+    window.ReducedMusic = ReducedMusic;
+    
+    // Expose manager functions globally
+    window.setMusicDataFromManager = setMusicDataFromManager;
+    window.validatePlaylistData = validatePlaylistData;
+
+    // Export for module usage if needed
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { 
+            loadMusicData, 
+            allMusic, 
+            ReducedMusic, 
+            setMusicDataFromManager, 
+            validatePlaylistData 
+        };
+    }
+  </script>
+  <script>
+   // Manager Message System
+class ManagerMessageSystem {
+    constructor() {
+        this.messageContainer = null;
+        this.currentMessage = null;
+        this.autoHideTimeout = null;
+        this.init();
+    }
+
+    init() {
+        // Find existing information container
+        this.messageContainer = document.querySelector('.information');
+        if (this.messageContainer) {
+            console.log('Found existing information container');
+        } else {
+            console.warn('Information container not found');
+        }
+    }
+
+    createMessageContainer() {
+        // This method is no longer needed since we're using existing container
+        // but keeping it for compatibility
+        if (!this.messageContainer) {
+            this.messageContainer = document.querySelector('.information');
+        }
+    }
+
+    clearMessage() {
+        if (this.messageContainer) {
+            // Simply clear all content immediately
+            this.messageContainer.innerHTML = '';
+            this.currentMessage = null;
+        }
+
+        if (this.autoHideTimeout) {
+            clearTimeout(this.autoHideTimeout);
+            this.autoHideTimeout = null;
+        }
+    }
+
+    showMessage(text, type = 'info', duration = 5000) {
+        if (!this.messageContainer) {
+            console.warn('Message container not found, creating...');
+            this.createMessageContainer();
+            if (!this.messageContainer) {
+                console.error('Failed to create message container');
+                return;
+            }
+        }
+
+        // Clear any existing message immediately
+        this.clearMessage();
+
+        // Create new message element
+        const messageEl = document.createElement('div');
+        messageEl.className = `manager-message ${type}`;
+        messageEl.textContent = text.toUpperCase();
+
+        // Add loading class for loading messages
+        if (type === 'loading') {
+            messageEl.classList.add('loading');
+        }
+
+        // Add to container immediately (no animation)
+        this.messageContainer.appendChild(messageEl);
+        this.currentMessage = messageEl;
+
+        // Auto-hide after duration (unless it's a loading message)
+        if (duration > 0 && type !== 'loading') {
+            this.autoHideTimeout = setTimeout(() => {
+                this.clearMessage();
+            }, duration);
+        }
+
+        return messageEl;
+    }
+
+    showSuccess(text, duration = 3000) {
+        return this.showMessage(text, 'success', duration);
+    }
+
+    showError(text, duration = 5000) {
+        return this.showMessage(text, 'error', duration);
+    }
+
+    showWarning(text, duration = 4000) {
+        return this.showMessage(text, 'warning', duration);
+    }
+
+    showInfo(text, duration = 3000) {
+        return this.showMessage(text, 'info', duration);
+    }
+
+    showLoading(text = 'Loading...') {
+        return this.showMessage(text, 'loading', 0); // 0 duration means no auto-hide
+    }
+
+    showConfirm(text, onConfirm, onCancel, confirmText = 'YES', cancelText = 'NO') {
+        if (!this.messageContainer) {
+            console.warn('Message container not found');
+            return;
+        }
+
+        // Clear any existing message
+        this.clearMessage();
+
+        // Create confirmation message
+        const messageEl = document.createElement('div');
+        messageEl.className = 'manager-message confirm';
+        
+        const textEl = document.createElement('div');
+        textEl.textContent = text.toUpperCase();
+        
+        const buttonsEl = document.createElement('div');
+        buttonsEl.className = 'confirm-buttons';
+        
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'confirm-btn primary';
+        confirmBtn.textContent = confirmText;
+        confirmBtn.onclick = () => {
+            this.clearMessage();
+            if (onConfirm) onConfirm();
+        };
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'confirm-btn';
+        cancelBtn.textContent = cancelText;
+        cancelBtn.onclick = () => {
+            this.clearMessage();
+            if (onCancel) onCancel();
+        };
+        
+        buttonsEl.appendChild(confirmBtn);
+        buttonsEl.appendChild(cancelBtn);
+        
+        messageEl.appendChild(textEl);
+        messageEl.appendChild(buttonsEl);
+
+        // Add to container
+        this.messageContainer.appendChild(messageEl);
+        this.currentMessage = messageEl;
+
+        // Trigger show animation
+        requestAnimationFrame(() => {
+            messageEl.classList.add('show');
+        });
+
+        return messageEl;
+    }
+
+    // Update existing message (useful for loading states)
+    updateMessage(text, type) {
+        if (this.currentMessage) {
+            this.currentMessage.textContent = text.toUpperCase();
+            this.currentMessage.className = `manager-message ${type}`;
+            
+            if (type === 'loading') {
+                this.currentMessage.classList.add('loading');
+            }
+        }
+    }
+}
+
+// Initialize the manager message system
+let managerMessages = null;
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize on manager page
+    if (document.getElementById('ManagerPage')) {
+        managerMessages = new ManagerMessageSystem();
+        
+        // Override the global alert function for manager page
+        const originalAlert = window.alert;
+        window.managerAlert = function(message) {
+            if (managerMessages && document.getElementById('ManagerPage').style.display !== 'none') {
+                // Determine message type based on content
+                const lowerMessage = message.toLowerCase();
+                if (lowerMessage.includes('error') || lowerMessage.includes('failed') || lowerMessage.includes('cannot')) {
+                    managerMessages.showError(message);
+                } else if (lowerMessage.includes('success') || lowerMessage.includes('loaded') || lowerMessage.includes('complete')) {
+                    managerMessages.showSuccess(message);
+                } else if (lowerMessage.includes('warning') || lowerMessage.includes('issue')) {
+                    managerMessages.showWarning(message);
+                } else {
+                    managerMessages.showInfo(message);
+                }
+            } else {
+                // Fallback to regular alert if not on manager page
+                originalAlert(message);
+            }
+        };
+
+        // Override confirm function for manager page
+        const originalConfirm = window.confirm;
+        window.managerConfirm = function(message, callback) {
+            if (managerMessages && document.getElementById('ManagerPage').style.display !== 'none') {
+                return new Promise((resolve) => {
+                    managerMessages.showConfirm(
+                        message,
+                        () => {
+                            resolve(true);
+                            if (callback) callback(true);
+                        },
+                        () => {
+                            resolve(false);
+                            if (callback) callback(false);
+                        }
+                    );
+                });
+            } else {
+                // Fallback to regular confirm
+                const result = originalConfirm(message);
+                if (callback) callback(result);
+                return Promise.resolve(result);
+            }
+        };
+    }
+});
+
+// Expose globally for use in manager functions
+window.managerMessages = managerMessages;
+window.ManagerMessageSystem = ManagerMessageSystem;
+  </script>
+
+<script>
+    // ... all your existing authentication and manager code ...
+    
+    // ADD THE HELPER FUNCTIONS HERE, at the end of this script block:
+    function showManagerLoadingState(message = 'Loading...') {
+        if (managerMessages) {
+            managerMessages.showLoading(message);
+        }
+    }
+  
+    function showManagerSuccess(message, duration = 3000) {
+        if (managerMessages) {
+            managerMessages.showSuccess(message, duration);
+        }
+    }
+  
+    function showManagerError(message, duration = 5000) {
+        if (managerMessages) {
+            managerMessages.showError(message, duration);
+        }
+    }
+  
+    function showManagerWarning(message, duration = 4000) {
+        if (managerMessages) {
+            managerMessages.showWarning(message, duration);
+        }
+    }
+  </script>
+
+  <!--<script src="MediaManager.js"></script>-->
   <script src="AudioPlayer00.js"></script>
-  <script src="VoiceControl.js"></script>
+  <!--<script src="VoiceControl.js"></script>-->
   <script src="ServiceWorker.js"></script>
   <script src="https://kit.fontawesome.com/3c627968c9.js" crossorigin="anonymous"></script>
 </body>

@@ -36,6 +36,7 @@ class VoiceControlSystem {
       'sign out': () => this.handleLogout()
     };
     
+    this.injectButtonStyles()
     this.initialize();
   }
 
@@ -105,6 +106,52 @@ class VoiceControlSystem {
     this.setupButtons();
   }
 
+  injectButtonStyles() {
+    const style = document.createElement("style");
+    style.textContent = `
+      .PABox .PABoxButton {
+        width: 100%;
+        background-color: white;
+        font-size: 10px;
+        font-family: monospace;
+        color: black;
+        border: none;
+        padding: 8px;
+        margin-top: 10px;
+        border-radius: 8px;
+        font-weight: bold;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  createVoiceControlBox(containerId, buttonId) {
+    // Find the target container (wrapper)
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.warn(`Container ${containerId} not found`);
+      return null;
+    }
+  
+    // Create PABox div
+    const paBox = document.createElement('div');
+    paBox.className = 'PABox';
+    
+    // Create voice control button
+    const voiceBtn = document.createElement('button');
+    voiceBtn.id = buttonId;
+    voiceBtn.className = 'PABoxButton';
+    voiceBtn.textContent = this.originalButtonText;
+    
+    // Append button to PABox
+    paBox.appendChild(voiceBtn);
+    
+    // Append PABox to container
+    container.appendChild(paBox);
+    
+    return voiceBtn;
+  }
+
   async checkMicrophonePermission() {
     if (this.permissionChecked) {
       return this.permissionGranted;
@@ -163,54 +210,57 @@ class VoiceControlSystem {
   }
 
   setupButtons() {
-    // Find voice control buttons by their specific IDs
-    const homeVoiceBtn = document.getElementById('voiceBtn');
-    const disguiseVoiceBtn = document.getElementById('voiceBtn2');
+    // Create voice control boxes dynamically
+    const homeWrapper = document.getElementById('wrapper');
+    const disguiseWrapper = document.getElementById('wrapper2');
     
-    // Store buttons with their associated player info
-    if (homeVoiceBtn) {
-      this.buttons.voiceBtn = {
-        element: homeVoiceBtn,
-        playerId: 'home',
-        originalText: homeVoiceBtn.textContent || this.originalButtonText
-      };
-      
-      // Add click event listener
-      homeVoiceBtn.addEventListener('click', () => {
-        if (this.isListening) {
-          this.stopListening();
-        } else {
-          this.startListening();
-        }
-      });
-      
-      console.log('Home voice control button initialized');
+    if (homeWrapper) {
+      const homeVoiceBtn = this.createVoiceControlBox('wrapper', 'voiceBtn');
+      if (homeVoiceBtn) {
+        this.buttons.voiceBtn = {
+          element: homeVoiceBtn,
+          playerId: 'home',
+          originalText: this.originalButtonText
+        };
+        
+        homeVoiceBtn.addEventListener('click', () => {
+          if (this.isListening) {
+            this.stopListening();
+          } else {
+            this.startListening();
+          }
+        });
+        
+        console.log('Home voice control button created and initialized');
+      }
     }
     
-    if (disguiseVoiceBtn) {
-      this.buttons.voiceBtn2 = {
-        element: disguiseVoiceBtn,
-        playerId: 'disguise',
-        originalText: disguiseVoiceBtn.textContent || this.originalButtonText
-      };
-      
-      // Add click event listener
-      disguiseVoiceBtn.addEventListener('click', () => {
-        if (this.isListening) {
-          this.stopListening();
-        } else {
-          this.startListening();
-        }
-      });
-      
-      console.log('Disguise voice control button initialized');
+    if (disguiseWrapper) {
+      const disguiseVoiceBtn = this.createVoiceControlBox('wrapper2', 'voiceBtn2');
+      if (disguiseVoiceBtn) {
+        this.buttons.voiceBtn2 = {
+          element: disguiseVoiceBtn,
+          playerId: 'disguise',
+          originalText: this.originalButtonText
+        };
+        
+        disguiseVoiceBtn.addEventListener('click', () => {
+          if (this.isListening) {
+            this.stopListening();
+          } else {
+            this.startListening();
+          }
+        });
+        
+        console.log('Disguise voice control button created and initialized');
+      }
     }
     
     const buttonCount = Object.keys(this.buttons).length;
     if (buttonCount === 0) {
-      console.warn('No voice control buttons found. Make sure elements with IDs "voiceBtn" and/or "voiceBtn2" exist.');
+      console.warn('No voice control containers found. Make sure elements with IDs "wrapper" and/or "wrapper2" exist.');
     } else {
-      console.log(`Found ${buttonCount} voice control button(s)`);
+      console.log(`Created and initialized ${buttonCount} voice control button(s)`);
     }
   }
 
@@ -647,12 +697,26 @@ class VoiceControlSystem {
 }
 
 // Initialize voice control when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-  // Wait a bit for other scripts to load
-  setTimeout(() => {
+// Initialize voice control when DOM is loaded OR when manually called
+function initializeVoiceControlSystem() {
+  if (!window.voiceControl) {
+    console.log('Creating VoiceControlSystem instance...');
     window.voiceControl = new VoiceControlSystem();
-  }, 1000);
-});
+  }
+}
+
+// Auto-initialize if DOM is already loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initializeVoiceControlSystem, 1000);
+  });
+} else {
+  // DOM is already loaded, initialize immediately
+  setTimeout(initializeVoiceControlSystem, 100);
+}
+
+// Expose initialization function for manual calling
+window.initializeVoiceControlSystem = initializeVoiceControlSystem;
 
 // Ensure voice control is stopped on logout
 document.addEventListener('DOMContentLoaded', function() {

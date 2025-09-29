@@ -1,5 +1,5 @@
-// Add this to your existing test.js file
-document.getElementById("title").addEventListener("click", function() {
+// AudioPlayer00.js - Standalone audio player that optionally uses MediaManager
+/*document.getElementById("title").addEventListener("click", function() {
   // Clean up players instead of just pausing
   if (typeof cleanupPlayers === 'function') {
     cleanupPlayers();
@@ -15,7 +15,7 @@ document.getElementById("title").addEventListener("click", function() {
   localStorage.removeItem("LoginTime");
   document.body.style.backgroundColor = "white";
   clearInputFields();
-  refreshPage();
+  window.location.reload();
 });
 
 document.getElementById("title2").addEventListener("click", function() {
@@ -34,8 +34,8 @@ document.getElementById("title2").addEventListener("click", function() {
   localStorage.removeItem("LoginTime");
   document.body.style.backgroundColor = "white";
   clearInputFields();
-  refreshPage();
-});
+  window.location.reload();
+});*/
 
 function pauseAudio() {
   const audio = document.getElementById('main-audio');
@@ -97,33 +97,23 @@ class MusicPlayer {
       this.musicIndex = 1;
       localStorage.setItem(`musicIndex${suffix}`, 1);
     }
-    // Configure media folders based on page
+    
+    // Configure suffix and folders
     this.suffix = suffix;
-    this.imageFolder = suffix === '2' ? 'MainAssets/ImagesDisguise/' : 'MainAssets/Images/';
-    this.videoFolder = suffix === '2' ? 'VideosDisguise/' : 'MainAssets/Videos/';
     this.audioFolder = 'MainAssets/Audios/';
     this.audioBucketUrl = 'https://r2-asset-proxy.mcvities755.workers.dev/account2/audios/';
-    this.videoBucketUrls = [
-      'https://r2-asset-proxy.mcvities755.workers.dev/account1/videos1/',      // Account 1 - videos1
-      'https://r2-asset-proxy.mcvities755.workers.dev/account2/videos2/',     // Account 2 - videos2  
-      'https://r2-asset-proxy.mcvities755.workers.dev/account3/videos3/'      // Account 3 - videos3
-    ];
 
-    // Configure R2 bucket URLs for images
-    this.imageBucketUrl = suffix === '2' 
-      ? 'https://r2-asset-proxy.mcvities755.workers.dev/account3/images-disguise/' // Disguise images
-      : 'https://r2-asset-proxy.mcvities755.workers.dev/account3/images/'; // Main images
+    // Initialize MediaManager if available
+    this.mediaManager = this.initializeMediaManager(suffix);
 
     // Element selectors
     this.wrapper = document.querySelector(`#wrapper${suffix}`);
-    this.coverArea = this.wrapper.querySelector(".img-area");
     this.musicName = this.wrapper.querySelector(".song-details .name");
     this.musicArtist = this.wrapper.querySelector(".song-details .artist");
     this.playPauseBtn = this.wrapper.querySelector(".play-pause");
     this.prevBtn = this.wrapper.querySelector(`#prev${suffix}`);
     this.nextBtn = this.wrapper.querySelector(`#next${suffix}`);
     this.mainAudio = this.wrapper.querySelector(`#main-audio${suffix}`);
-    this.videoAd = this.wrapper.querySelector(`#video${suffix}`);
     this.progressArea = this.wrapper.querySelector(".progress-area");
     this.progressBar = this.progressArea.querySelector(".progress-bar");
     this.musicList = this.wrapper.querySelector(".music-list");
@@ -134,16 +124,23 @@ class MusicPlayer {
     this.header = this.wrapper.querySelector(".row");
     this.ulTag = this.wrapper.querySelector("ul");
     this.repeatBtn = this.wrapper.querySelector(`#repeat-plist${suffix}`);
-    
-    // Only initialize border box for Player 2
-    if (suffix === '2') {
-      this.borderBox = document.getElementById(`video-border-box${suffix}`);
-    }
+
+    // Cover area - only used when MediaManager is NOT available
+    this.coverArea = this.wrapper.querySelector(".img-area");
 
     // Player state
     this.musicIndex = 1;
     this.isMusicPaused = true;
-    this.musicSource = suffix === '2' ? ReducedMusic : allMusic;
+    this.musicSource = suffix === '2' ? 
+      (window.ReducedMusic || []) : 
+      (window.allMusic || []);
+
+    // Add safety check and reload capability
+    if (this.musicSource.length === 0) {
+      console.warn('Music source is empty, attempting to reload data...');
+      this.loadMusicDataIfNeeded();
+    }
+    
     this.originalOrder = [...this.musicSource];
     this.shuffledOrder = [];
     this.isMuted = false;
@@ -188,9 +185,6 @@ class MusicPlayer {
     this.searchTimeout = null;
     this.renderFrame = null;
 
-    this.controlsToggledManually = false;
-    this.videoOverride = false;
-
     this.cachedProgressRect = null;
     this.lastRectCache = 0;
     this.lastTimeUpdate = 0;
@@ -200,29 +194,69 @@ class MusicPlayer {
     this.scrollTimeout = null;
     this.lastAutoScrollTime = 0;
     
-    // Only set up border box styles for Player 2
-    if (suffix === '2') {
-      this.borderBoxStyles = {
-        player2DarkMode: {
-          top: '0px',
-          left: '0px',
-          width: '370px',
-          height: '370px',
-          transform: 'translate(0, 0)',
-          borderRadius: '15px'
-        }
-      };
-
-      this.borderBoxState = {
-        isVisible: false,
-        currentStyle: null,
-        lastUpdate: 0
-      };
-
-      this.updateBorderBoxDebounced = this.debounce(this.updateBorderBoxImmediate.bind(this), 16);
-    }
-    
     this.initialize();
+  }
+
+  // Initialize MediaManager if available, but don't fail if it's not
+  initializeMediaManager(suffix) {
+    try {
+      // Check if MediaManager is available
+      if (typeof MediaManager !== 'undefined') {
+        // Try to get existing instance first
+        const existingManager = suffix === '2' ? window.disguiseMediaManager : window.homeMediaManager;
+        if (existingManager) {
+          return existingManager;
+        }
+        
+        // Create new instance if needed
+        const manager = new MediaManager(suffix);
+        if (suffix === '2') {
+          window.disguiseMediaManager = manager;
+        } else {
+          window.homeMediaManager = manager;
+        }
+        return manager;
+      }
+    } catch (error) {
+      console.warn('MediaManager initialization failed, audio player will work without media features:', error);
+    }
+    return null;
+  }
+
+  // Safe method to call MediaManager functions
+  callMediaManager(method, ...args) {
+    try {
+      if (this.mediaManager && typeof this.mediaManager[method] === 'function') {
+        return this.mediaManager[method](...args);
+      }
+    } catch (error) {
+      console.warn(`MediaManager.${method} failed:`, error);
+    }
+    return null;
+  }
+
+  // Simple fallback when MediaManager is not available - just show a placeholder
+  showCoverPlaceholder() {
+    if (!this.coverArea || this.mediaManager) return;
+
+    this.coverArea.innerHTML = '';
+    const placeholder = document.createElement('div');
+    const isDarkMode = this.wrapper.classList.contains("dark-mode");
+    placeholder.style.cssText = `
+      width: 100%;
+      height: 100%;
+      background-color: ${isDarkMode ? 'black' : 'white'};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: inherit;
+      min-height: 380px;
+      color: ${isDarkMode ? 'black' : 'white'};
+      font-size: 14px;
+      text-align: center;
+    `;
+    placeholder.textContent = 'Audio Only Mode';
+    this.coverArea.appendChild(placeholder);
   }
 
   debounce(func, wait) {
@@ -248,42 +282,14 @@ class MusicPlayer {
     // Add enhanced progress bar functionality
     this.initializeEnhancedProgressBar();
     
-    // Test autoplay capability on mobile
-    //this.testAutoplaySupport();
-    
-    // Only initialize border box for Player 2
-    if (this.suffix === '2') {
-      this.initializeBorderBox();
+    // Show placeholder only if no MediaManager
+    if (!this.mediaManager) {
+      this.showCoverPlaceholder();
     }
-  
+    
     setTimeout(() => {
       this.isInitializing = false;
     }, 100)
-  }
-
-  // Only used for Player 2
-  initializeBorderBox() {
-    if (this.suffix !== '2' || !this.borderBox) return;
-    
-    // Force hide border box with multiple methods to ensure it's gone
-    this.borderBox.style.display = "none";
-    this.borderBox.style.visibility = "hidden";
-    this.borderBox.style.opacity = "0";
-    this.borderBox.classList.remove('player2-dark');
-    
-    // Reset border box state
-    this.borderBoxState = {
-      isVisible: false,
-      currentStyle: null,
-      lastUpdate: 0
-    };
-    
-    // For extra safety, use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      if (this.borderBox) {
-        this.borderBox.style.display = "none";
-      }
-    });
   }
 
   initializeEnhancedProgressBar() {
@@ -323,13 +329,6 @@ class MusicPlayer {
     this.handleProgressClick(e);
   }
 
-  updateBorderBoxDisplay() {
-    // Only update border box for Player 2
-    if (this.suffix === '2') {
-      this.updateBorderBoxDebounced();
-    }
-  }
-
   forceListRender() {
     this.forceRender = true;
     this.renderVisibleItems();
@@ -352,9 +351,6 @@ class MusicPlayer {
     this.mainAudio.addEventListener("ended", () => this.handleSongEnd());
     this.mainAudio.addEventListener("pause", () => this.handleAudioPause());
     this.mainAudio.addEventListener("play", () => this.handleAudioPlay());
-    this.videoAd.addEventListener("ended", () => this.handleVideoEnd());
-
-    this.musicName.addEventListener("click", () => this.toggleVideoControls());
 
     // Virtualized scroll event
     this.ulTag.addEventListener("scroll", () => this.handleVirtualizedScroll(), { passive: true });
@@ -375,11 +371,6 @@ class MusicPlayer {
       }, 1500); // Allow auto-scroll again after 1.5 seconds of no manual scrolling
     }, { passive: true });
 
-    const seeVideoBtn = document.querySelector('.seeVideo');
-    if (seeVideoBtn) {
-      seeVideoBtn.addEventListener("click", () => this.toggleVideoOverride());
-    }
-
     if (this.searchField) {
       this.searchField.addEventListener('input', (e) => this.handleSearch(e));
     }
@@ -392,18 +383,6 @@ class MusicPlayer {
         this.renderTicking = false;
       });
       this.renderTicking = true;
-    }
-  }
-
-  toggleVideoOverride() {
-    this.videoOverride = !this.videoOverride;
-    
-    if (this.videoOverride) {
-      // Override mode: always show video
-      this.showVideoOverride();
-    } else {
-      // Normal mode: restore original behavior
-      this.toggleVideoDisplay(this.isMusicPaused);
     }
   }
 
@@ -430,49 +409,6 @@ class MusicPlayer {
       console.warn(`${message} (Further similar errors will be suppressed for 5 seconds)`);
       this.errorCounts[key]++;
       this.lastErrorTime[key] = now;
-    }
-  }
-  
-  showVideoOverride() {
-    if (this.suffix === '2') {
-      this.videoAd.style.display = "none";
-      return;
-    }
-    
-    this.videoAd.style.display = "block";
-    
-    // Check if video is in bigger mode
-    if (this.videoAd.classList.contains('bigger-video')) {
-      // Full size video positioning (don't change position)
-      Object.assign(this.videoAd.style, {
-        top: '0px',
-        left: '0px',
-        transform: 'translate(0, 0)'
-      });
-    } else {
-      // Overlay size video positioning (centered)
-      Object.assign(this.videoAd.style, {
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)'
-      });
-    }
-    
-    // Set video mute state based on audio playing state
-    this.videoAd.muted = !this.isMusicPaused;
-    
-    // Force video to play with error handling
-    const playPromise = this.videoAd.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.warn("Video autoplay failed:", error);
-        // Retry after a short delay
-        setTimeout(() => {
-          this.videoAd.play().catch(e => {
-            console.warn("Video retry also failed:", e);
-          });
-        }, 100);
-      });
     }
   }
 
@@ -504,24 +440,23 @@ class MusicPlayer {
     }
   }
 
-  toggleVideoControls() {
-    // Only allow control toggling when video is in bigger mode
-    if (!this.videoAd.classList.contains("bigger-video")) {
-      // Force controls off for smaller video mode
-      this.videoAd.controls = false;
-      this.controlsToggledManually = false;
-      return;
-    }
-  
-    // Toggle controls only in bigger video mode
-    this.controlsToggledManually = !this.controlsToggledManually;
-    this.videoAd.controls = this.controlsToggledManually;
-  
-    // If controls are turned off and audio is paused, resume video playback
-    if (!this.controlsToggledManually && this.mainAudio.paused) {
-      this.videoAd.play().catch(error => {
-        console.warn("Failed to resume video playback:", error);
-      });
+  async loadMusicDataIfNeeded() {
+    if (this.musicSource.length === 0) {
+      try {
+        await loadMusicData();
+        this.musicSource = this.suffix === '2' ? 
+          (window.ReducedMusic || []) : 
+          (window.allMusic || []);
+        
+        if (this.musicSource.length > 0) {
+          this.originalOrder = [...this.musicSource];
+          this.populateMusicList(this.originalOrder);
+          this.updatePlayingSong();
+          console.log('Music data reloaded successfully');
+        }
+      } catch (error) {
+        console.error('Failed to reload music data:', error);
+      }
     }
   }
 
@@ -529,63 +464,29 @@ class MusicPlayer {
     const music = this.isShuffleMode ?
       this.shuffledOrder[index - 1] :
       this.musicSource[index - 1];
-  
+
     this.musicName.textContent = music.name;
     this.musicArtist.textContent = music.artist;
-  
-    const { coverType = 'Images', src, type = 'jpg' } = music;
-    this.coverArea.innerHTML = '';
-  
-    // Choose image or video element
-    const mediaElement = (this.suffix === '2' || coverType !== 'video')
-      ? this.createImageElement(src, type)
-      : this.createVideoElementWithFallback(src, type);
-  
-    this.coverArea.appendChild(mediaElement);
-  
+
+    // Load media content using MediaManager if available, otherwise show placeholder
+    if (this.mediaManager) {
+      this.callMediaManager('loadMediaContent', music, index);
+    } else {
+      this.showCoverPlaceholder();
+    }
+
     // Use backup fallback only for the first song (index 1)
     if (index === 1) {
-      this.setInitialAudioSource(src);
+      this.setInitialAudioSource(music.src);
     } else {
-      this.setAudioSourceWithFallback(src);
+      this.setAudioSourceWithFallback(music.src);
     }
-  
-    // Only set video source for player 1, but keep video element for player 2 (for border positioning)
-    if (this.suffix !== '2') {
-      // Original player - full video functionality
-      this.setVideoSourceWithFallback(src);
-      
-      // If video override is active, ensure video plays after source change
-      if (this.videoOverride) {
-        // Wait for video to load then apply override behavior
-        const handleVideoLoaded = () => {
-          this.showVideoOverride();
-        };
-        
-        // Use both events to ensure it works across different scenarios
-        this.videoAd.addEventListener('loadeddata', handleVideoLoaded, { once: true });
-        this.videoAd.addEventListener('canplay', handleVideoLoaded, { once: true });
-        
-        // Fallback timeout in case events don't fire
-        setTimeout(() => {
-          if (this.videoOverride) {
-            this.showVideoOverride();
-          }
-        }, 500);
-      }
-    } else {
-      // Player 2 - NO VIDEO, but keep element for border reference
-      this.videoAd.src = "";
-      this.videoAd.style.display = "none";
-    }
-  
+
     localStorage.setItem(`musicIndex${this.suffix}`, index);
     this.updatePlayingSong();
     
-    // Only update border box for Player 2
-    if (this.suffix === '2' && !this.isInitializing) {
-      this.updateBorderBoxDisplay();
-    }
+    // NEW: Update video override mute state when loading new music
+    this.callMediaManager('refreshVideoOverrideMuteState');
 
     if (this.musicList.classList.contains("show")) {
       setTimeout(() => {
@@ -702,195 +603,12 @@ class MusicPlayer {
     this.mainAudio.onerror = handleInitialAudioError;
   }
 
-  /*waitForAudioReady() {
-    return new Promise((resolve) => {
-      if (this.mainAudio.readyState >= 3) { // HAVE_FUTURE_DATA or higher
-        resolve();
-        return;
-      }
-      
-      const handleCanPlay = () => {
-        this.mainAudio.removeEventListener('canplay', handleCanPlay);
-        this.mainAudio.removeEventListener('loadeddata', handleCanPlay);
-        resolve();
-      };
-      
-      this.mainAudio.addEventListener('canplay', handleCanPlay);
-      this.mainAudio.addEventListener('loadeddata', handleCanPlay);
-      
-      // Fallback timeout
-      setTimeout(() => {
-        this.mainAudio.removeEventListener('canplay', handleCanPlay);
-        this.mainAudio.removeEventListener('loadeddata', handleCanPlay);
-        resolve();
-      }, 2000);
-    });
-  }*/
-
-  createVideoElementWithFallback(src, type) {
-    const video = document.createElement('video');
-    video.controls = true;
-    video.autoplay = true;
-    video.loop = true;
-  
-    // R2 sources
-    const r2Sources = [
-      `${this.videoBucketUrls[0]}${src}.${type}`,
-      `${this.videoBucketUrls[1]}${src}.${type}`,
-      `${this.videoBucketUrls[2]}${src}.${type}`
-    ];
-    
-    // Local and upload fallbacks
-    const localVideoSrc = `${this.videoFolder}${src}.${type}`;
-    const uploadVideoSrc = `Upload/${src}.${type}`; // New upload folder fallback
-    const allSources = [...r2Sources, localVideoSrc, uploadVideoSrc];
-  
-    // Track fallback attempts
-    let attempt = 0;
-  
-    const tryNextSource = () => {
-      if (attempt >= allSources.length) {
-        console.error("All video sources (R2, local, and upload) failed to load.");
-        return;
-      }
-      
-      video.src = allSources[attempt];
-      
-      // Mark R2 as unavailable if we've exhausted R2 sources
-      if (attempt >= r2Sources.length) {
-        this.r2Available = false;
-        console.warn("R2 video sources failed, using local/upload fallback");
-      }
-      
-      attempt++;
-    };
-  
-    // On error, try next fallback source
-    video.onerror = () => {
-      console.warn(`Video source failed: ${allSources[attempt - 1]}, trying next fallback`);
-      tryNextSource();
-    };
-  
-    // Start with first source
-    tryNextSource();
-  
-    return video;
-  }
-
-  setVideoSourceWithFallback(src) {
-    // R2 sources
-    const r2Sources = [
-      `${this.videoBucketUrls[0]}${src}.mp4`,
-      `${this.videoBucketUrls[1]}${src}.mp4`,
-      `${this.videoBucketUrls[2]}${src}.mp4`
-    ];
-    
-    // Local and upload fallbacks
-    const localVideoSrc = `${this.videoFolder}${src}.mp4`;
-    const uploadVideoSrc = `Upload/${src}.mp4`; // New upload folder fallback
-    const allSources = [...r2Sources, localVideoSrc, uploadVideoSrc];
-  
-    let attempt = 0;
-  
-    const tryNextSource = () => {
-      if (attempt >= allSources.length) {
-        console.error("All videoAd sources (R2, local, and upload) failed to load.");
-        return;
-      }
-      
-      this.videoAd.src = allSources[attempt];
-      
-      // Mark R2 as unavailable if we've exhausted R2 sources
-      if (attempt >= r2Sources.length) {
-        this.r2Available = false;
-        console.warn("R2 videoAd sources failed, using local/upload fallback");
-      }
-      
-      attempt++;
-    };
-  
-    this.videoAd.onerror = () => {
-      console.warn(`videoAd source failed: ${allSources[attempt - 1]}, trying next fallback`);
-      tryNextSource();
-    };
-  
-    tryNextSource();
-  }   
-
-  createImageElement(src, type) {
-    const img = document.createElement('img');
-    
-    // Try R2 bucket first
-    const r2ImageSrc = `${this.imageBucketUrl}${src}.${type}`;
-    const localImageSrc = `${this.imageFolder}${src}.${type}`;
-    const uploadImageSrc = `Upload/${src}.${type}`; // New upload folder fallback
-    
-    img.src = r2ImageSrc;
-    img.alt = this.musicName.textContent;
-    
-    // Add error handling for image loading
-    img.onerror = () => {
-      console.warn(`Failed to load image from R2 bucket: ${r2ImageSrc}, trying local: ${localImageSrc}`);
-      
-      // For disguise player (Player 2), try local first, then upload, then create white fallback
-      if (this.suffix === '2') {
-        img.src = localImageSrc;
-        img.onerror = () => {
-          console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
-          img.src = uploadImageSrc;
-          img.onerror = () => {
-            console.warn(`Failed to load upload image: ${uploadImageSrc}, using white fallback`);
-            this.createWhiteFallback(img);
-          };
-        };
-      } else {
-        // For regular player, try local folder then upload folder
-        img.src = localImageSrc;
-        img.onerror = () => {
-          console.warn(`Failed to load local image: ${localImageSrc}, trying upload: ${uploadImageSrc}`);
-          img.src = uploadImageSrc;
-          img.onerror = () => {
-            console.warn(`Failed to load upload image: ${uploadImageSrc}`);
-          };
-        };
-      }
-      this.r2Available = false;
-    };
-    
-    return img;
-  }
-
-  createWhiteFallback(imgElement) {
-    // Create a white div to replace the failed image for disguise player
-    const whiteDiv = document.createElement('div');
-    whiteDiv.style.cssText = `
-      width: 100%;
-      height: 100%;
-      background-color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: inherit;
-      min-height: 280px;
-    `;
-    
-    // Replace the image element with the white div
-    if (imgElement.parentNode) {
-      imgElement.parentNode.replaceChild(whiteDiv, imgElement);
-    }
-    
-    return whiteDiv;
-  }
-
   togglePlayPause() {
     this.isMusicPaused ? this.playMusic() : this.pauseMusic();
   }
 
   async playMusic() {
     try {
-      // Remove the waitForAudioReady call that might be causing delays
-      // Just try to play directly
-      
       const playPromise = this.mainAudio.play();
       
       if (playPromise !== undefined) {
@@ -902,36 +620,13 @@ class MusicPlayer {
         this.isMusicPaused = false;
         localStorage.setItem(`isMusicPaused${this.suffix}`, false);
         
-        if (this.videoOverride) {
-          this.videoAd.muted = true;
-          this.showVideoOverride();
-        } else {
-          this.toggleVideoDisplay(false);
-          
-          // NEW: Auto-resize video to smaller/overlay mode when music starts playing
-          // Only for player 1 (no video for player 2)
-          if (this.suffix !== '2' && this.videoAd.classList.contains("bigger-video")) {
-            this.videoAd.classList.remove("bigger-video");
-            this.videoAd.classList.add("overlay-video");
-            
-            // Reset controls when switching to overlay mode
-            this.videoAd.controls = false;
-            this.controlsToggledManually = false;
-            
-            // Update video positioning for overlay mode
-            Object.assign(this.videoAd.style, {
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)'
-            });
-          }
-        }
+        // Handle video display using MediaManager if available
+        this.callMediaManager('toggleVideoDisplay', false);
+        this.callMediaManager('autoResizeVideoOnPlay');
+        this.callMediaManager('resetVideoSize');
         
-        this.resetVideoSize();
-        
-        if (this.suffix === '2') {
-          this.updateBorderBoxDisplay();
-        }
+        // NEW: Notify MediaManager about music play state change for video override muting
+        this.callMediaManager('onMusicPlayStateChange', true);
       }
     } catch (error) {
       console.warn("Failed to play audio - user interaction may be required:", error);
@@ -944,14 +639,12 @@ class MusicPlayer {
       
       // Show a user-friendly message for mobile users
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        // You could show a toast or notification here
         console.log("Tap the play button to start music");
       }
     }
     this.updatePlayingSong();
   }
-  
-  // Update the existing pauseMusic method to handle video unmuting in override mode:
+
   pauseMusic() {
     this.wrapper.classList.remove("paused");
     this.playPauseBtn.querySelector("i").textContent = "play_arrow";
@@ -959,84 +652,13 @@ class MusicPlayer {
     this.isMusicPaused = true;
     localStorage.setItem(`isMusicPaused${this.suffix}`, true);
     
-    if (this.videoOverride) {
-      // In override mode: unmute video when audio pauses and ensure it's playing
-      this.videoAd.muted = false;
-      this.showVideoOverride();
-    } else {
-      this.toggleVideoDisplay(true);
-      this.muteVideo();
-    }
+    // Handle video display using MediaManager if available
+    this.callMediaManager('toggleVideoDisplay', true);
+    this.callMediaManager('muteVideo');
+    this.callMediaManager('resetVideoSize');
     
-    this.resetVideoSize();
-    
-    // Only update border box for Player 2
-    if (this.suffix === '2') {
-      this.updateBorderBoxDisplay();
-    }
-  }
-
-  
-  resetVideoSize() {
-    // Always reset controls and loop settings
-    this.videoAd.controls = false;
-    this.controlsToggledManually = false;
-    this.videoAd.loop = true;
-    
-    // If no size class is set at all, default to overlay
-    if (!this.videoAd.classList.contains("bigger-video") && 
-        !this.videoAd.classList.contains("overlay-video")) {
-      this.videoAd.classList.add("overlay-video");
-    }
-    
-    // Ensure controls are disabled for overlay mode
-    if (this.videoAd.classList.contains("overlay-video")) {
-      this.videoAd.controls = false;
-      this.controlsToggledManually = false;
-    }
-  }
-  
-  toggleVideoDisplay(show) {
-    // If video override is active, use override behavior instead
-    if (this.videoOverride) {
-      this.showVideoOverride();
-      return;
-    }
-    
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    
-    if (show) {
-      if (this.suffix === '2') {
-        this.videoAd.style.display = "none";
-      } else {
-        this.videoAd.style.display = "block";
-        
-        const videoSize = 280;
-        const containerSize = 370;
-        const videoOffset = (containerSize - videoSize) / 2;
-        
-        // Batch video positioning updates
-        Object.assign(this.videoAd.style, {
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        });
-        
-        this.videoAd.play();
-      }
-    } else {
-      if (this.suffix === '2') {
-        this.videoAd.style.display = "none";
-        this.videoAd.pause();
-      } else {
-        this.videoAd.style.display = "none";
-        this.videoAd.pause();
-      }
-    }
-  }
-
-  muteVideo() {
-    this.videoAd.muted = true;
+    // NEW: Notify MediaManager about music play state change for video override muting
+    this.callMediaManager('onMusicPlayStateChange', false);
   }
 
   scrollToCurrentSong() {
@@ -1085,7 +707,7 @@ class MusicPlayer {
     
     this.loadMusic(this.musicIndex);
     this.playMusic();
-    this.resetVideoSize();
+    this.callMediaManager('resetVideoSize');
 
     if (this.musicList.classList.contains("show")) {
       setTimeout(() => {
@@ -1493,109 +1115,14 @@ class MusicPlayer {
     }
   }
 
-  
-  /*createMusicListItem(music, actualIndex) {
-    const liTag = document.createElement("li");
-    liTag.setAttribute("li-index", actualIndex + 1);
-
-    // Check if we already have the duration cached
-    const cachedDuration = this.getDurationCache(music.src);
-    const displayDuration = cachedDuration || "3:40";
-
-    liTag.innerHTML = `
-      <div class="row">
-        <span>${music.name}</span>
-        <p>${music.artist}</p>
-      </div>
-      <span id="${music.src}" class="audio-duration">${displayDuration}</span>
-      <audio class="${music.src}" src="${this.audioBucketUrl}${music.src}.mp3"></audio>
-    `;
-
-    // Apply dark mode styles immediately if in dark mode
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    if (isDarkMode) {
-      liTag.style.color = 'white';
-      liTag.style.borderBottom = '3px solid white';
-    } else {
-      liTag.style.color = 'black';
-      liTag.style.borderBottom = '3px solid black';
-    }
-
-    const liAudioTag = liTag.querySelector(`.${music.src}`);
-    const durationSpan = liTag.querySelector(".audio-duration");
-    
-    // Add fallback for list audio elements with throttled logging
-    liAudioTag.onerror = () => {
-      this.throttledLog('audio_r2', `List audio failed from R2, trying local: ${this.audioFolder}${music.src}.mp3`, music.src);
-      liAudioTag.src = `${this.audioFolder}${music.src}.mp3`;
-      
-      liAudioTag.onerror = () => {
-        this.throttledLog('audio_local', `List audio failed from local, trying upload: Upload/${music.src}.mp3`, music.src);
-        liAudioTag.src = `Upload/${music.src}.mp3`;
-        this.r2Available = false;
-        
-        liAudioTag.onerror = () => {
-          this.throttledLog('audio_all', `All audio sources failed for: ${music.src}`, music.src);
-        };
-      };
-    };
-    
-    // Only load duration if not already cached
-    if (!cachedDuration) {
-      liAudioTag.addEventListener("loadeddata", () => {
-        try {
-          const duration = liAudioTag.duration;
-          if (isNaN(duration) || duration === 0) {
-            this.throttledLog('duration', `Invalid duration for: ${music.src}`, music.src);
-            return;
-          }
-          
-          const totalMin = Math.floor(duration / 60);
-          const totalSec = Math.floor(duration % 60).toString().padStart(2, "0");
-          const formattedDuration = `${totalMin}:${totalSec}`;
-          
-          // Cache the duration
-          this.setDurationCache(music.src, formattedDuration);
-          
-          // Update display only if this element is still in the DOM
-          if (durationSpan && durationSpan.isConnected) {
-            durationSpan.textContent = formattedDuration;
-          }
-        } catch (error) {
-          this.throttledLog('duration_error', `Duration calculation error for ${music.src}: ${error.message}`, music.src);
-        }
-      });
-    }
-
-    liTag.addEventListener("click", () => {
-      try {
-        // Set the music index based on current mode
-        if (this.isShuffleMode) {
-          const clickedMusic = this.musicSource[actualIndex];
-          const shuffledIndex = this.shuffledOrder.findIndex(song => song.src === clickedMusic.src);
-          this.musicIndex = shuffledIndex >= 0 ? shuffledIndex + 1 : 1;
-        } else {
-          this.musicIndex = actualIndex + 1;
-        }
-        this.loadMusic(this.musicIndex);
-        this.playMusic();
-        this.resetVideoSize();
-      } catch (error) {
-        this.throttledLog('click_error', `Click handler error: ${error.message}`, music.src);
-      }
-    });
-
-    return liTag;
-  }*/
-
   createMusicListItem(music, actualIndex) {
     const liTag = document.createElement("li");
     liTag.setAttribute("li-index", actualIndex + 1);
-  
+
     // Use cached duration if available, otherwise show placeholder
     const cachedDuration = this.getDurationCache(music.src);
     const displayDuration = cachedDuration || "0:00";
-  
+
     liTag.innerHTML = `
       <div class="row">
         <span>${music.name}</span>
@@ -1603,12 +1130,12 @@ class MusicPlayer {
       </div>
       <span id="${music.src}" class="audio-duration">${displayDuration}</span>
     `;
-  
+
     // Apply dark mode styles immediately if in dark mode
     const isDarkMode = this.wrapper.classList.contains("dark-mode");
     liTag.style.color = isDarkMode ? 'white' : 'black';
     liTag.style.borderBottom = isDarkMode ? '3px solid white' : '3px solid black';
-  
+
     // UPDATED click handler to work with search
     liTag.addEventListener("click", () => {
       try {
@@ -1635,7 +1162,7 @@ class MusicPlayer {
         
         this.loadMusic(this.musicIndex);
         this.playMusic();
-        this.resetVideoSize();
+        this.callMediaManager('resetVideoSize');
         
         // Close search results after selection
         if (this.isSearching && this.searchField) {
@@ -1646,7 +1173,7 @@ class MusicPlayer {
         this.throttledLog('click_error', `Click handler error: ${error.message}`, music.src);
       }
     });
-  
+
     return liTag;
   }
 
@@ -1655,15 +1182,15 @@ class MusicPlayer {
     liTag.className = 'search-result-item'; // Unique class for search items
     liTag.setAttribute("li-index", originalIndex + 1);
     liTag.setAttribute("data-search-result", "true"); // Mark as search result
-  
+
     // Use cached duration if available, otherwise show placeholder
     const cachedDuration = this.getDurationCache(music.src);
     const displayDuration = cachedDuration || "0:00";
-  
+
     // Clean the display text to prevent any HTML injection
     const cleanName = String(music.name).replace(/<[^>]*>/g, '').trim();
     const cleanArtist = String(music.artist).replace(/<[^>]*>/g, '').trim();
-  
+
     liTag.innerHTML = `
       <div class="row">
         <span>${cleanName}</span>
@@ -1671,12 +1198,12 @@ class MusicPlayer {
       </div>
       <span id="search-${music.src}" class="audio-duration">${displayDuration}</span>
     `;
-  
+
     // Apply dark mode styles immediately if in dark mode
     const isDarkMode = this.wrapper.classList.contains("dark-mode");
     liTag.style.color = isDarkMode ? 'white' : 'black';
     liTag.style.borderBottom = isDarkMode ? '3px solid white' : '3px solid black';
-  
+
     // Search-specific click handler
     liTag.addEventListener("click", () => {
       try {
@@ -1685,7 +1212,7 @@ class MusicPlayer {
           console.warn('Invalid music selection in search results');
           return;
         }
-  
+
         // Find the correct index based on current playback mode
         if (this.isShuffleMode) {
           const shuffledIndex = this.shuffledOrder.findIndex(song => 
@@ -1698,7 +1225,7 @@ class MusicPlayer {
         
         this.loadMusic(this.musicIndex);
         this.playMusic();
-        this.resetVideoSize();
+        this.callMediaManager('resetVideoSize');
         
         // Clear search and restore normal view
         if (this.searchField) {
@@ -1712,7 +1239,7 @@ class MusicPlayer {
         this.throttledLog('search_click_error', `Search click handler error: ${error.message}`, music.src);
       }
     });
-  
+
     return liTag;
   }
 
@@ -1741,7 +1268,7 @@ class MusicPlayer {
       if (!audioTag) return;
       
       const id = audioTag.id;
-      const isPlaying = id === currentMusic.src;
+      const isPlaying = id === currentMusic.src || id === `search-${currentMusic.src}`;
 
       if (!audioTag.hasAttribute("t-duration")) {
         audioTag.setAttribute("t-duration", audioTag.textContent);
@@ -1857,10 +1384,6 @@ class MusicPlayer {
         playPauseIcon.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
       }
       
-      // Only update border box for Player 2
-      if (this.suffix === '2') {
-        this.updateBorderBoxDisplay();
-      }
     } else {
       document.body.style.backgroundColor = "black";
       this.listcolourwhite();
@@ -1923,11 +1446,14 @@ class MusicPlayer {
         playPauseIcon.style.removeProperty('-webkit-background-clip');
         playPauseIcon.style.removeProperty('-webkit-text-fill-color');
       }
-      
-      // Only update border box for Player 2
-      if (this.suffix === '2') {
-        this.updateBorderBoxDisplay();
-      }
+    }
+
+    // Notify MediaManager of dark mode change (if available)
+    this.callMediaManager('updateDarkMode', isDarkMode);
+    
+    // Update cover placeholder if in standalone mode
+    if (!this.mediaManager) {
+      this.showCoverPlaceholder();
     }
   }
 
@@ -2083,47 +1609,6 @@ class MusicPlayer {
     return results;
   }
 
-  handleDragOptimized = (e) => {
-    if (!isDragging) return;
-    
-    // Cancel any pending RAF to avoid stacking
-    if (dragRAF) {
-      cancelAnimationFrame(dragRAF);
-    }
-    
-    // Use RAF for smooth dragging
-    dragRAF = requestAnimationFrame(() => {
-      e.preventDefault();
-      
-      // Cache rect calculation - only recalculate if needed
-      if (!this.cachedProgressRect || performance.now() - this.lastRectCache > 100) {
-        this.cachedProgressRect = this.progressArea.getBoundingClientRect();
-        this.lastRectCache = performance.now();
-      }
-      
-      const offsetX = Math.max(0, Math.min(e.clientX - this.cachedProgressRect.left, this.cachedProgressRect.width));
-      const songDuration = this.mainAudio.duration;
-      
-      if (!isNaN(songDuration) && songDuration > 0) {
-        const newTime = (offsetX / this.cachedProgressRect.width) * songDuration;
-        const clampedTime = Math.max(0, Math.min(newTime, songDuration));
-        
-        // Update audio time and progress bar efficiently
-        this.mainAudio.currentTime = clampedTime;
-        this.updateProgressBarImmediate(clampedTime, songDuration);
-        
-        // Throttled time display update
-        const now = performance.now();
-        if (now - this.lastTimeUpdate > this.timeUpdateThrottle) {
-          this.updateTimeDisplayOptimized(clampedTime, songDuration);
-          this.lastTimeUpdate = now;
-        }
-      }
-      
-      dragRAF = null;
-    });
-  };
-
   handleSearch(e) {
     const query = e.target.value.trim();
     
@@ -2174,33 +1659,6 @@ class MusicPlayer {
     this.renderFilteredItems();
   }
 
-  performSearch(query) {
-    // Check cache first
-    if (this.searchCache.has(query)) {
-      this.filteredMusic = [...this.searchCache.get(query)]; // Create new array to avoid reference issues
-      this.isSearching = true;
-      this.renderFilteredItems();
-      return;
-    }
-    
-    // For reliability, always do a full search instead of incremental
-    // The caching provides the performance benefit we need
-    this.filteredMusic = this.performFullSearch(query);
-    
-    // Cache the result (limit cache size to prevent memory issues)
-    if (this.searchCache.size > 100) {
-      const firstKey = this.searchCache.keys().next().value;
-      this.searchCache.delete(firstKey);
-    }
-    this.searchCache.set(query, [...this.filteredMusic]);
-    this.lastQuery = query;
-    this.lastResults = [...this.filteredMusic];
-    
-    this.isSearching = true;
-    this.renderFilteredItems();
-  }
-  
-  // Replace the renderFilteredItems method:
   renderFilteredItems() {
     if (!this.musicListItems || !this.ulTag) return;
     
@@ -2300,7 +1758,6 @@ class MusicPlayer {
     });
   }
   
-  // Replace the restoreOriginalList method:
   restoreOriginalList() {
     if (!this.musicListItems || !this.ulTag) return;
     
@@ -2331,11 +1788,28 @@ class MusicPlayer {
       this.muteButton.disabled = true;
       return;
     }
-
-    this.videoAd.muted = !this.videoAd.muted;
-    this.isMuted = this.videoAd.muted;
-    this.muteButton.classList.toggle("muted", this.isMuted);
-    this.muteButton.classList.toggle("unmuted", !this.isMuted);
+  
+    // Check if MediaManager has video override enabled
+    const hasVideoOverride = this.mediaManager && this.mediaManager.videoOverride;
+    
+    if (hasVideoOverride) {
+      // When video override is enabled, don't allow manual mute control
+      // The mute state should be controlled automatically by music playback state
+      console.log("Manual mute disabled - video override is controlling mute state");
+      return;
+    }
+  
+    // Only allow manual mute control when video override is NOT enabled
+    // Use MediaManager if available, otherwise handle basic video muting
+    if (this.mediaManager && this.mediaManager.videoAd) {
+      this.mediaManager.videoAd.muted = !this.mediaManager.videoAd.muted;
+      this.isMuted = this.mediaManager.videoAd.muted;
+      this.muteButton.classList.toggle("muted", this.isMuted);
+      this.muteButton.classList.toggle("unmuted", !this.isMuted);
+    } else if (!this.mediaManager) {
+      // Fallback video muting without MediaManager - but since standalone has no video, this does nothing
+      console.log("Standalone mode - no video to mute");
+    }
   }
 
   handleAudioPause() {
@@ -2346,10 +1820,6 @@ class MusicPlayer {
   handleAudioPlay() {
     this.muteButton.disabled = true;
     this.playMusic();
-  }
-
-  handleVideoEnd() {
-    this.muteButton.disabled = false;
   }
 
   listcolourblack() {
@@ -2374,83 +1844,6 @@ class MusicPlayer {
     this.header.style.color = "black";
   }
 
-  updateBorderBoxImmediate() {
-    // Only handle border box for Player 2
-    if (this.suffix !== '2' || !this.borderBox) return;
-
-    if (this.isInitializing) {
-      this.borderBox.style.display = "none";
-      return;
-    }
-    
-    const now = performance.now();
-    
-    // Throttle updates to avoid excessive DOM manipulation
-    if (now - this.borderBoxState.lastUpdate < 16) return;
-    
-    const isDarkMode = this.wrapper.classList.contains("dark-mode");
-    
-    // Determine visibility and style in one pass
-    let shouldShowBorder = false;
-    let targetStyle = null;
-    
-    if (isDarkMode) {
-      shouldShowBorder = true;
-      targetStyle = 'player2DarkMode';
-    }
-    
-    // Only update if state actually changed
-    if (this.borderBoxState.isVisible !== shouldShowBorder || 
-        this.borderBoxState.currentStyle !== targetStyle) {
-      
-      // Batch all DOM operations together
-      this.applyBorderBoxChanges(shouldShowBorder, targetStyle);
-      
-      // Update cached state
-      this.borderBoxState.isVisible = shouldShowBorder;
-      this.borderBoxState.currentStyle = targetStyle;
-      this.borderBoxState.lastUpdate = now;
-    }
-  }
-
-  applyBorderBoxChanges(shouldShow, styleKey) {
-    if (shouldShow && styleKey) {
-      const styles = this.borderBoxStyles[styleKey];
-      
-      // Use CSS transform for better performance
-      const cssText = `
-        display: block;
-        top: ${styles.top};
-        left: ${styles.left};
-        width: ${styles.width};
-        height: ${styles.height};
-        transform: ${styles.transform};
-        border-radius: ${styles.borderRadius};
-      `;
-      
-      // Apply all styles at once using cssText (single reflow)
-      this.borderBox.style.cssText = cssText;
-    } else {
-      // Hide with minimal DOM impact
-      this.borderBox.style.cssText = 'display: none; visibility: hidden; opacity: 0;';
-    }
-  }
-
-  setupPerformanceMonitoring() {
-    if (this.suffix === '2' && this.borderBox && 'IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            // Border box is not visible, can skip some updates
-            this.borderBoxState.isVisible = false;
-          }
-        });
-      });
-      
-      observer.observe(this.borderBox);
-    }
-  }
-
   // Add resize observer for responsive behavior
   setupResizeObserver() {
     if ('ResizeObserver' in window && this.ulTag) {
@@ -2461,191 +1854,191 @@ class MusicPlayer {
       resizeObserver.observe(this.ulTag);
     }
   }
-}
 
-function handleSize() {
-  console.log("hello");
-  // Only handle video element for player 1 (no video interaction for player 2)
-  const sizer = document.getElementById("video");
-  
-  if (!sizer) return;
-  
-  if (!sizer.classList.contains("overlay-video") && !sizer.classList.contains("bigger-video")) {
-    sizer.classList.add("overlay-video");
+  // Cleanup method
+  cleanup() {
+    // Clean up progress bar resources
+    this.cleanupProgressBar();
+    
+    // Clear timeouts and intervals
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    if (this.renderFrame) {
+      cancelAnimationFrame(this.renderFrame);
+    }
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+    }
+    
+    // Stop audio
+    if (this.mainAudio) {
+      this.mainAudio.pause();
+      this.mainAudio.currentTime = 0;
+      this.mainAudio.src = '';
+      this.mainAudio.load();
+    }
+    
+    // Clear lists
+    if (this.ulTag) {
+      this.ulTag.innerHTML = '';
+    }
+    
+    // Clear cover area
+    if (this.coverArea) {
+      this.coverArea.innerHTML = '';
+    }
+    
+    // Cleanup MediaManager if available
+    this.callMediaManager('cleanup');
   }
-
-  // Remove existing click listeners without cloning (which breaks references)
-  sizer.removeEventListener("click", sizer.clickHandler);
-
-  // Create the click handler function
-  const clickHandler = () => {
-    const player = window.homePlayer;
-    
-    // Prevent size toggle if controls are shown by user AND video is currently in bigger mode
-    if (sizer.classList.contains("bigger-video") && player && player.controlsToggledManually) return;
-  
-    sizer.classList.toggle("overlay-video");
-    sizer.classList.toggle("bigger-video");
-    
-    // Handle controls based on new size
-    if (sizer.classList.contains("bigger-video")) {
-      // Bigger video: controls can be toggled by user
-      // Don't automatically enable controls - let user toggle them via song title
-      sizer.controls = false;
-      if (player) {
-        player.controlsToggledManually = false;
-      }
-    } else {
-      // Overlay video: force controls off and reset toggle state
-      sizer.controls = false;
-      if (player) {
-        player.controlsToggledManually = false;
-      }
-    }
-    
-    // Update video positioning based on new size
-    if (player && sizer.style.display !== "none") {
-      if (player.videoOverride) {
-        // If override is active, let showVideoOverride handle positioning
-        player.showVideoOverride();
-      } else {
-        // Normal positioning logic
-        if (sizer.classList.contains('bigger-video')) {
-          sizer.style.top = '0px';
-          sizer.style.left = '0px';
-          sizer.style.transform = 'translate(0, 0)';
-        } else {
-          sizer.style.top = '50%';
-          sizer.style.left = '50%';
-          sizer.style.transform = 'translate(-50%, -50%)';
-        }
-      }
-    }
-  };
-
-  // Store reference to handler for future removal
-  sizer.clickHandler = clickHandler;
-  
-  // Add the new click listener
-  sizer.addEventListener("click", clickHandler);
 }
 
-// Initialize players when DOM loads
+// Updated handleSize function to work with MediaManager
+function handleSize() {
+  console.log("Setting up video controls for player 1");
+  
+  // This function now only needs to ensure MediaManager is properly set up
+  if (window.homeMediaManager && window.homeMediaManager.setupVideoSizeToggle) {
+    window.homeMediaManager.setupVideoSizeToggle();
+  } else if (typeof MediaManager !== 'undefined') {
+    // Try to initialize if not available
+    try {
+      if (!window.homeMediaManager) {
+        window.homeMediaManager = new MediaManager('');
+      }
+      if (window.homeMediaManager.setupVideoSizeToggle) {
+        window.homeMediaManager.setupVideoSizeToggle();
+      }
+    } catch (error) {
+      console.warn('Could not setup video controls:', error);
+    }
+  }
+}
+
 // Global player initialization functions
-function initializeHomePlayer() {
+async function initializeHomePlayer() {
   if (!window.homePlayer) {
+    // Wait for music data to load first
+    if (!window.allMusic || window.allMusic.length === 0) {
+      console.log('Waiting for music data to load...');
+      if (typeof loadMusicData === 'function') {
+        await loadMusicData();
+      }
+    }
+    
     console.log('Initializing Home Player...');
     window.homePlayer = new MusicPlayer();
     handleSize();
     
-    // Prefetch assets for home player
-    requestIdleCallback(() => {
-      if (window.allMusic) {
-        window.homePlayer.assetManager?.prefetchPlaylistAssets(window.allMusic);
-      }
-    });
+    // Prefetch assets for home player if MediaManager is available
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(() => {
+        if (window.allMusic && window.homePlayer.mediaManager) {
+          // Prefetch assets if available
+          if (window.homePlayer.mediaManager.prefetchPlaylistAssets) {
+            window.homePlayer.mediaManager.prefetchPlaylistAssets(window.allMusic);
+          }
+        }
+      });
+    }
   }
 }
 
-function initializeDisguisePlayer() {
+async function initializeDisguisePlayer() {
   if (!window.disguisePlayer) {
+    // Wait for music data to load first
+    if (!window.ReducedMusic || window.ReducedMusic.length === 0) {
+      console.log('Waiting for reduced music data to load...');
+      if (typeof loadMusicData === 'function') {
+        await loadMusicData();
+      }
+    }
+    
     console.log('Initializing Disguise Player...');
     window.disguisePlayer = new MusicPlayer('2');
     
-    // Prefetch assets for disguise player  
-    requestIdleCallback(() => {
-      if (window.allMusicDisguise) {
-        window.disguisePlayer.assetManager?.prefetchPlaylistAssets(window.allMusicDisguise);
-      }
-    });
+    // Prefetch assets for disguise player if MediaManager is available
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(() => {
+        if (window.ReducedMusic && window.disguisePlayer.mediaManager) {
+          // Prefetch assets if available
+          if (window.disguisePlayer.mediaManager.prefetchPlaylistAssets) {
+            window.disguisePlayer.mediaManager.prefetchPlaylistAssets(window.ReducedMusic);
+          }
+        }
+      });
+    }
   }
+}
+
+// Add this function to AudioPlayer00.js
+function resetPlayerState() {
+  // Reset global player variables if they exist
+  if (typeof musicIndex !== 'undefined') {
+      window.musicIndex = 1;
+  }
+  if (typeof isMusicPaused !== 'undefined') {
+      window.isMusicPaused = true;
+  }
+  
+  // Reset UI states for both players
+  ['', '2'].forEach(suffix => {
+      const playBtn = document.querySelector(`#wrapper${suffix} .play-pause i`);
+      if (playBtn) {
+          playBtn.classList.remove('pause');
+          playBtn.classList.add('play');
+          playBtn.textContent = 'play_arrow';
+      }
+      
+      // Reset progress bars
+      const progressBar = document.querySelector(`#wrapper${suffix} .progress-bar`);
+      if (progressBar) {
+          progressBar.style.width = '0%';
+      }
+      
+      // Reset time displays
+      const currentTime = document.querySelector(`#wrapper${suffix} .current-time`);
+      const maxDuration = document.querySelector(`#wrapper${suffix} .max-duration`);
+      if (currentTime) currentTime.textContent = '0:00';
+      if (maxDuration) maxDuration.textContent = '0:00';
+      
+      // Clear any wrapper paused state
+      const wrapper = document.querySelector(`#wrapper${suffix}`);
+      if (wrapper) {
+          wrapper.classList.remove('paused');
+      }
+  });
+  
+  console.log('Player state reset complete');
 }
 
 function cleanupPlayers() {
   console.log('Cleaning up music players...');
   
+  // Cleanup MediaManagers first if available
+  if (typeof cleanupMediaManagers === 'function') {
+    cleanupMediaManagers();
+  }
+  
   if (window.homePlayer) {
-    // Stop any playing audio/video
-    const audio = document.getElementById('main-audio');
-    const video = document.getElementById('video');
-    
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.src = '';
-      audio.load(); // Reset the audio element
+    try {
+      window.homePlayer.cleanup();
+      console.log('Home player deinitialized');
+    } catch (error) {
+      console.warn('Error cleaning up home player:', error);
     }
-    
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-      video.src = '';
-      video.load(); // Reset the video element
-    }
-    
-    // Clear any intervals/timeouts the player might have
-    if (window.homePlayer.sessionCheckInterval) {
-      clearInterval(window.homePlayer.sessionCheckInterval);
-    }
-    if (window.homePlayer.searchTimeout) {
-      clearTimeout(window.homePlayer.searchTimeout);
-    }
-    if (window.homePlayer.renderFrame) {
-      cancelAnimationFrame(window.homePlayer.renderFrame);
-    }
-    
-    // NEW: Clean up progress bar resources
-    if (window.homePlayer.cleanupProgressBar) {
-      window.homePlayer.cleanupProgressBar();
-    }
-    
-    console.log('Home player deinitialized');
     window.homePlayer = null;
   }
   
   if (window.disguisePlayer) {
-    // Stop any playing audio/video
-    const audio2 = document.getElementById('main-audio2');
-    const video2 = document.getElementById('video2');
-    
-    if (audio2) {
-      audio2.pause();
-      audio2.currentTime = 0;
-      audio2.src = '';
-      audio2.load(); // Reset the audio element
+    try {
+      window.disguisePlayer.cleanup();
+      console.log('Disguise player deinitialized');
+    } catch (error) {
+      console.warn('Error cleaning up disguise player:', error);
     }
-    
-    if (video2) {
-      video2.pause();
-      video2.currentTime = 0;
-      video2.src = '';
-      video2.load(); // Reset the video element
-    }
-    
-    // Clear any intervals/timeouts the player might have
-    if (window.disguisePlayer.sessionCheckInterval) {
-      clearInterval(window.disguisePlayer.sessionCheckInterval);
-    }
-    if (window.disguisePlayer.searchTimeout) {
-      clearTimeout(window.disguisePlayer.searchTimeout);
-    }
-    if (window.disguisePlayer.renderFrame) {
-      cancelAnimationFrame(window.disguisePlayer.renderFrame);
-    }
-    
-    // NEW: Clean up progress bar resources
-    if (window.disguisePlayer.cleanupProgressBar) {
-      window.disguisePlayer.cleanupProgressBar();
-    }
-    
-    console.log('Disguise player deinitialized');
     window.disguisePlayer = null;
-  }
-  
-  // Clear any cached data
-  if (window.assetManager) {
-    window.assetManager.prefetchedAssets?.clear();
-    window.assetManager.imageCache?.clear();
   }
   
   console.log('All players cleaned up successfully');
@@ -2653,6 +2046,16 @@ function cleanupPlayers() {
 
 // Only initialize handleSize on DOM load - players will be initialized on login
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize MediaManagers first if available
+  if (typeof initializeMediaManagers === 'function') {
+    try {
+      initializeMediaManagers();
+    } catch (error) {
+      console.warn('Failed to initialize MediaManagers:', error);
+    }
+  }
+  
+  // Then setup video controls (only for player 1)
   handleSize();
 });
 

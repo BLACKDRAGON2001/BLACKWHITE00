@@ -466,7 +466,7 @@ ul li.playing{
   transition: scroll-behavior 0.3s ease;
 }
 
-.PABox .PABoxButton{
+/*.PABox .PABoxButton{
   width: 100%;
   background-color: white;
   font-size: 10px;
@@ -477,7 +477,7 @@ ul li.playing{
   margin-top: 10px;
   border-radius: 8px;
   font-weight: bold;
-}
+}*/
 
 /* Add these CSS rules to your AudioPlayer.css to prevent flicker */
 
@@ -706,5 +706,184 @@ body:has(#DisguisePage[style*="display: block"]) #HomePage {
   .progress-area:hover {
     height: 8px; /* Direct height change instead of transform */
     transform: none;
+  }
+}
+
+/* Manager Message System Styles */
+.information {
+  width: 100%;
+  margin-top: 20px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.manager-message {
+  width: 100%;
+  height: 100px;
+  padding: 15px;
+  border-radius: 5px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.4;
+  box-sizing: border-box;
+  background: white;
+  color: black;
+  border: 3px solid black;
+}
+
+/* Success messages */
+.manager-message.success {
+  background: white;
+  color: black;
+  border: 3px solid black;
+}
+
+/* Error messages */
+.manager-message.error {
+  background: black;
+  color: white;
+  border: 3px solid white;
+}
+
+/* Info/loading messages */
+.manager-message.info {
+  background: white;
+  color: black;
+  border: 3px solid black;
+}
+
+/* Warning messages */
+.manager-message.warning {
+  background: white;
+  color: black;
+  border: 3px solid black;
+}
+
+/* Confirmation messages */
+.manager-message.confirm {
+  background: white;
+  color: black;
+  border: 3px solid black;
+  padding: 20px 15px;
+}
+
+.manager-message.confirm .confirm-buttons {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.manager-message.confirm .confirm-btn {
+  padding: 8px 20px;
+  border: 2px solid black;
+  background: white;
+  color: black;
+  font-family: monospace;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.manager-message.confirm .confirm-btn.primary {
+  background: black;
+  color: white;
+}
+
+.manager-message.confirm .confirm-btn:hover {
+  opacity: 0.8;
+}
+
+/* Loading spinner animation */
+.manager-message.loading::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid transparent;
+  border-top: 2px solid black;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Confirmation messages */
+.manager-message.confirm {
+  background: white;
+  color: black;
+  border: 3px solid black;
+  padding: 20px 15px;
+}
+
+.manager-message.confirm .confirm-buttons {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.manager-message.confirm .confirm-btn {
+  padding: 8px 20px;
+  border: 2px solid black;
+  background: white;
+  color: black;
+  font-family: monospace;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s ease-in-out;
+}
+
+.manager-message.confirm .confirm-btn.primary {
+  background: black;
+  color: white;
+}
+
+.manager-message.confirm .confirm-btn:hover {
+  opacity: 0.8;
+}
+
+/* Loading spinner animation */
+.manager-message.loading::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid transparent;
+  border-top: 2px solid black;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Auto-hide animation */
+.manager-message.auto-hide {
+  animation: autoHideMessage 5s ease-in-out forwards;
+}
+
+@keyframes autoHideMessage {
+  0%, 80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
