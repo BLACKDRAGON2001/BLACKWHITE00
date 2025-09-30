@@ -255,42 +255,42 @@ class MediaManager {
   }
 
   toggleVideoOverride() {
-      if (this.suffix === '2' || !this.videoAd) return; // No video override for player 2
+    if (this.suffix === '2' || !this.videoAd) return; // No video override for player 2
+    
+    this.videoOverride = !this.videoOverride;
+    
+    if (this.videoOverride) {
+      // When enabling override, check the actual audio element state directly
+      const mainAudio = document.querySelector(`#main-audio${this.suffix}`);
+      const isMusicPlaying = mainAudio ? !mainAudio.paused : false;
+      const shouldMute = isMusicPlaying; // Unmute if music is paused, mute if playing
       
-      this.videoOverride = !this.videoOverride;
+      console.log(`Video override enabled. Audio paused: ${mainAudio?.paused}, Music playing: ${isMusicPlaying}, Video will be muted: ${shouldMute}`);
       
-      if (this.videoOverride) {
-        this.showVideoOverride();
-      } else {
-        // When disabling video override, reset video to proper state
-        
-        // First, reset video size classes and controls
-        this.videoAd.classList.remove("bigger-video");
-        this.videoAd.classList.add("overlay-video");
-        this.videoAd.controls = false;
-        this.controlsToggledManually = false;
-        
-        // Reset positioning to overlay mode
-        Object.assign(this.videoAd.style, {
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        });
-        
-        // Now check music state to determine video visibility
-        // We need to get music state from the player if available
-        const isMusicPlaying = this.player ? !this.player.isMusicPaused : false;
-        
-        if (isMusicPlaying) {
-          // Music is playing, so hide the video
-          this.videoAd.style.display = "none";
-          this.videoAd.pause();
-        } else {
-          // Music is paused, so show the video
-          this.toggleVideoDisplay(true); // true = show video (music is paused)
-        }
-      }
+      this.videoAd.muted = shouldMute;
+      this.showVideoOverride();
+    } else {
+      // When disabling video override, hide the video and reset state
+      this.videoAd.style.display = "none";
+      this.videoAd.pause();
+      this.videoAd.muted = true; // Reset to muted
+      
+      // Reset video state
+      this.videoAd.classList.remove("bigger-video");
+      this.videoAd.classList.add("overlay-video");
+      this.videoAd.controls = false;
+      this.controlsToggledManually = false;
+      
+      // Reset positioning to overlay mode
+      Object.assign(this.videoAd.style, {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+      });
+      
+      console.log('Video override disabled');
     }
+  }
 
   showVideoOverride() {
     if (this.suffix === '2' || !this.videoAd) {
@@ -314,16 +314,8 @@ class MediaManager {
       });
     }
     
-    // Check music state to determine video mute behavior
-    const isMusicPlaying = this.player ? !this.player.isMusicPaused : false;
-    
-    if (isMusicPlaying) {
-      // Music is playing, so mute the video
-      this.videoAd.muted = true;
-    } else {
-      // Music is paused, so unmute the video
-      this.videoAd.muted = false;
-    }
+    // Mute state is set in toggleVideoOverride() when override is first enabled
+    // and updated in onMusicPlayStateChange() when music play state changes
     
     // Always play the video when override is enabled
     const playPromise = this.videoAd.play();
@@ -546,16 +538,18 @@ class MediaManager {
 
   // Methods called by AudioPlayer through callMediaManager()
   onMusicPlayStateChange(isPlaying) {
+    // FIXED: Proper logic flow matching AudioPlayer00.js
     if (!this.videoOverride) {
+      // Normal mode: show video when music paused, hide when playing
       this.toggleVideoDisplay(!isPlaying); // !isPlaying = show video when music is paused
     } else {
-      // When override is enabled, just update the mute state
+      // Override mode: just update mute state, keep video visible
       if (this.videoAd) {
         this.videoAd.muted = isPlaying; // Mute video when music is playing
       }
     }
     
-    // Auto-resize video to smaller/overlay mode ONLY when override is NOT enabled
+    // Auto-resize video to smaller/overlay mode when music starts (only for player 1, not in override)
     if (this.suffix !== '2' && this.videoAd && !this.videoOverride && isPlaying && this.videoAd.classList.contains("bigger-video")) {
       this.videoAd.classList.remove("bigger-video");
       this.videoAd.classList.add("overlay-video");
@@ -587,6 +581,7 @@ class MediaManager {
   }
 
   toggleVideoDisplay(show) {
+    // FIXED: Respect videoOverride properly
     if (this.videoOverride) {
       this.showVideoOverride();
       return;
@@ -597,6 +592,7 @@ class MediaManager {
     if (show) {
       // When music is paused (show = true), show the video
       if (this.suffix === '2') {
+        // Player 2 never shows video
         this.videoAd.style.display = "none";
       } else {
         this.videoAd.style.display = "block";
@@ -626,6 +622,7 @@ class MediaManager {
   resetVideoSize() {
     if (!this.videoAd) return; // Safety check
 
+    // FIXED: Don't reset if override is active
     if (this.videoOverride) return;
     
     this.videoAd.controls = false;
@@ -755,26 +752,26 @@ window.disguiseMediaManager = null;
 
 // Initialization functions
 function initializeMediaManagers() {
-if (!window.homeMediaManager) {
-  window.homeMediaManager = new MediaManager('');
-}
-if (!window.disguiseMediaManager) {
-  window.disguiseMediaManager = new MediaManager('2');
-}
-console.log('MediaManager instances created');
+  if (!window.homeMediaManager) {
+    window.homeMediaManager = new MediaManager('');
+  }
+  if (!window.disguiseMediaManager) {
+    window.disguiseMediaManager = new MediaManager('2');
+  }
+  console.log('MediaManager instances created');
 }
 
 // Cleanup function
 function cleanupMediaManagers() {
-if (window.homeMediaManager) {
-  window.homeMediaManager.cleanup();
-  window.homeMediaManager = null;
-}
-if (window.disguiseMediaManager) {
-  window.disguiseMediaManager.cleanup();
-  window.disguiseMediaManager = null;
-}
-console.log('MediaManager instances cleaned up');
+  if (window.homeMediaManager) {
+    window.homeMediaManager.cleanup();
+    window.homeMediaManager = null;
+  }
+  if (window.disguiseMediaManager) {
+    window.disguiseMediaManager.cleanup();
+    window.disguiseMediaManager = null;
+  }
+  console.log('MediaManager instances cleaned up');
 }
 
 // Export functions
