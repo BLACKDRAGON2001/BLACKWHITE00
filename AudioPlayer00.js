@@ -750,6 +750,45 @@ class MusicPlayer {
     this.progressBar.style.width = `${percentage.toFixed(1)}%`;
   }
 
+  handleDragOptimized(e, isDragging, dragRAF) {
+    if (!isDragging) return null;
+    
+    // Cancel any pending RAF to avoid stacking
+    if (dragRAF) {
+      cancelAnimationFrame(dragRAF);
+    }
+    
+    // Use RAF for smooth dragging
+    return requestAnimationFrame(() => {
+      e.preventDefault();
+      
+      // Cache rect calculation - only recalculate if needed
+      if (!this.cachedProgressRect || performance.now() - this.lastRectCache > 100) {
+        this.cachedProgressRect = this.progressArea.getBoundingClientRect();
+        this.lastRectCache = performance.now();
+      }
+      
+      const offsetX = Math.max(0, Math.min(e.clientX - this.cachedProgressRect.left, this.cachedProgressRect.width));
+      const songDuration = this.mainAudio.duration;
+      
+      if (!isNaN(songDuration) && songDuration > 0) {
+        const newTime = (offsetX / this.cachedProgressRect.width) * songDuration;
+        const clampedTime = Math.max(0, Math.min(newTime, songDuration));
+        
+        // Update audio time and progress bar efficiently
+        this.mainAudio.currentTime = clampedTime;
+        this.updateProgressBarImmediate(clampedTime, songDuration);
+        
+        // Throttled time display update
+        const now = performance.now();
+        if (now - this.lastTimeUpdate > this.timeUpdateThrottle) {
+          this.updateTimeDisplayOptimized(clampedTime, songDuration);
+          this.lastTimeUpdate = now;
+        }
+      }
+    });
+  }
+
   setupProgressBarDragging() {
     let isDragging = false;
     let wasPlaying = false;
@@ -764,52 +803,15 @@ class MusicPlayer {
         this.mainAudio.pause();
       }
       
-      // Prevent text selection - cache the style
+      // Prevent text selection
       document.body.style.userSelect = 'none';
       
       // Handle initial position
-      this.handleDragOptimized(e);
+      dragRAF = this.handleDragOptimized(e, isDragging, dragRAF);
     };
     
-    const handleDragOptimized = (e) => {
-      if (!isDragging) return;
-      
-      // Cancel any pending RAF to avoid stacking
-      if (dragRAF) {
-        cancelAnimationFrame(dragRAF);
-      }
-      
-      // Use RAF for smooth dragging
-      dragRAF = requestAnimationFrame(() => {
-        e.preventDefault();
-        
-        // Cache rect calculation - only recalculate if needed
-        if (!this.cachedProgressRect || performance.now() - this.lastRectCache > 100) {
-          this.cachedProgressRect = this.progressArea.getBoundingClientRect();
-          this.lastRectCache = performance.now();
-        }
-        
-        const offsetX = Math.max(0, Math.min(e.clientX - this.cachedProgressRect.left, this.cachedProgressRect.width));
-        const songDuration = this.mainAudio.duration;
-        
-        if (!isNaN(songDuration) && songDuration > 0) {
-          const newTime = (offsetX / this.cachedProgressRect.width) * songDuration;
-          const clampedTime = Math.max(0, Math.min(newTime, songDuration));
-          
-          // Update audio time and progress bar efficiently
-          this.mainAudio.currentTime = clampedTime;
-          this.updateProgressBarImmediate(clampedTime, songDuration);
-          
-          // Throttled time display update
-          const now = performance.now();
-          if (now - this.lastTimeUpdate > this.timeUpdateThrottle) {
-            this.updateTimeDisplayOptimized(clampedTime, songDuration);
-            this.lastTimeUpdate = now;
-          }
-        }
-        
-        dragRAF = null;
-      });
+    const handleMove = (e) => {
+      dragRAF = this.handleDragOptimized(e, isDragging, dragRAF);
     };
     
     const endDrag = () => {
@@ -835,12 +837,12 @@ class MusicPlayer {
       }
     };
     
-    // Use optimized event handlers
+    // Mouse events
     this.progressArea.addEventListener('mousedown', startDrag);
-    document.addEventListener('mousemove', handleDragOptimized);
+    document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', endDrag);
     
-    // Optimized touch events
+    // Touch events
     this.progressArea.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
       startDrag({
@@ -852,7 +854,7 @@ class MusicPlayer {
     document.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       const touch = e.touches[0];
-      handleDragOptimized({
+      handleMove({
         clientX: touch.clientX,
         preventDefault: () => e.preventDefault()
       });
