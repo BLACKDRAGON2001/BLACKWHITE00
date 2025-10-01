@@ -760,8 +760,6 @@ class MusicPlayer {
     
     // Use RAF for smooth dragging
     return requestAnimationFrame(() => {
-      e.preventDefault();
-      
       // Cache rect calculation - only recalculate if needed
       if (!this.cachedProgressRect || performance.now() - this.lastRectCache > 100) {
         this.cachedProgressRect = this.progressArea.getBoundingClientRect();
@@ -793,6 +791,7 @@ class MusicPlayer {
     let isDragging = false;
     let wasPlaying = false;
     let dragRAF = null;
+    let touchIdentifier = null; // Track specific touch for iOS
     
     const startDrag = (e) => {
       isDragging = true;
@@ -803,8 +802,14 @@ class MusicPlayer {
         this.mainAudio.pause();
       }
       
-      // Prevent text selection
+      // Prevent text selection and iOS scroll bounce
       document.body.style.userSelect = 'none';
+      document.body.style.webkitUserSelect = 'none';
+      document.body.style.touchAction = 'none';
+      
+      // Add iOS-specific styling for better feedback
+      this.progressArea.style.cursor = 'grabbing';
+      this.progressArea.style.webkitTouchCallout = 'none';
       
       // Handle initial position
       dragRAF = this.handleDragOptimized(e, isDragging, dragRAF);
@@ -818,7 +823,14 @@ class MusicPlayer {
       if (!isDragging) return;
       
       isDragging = false;
+      touchIdentifier = null;
+      
+      // Restore default styles
       document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+      document.body.style.touchAction = '';
+      this.progressArea.style.cursor = '';
+      this.progressArea.style.webkitTouchCallout = '';
       
       // Clear cached rect
       this.cachedProgressRect = null;
@@ -837,30 +849,54 @@ class MusicPlayer {
       }
     };
     
-    // Mouse events
+    // Mouse events (for desktop)
     this.progressArea.addEventListener('mousedown', startDrag);
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', endDrag);
     
-    // Touch events
+    // iOS-optimized touch events
     this.progressArea.addEventListener('touchstart', (e) => {
+      // Prevent default to stop iOS from interpreting as scroll
+      e.preventDefault();
+      
       const touch = e.touches[0];
+      touchIdentifier = touch.identifier;
+      
       startDrag({
-        clientX: touch.clientX,
-        preventDefault: () => e.preventDefault()
+        clientX: touch.clientX
       });
     }, { passive: false });
     
     document.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
-      const touch = e.touches[0];
+      
+      // Find the touch that started the drag
+      const touch = Array.from(e.touches).find(t => t.identifier === touchIdentifier);
+      if (!touch) return;
+      
+      // Prevent default to stop iOS scroll/bounce
+      e.preventDefault();
+      
       handleMove({
-        clientX: touch.clientX,
-        preventDefault: () => e.preventDefault()
+        clientX: touch.clientX
       });
     }, { passive: false });
     
-    document.addEventListener('touchend', endDrag, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      // Check if the dragging touch ended
+      const touchEnded = !Array.from(e.touches).find(t => t.identifier === touchIdentifier);
+      if (touchEnded) {
+        endDrag();
+      }
+    }, { passive: true });
+    
+    // Handle touchcancel (iOS specific - happens when interrupted)
+    document.addEventListener('touchcancel', (e) => {
+      const touchCancelled = !Array.from(e.touches).find(t => t.identifier === touchIdentifier);
+      if (touchCancelled) {
+        endDrag();
+      }
+    }, { passive: true });
   }
   
   // Enhanced progress bar update method
