@@ -406,9 +406,6 @@ class MediaManager {
     video.controls = true;
     video.autoplay = true;
     video.loop = true;
-    video.playsInline = true; // Critical for iPhone
-    video.setAttribute('playsinline', ''); // Ensure playsinline for iOS
-    video.setAttribute('webkit-playsinline', ''); // Legacy iOS support
     
     const r2Sources = [
       `${this.videoBucketUrls[0]}${src}.${type}`,
@@ -546,50 +543,10 @@ class MediaManager {
       // Normal mode: show video when music paused, hide when playing
       this.toggleVideoDisplay(!isPlaying); // !isPlaying = show video when music is paused
     } else {
-      // Override mode: Mute video FIRST, then handle music playback
+      // Override mode: just update mute state, keep video visible
       if (this.videoAd) {
-        if (isPlaying) {
-          // When music wants to play: IMMEDIATELY mute video first
-          this.videoAd.muted = true;
-          console.log(`Override mode - Video muted FIRST, then music will play`);
-          
-          // Ensure video keeps playing (muted)
-          if (this.videoAd.paused) {
-            this.videoAd.play().catch(error => {
-              console.warn("Failed to play muted video:", error);
-            });
-          }
-        } else {
-          // When music is paused: unmute video
-          this.videoAd.muted = false;
-          console.log(`Override mode - Music paused, video unmuted`);
-          
-          // Ensure video keeps playing (unmuted)
-          if (this.videoAd.paused) {
-            // Use requestAnimationFrame to ensure DOM is ready (helps with timing issues)
-            requestAnimationFrame(() => {
-              if (!this.videoAd || !this.videoOverride) return;
-              
-              const playPromise = this.videoAd.play();
-              if (playPromise !== undefined) {
-                playPromise
-                  .then(() => {
-                    console.log(`Video resumed in override mode (unmuted)`);
-                  })
-                  .catch(error => {
-                    console.warn("Failed to resume video in override mode:", error);
-                    // Retry after a brief delay (helps with iPhone timing issues)
-                    setTimeout(() => {
-                      if (this.videoOverride && this.videoAd && this.videoAd.paused) {
-                        this.videoAd.play().catch(e => {
-                          console.warn("Video retry also failed:", e);
-                        });
-                      }
-                    }, 150);
-                  });
-              }
-            });
-          }
+        if (this.videoAd.muted = isPlaying) {
+          this.videoAd.muted = true; // Mute video when music is playing
         }
       }
     }
@@ -648,21 +605,9 @@ class MediaManager {
           transform: 'translate(-50%, -50%)'
         });
         
-        // iPhone-friendly play attempt with proper error handling
-        const playPromise = this.videoAd.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.warn("Video play failed:", error);
-            // Retry for iPhone compatibility
-            setTimeout(() => {
-              if (!this.videoOverride && show) {
-                this.videoAd.play().catch(e => {
-                  console.warn("Video retry failed:", e);
-                });
-              }
-            }, 100);
-          });
-        }
+        this.videoAd.play().catch(error => {
+          console.warn("Video play failed:", error);
+        });
       }
     } else {
       // When music is playing (show = false), hide the video
