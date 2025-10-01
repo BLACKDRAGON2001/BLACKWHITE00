@@ -615,7 +615,7 @@ class MusicPlayer {
         await playPromise;
         
         // Only update UI state after successful play
-        this.callMediaManager('onMusicPlayStateChange', true);
+        this.mediaManager.videoAd.muted = true
         this.wrapper.classList.add("paused");
         this.playPauseBtn.querySelector("i").textContent = "pause";
         this.isMusicPaused = false;
@@ -627,6 +627,7 @@ class MusicPlayer {
         this.callMediaManager('resetVideoSize');
         
         // NEW: Notify MediaManager about music play state change for video override muting
+        this.callMediaManager('onMusicPlayStateChange', true);
       }
     } catch (error) {
       console.warn("Failed to play audio - user interaction may be required:", error);
