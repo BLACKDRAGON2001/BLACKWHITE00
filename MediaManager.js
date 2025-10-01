@@ -406,6 +406,9 @@ class MediaManager {
     video.controls = true;
     video.autoplay = true;
     video.loop = true;
+    video.playsInline = true; // Critical for iPhone
+    video.setAttribute('playsinline', ''); // Ensure playsinline for iOS
+    video.setAttribute('webkit-playsinline', ''); // Legacy iOS support
     
     const r2Sources = [
       `${this.videoBucketUrls[0]}${src}.${type}`,
@@ -543,9 +546,33 @@ class MediaManager {
       // Normal mode: show video when music paused, hide when playing
       this.toggleVideoDisplay(!isPlaying); // !isPlaying = show video when music is paused
     } else {
-      // Override mode: just update mute state, keep video visible
+      // Override mode: update mute state and ensure video keeps playing
       if (this.videoAd) {
-        this.videoAd.muted = isPlaying; // Mute video when music is playing
+        // Update mute state FIRST before any play attempts
+        this.videoAd.muted = isPlaying; // Mute video when music is playing, unmute when paused
+        
+        // For iPhone compatibility: always ensure video is playing in override mode
+        // Use a promise chain to handle iPhone's autoplay restrictions
+        if (this.videoAd.paused) {
+          const playPromise = this.videoAd.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log(`Video resumed in override mode (muted: ${this.videoAd.muted})`);
+              })
+              .catch(error => {
+                console.warn("Failed to resume video in override mode:", error);
+                // Retry after a brief delay (helps with iPhone timing issues)
+                setTimeout(() => {
+                  if (this.videoOverride && this.videoAd && this.videoAd.paused) {
+                    this.videoAd.play().catch(e => {
+                      console.warn("Video retry also failed:", e);
+                    });
+                  }
+                }, 150);
+              });
+          }
+        }
       }
     }
     
@@ -603,9 +630,21 @@ class MediaManager {
           transform: 'translate(-50%, -50%)'
         });
         
-        this.videoAd.play().catch(error => {
-          console.warn("Video play failed:", error);
-        });
+        // iPhone-friendly play attempt with proper error handling
+        const playPromise = this.videoAd.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.warn("Video play failed:", error);
+            // Retry for iPhone compatibility
+            setTimeout(() => {
+              if (!this.videoOverride && show) {
+                this.videoAd.play().catch(e => {
+                  console.warn("Video retry failed:", e);
+                });
+              }
+            }, 100);
+          });
+        }
       }
     } else {
       // When music is playing (show = false), hide the video
