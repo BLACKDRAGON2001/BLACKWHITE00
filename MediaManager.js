@@ -546,39 +546,50 @@ class MediaManager {
       // Normal mode: show video when music paused, hide when playing
       this.toggleVideoDisplay(!isPlaying); // !isPlaying = show video when music is paused
     } else {
-      // Override mode: update mute state and ensure video keeps playing
+      // Override mode: Mute video FIRST, then handle music playback
       if (this.videoAd) {
-        // Update mute state FIRST before any play attempts
-        this.videoAd.muted = isPlaying; // Mute video when music is playing, unmute when paused
-        
-        console.log(`Override mode - Music ${isPlaying ? 'playing' : 'paused'}, Video muted: ${this.videoAd.muted}`);
-        
-        // For iPhone compatibility: always ensure video is playing in override mode
-        // Use a promise chain to handle iPhone's autoplay restrictions
-        if (this.videoAd.paused) {
-          // Use requestAnimationFrame to ensure DOM is ready (helps with timing issues)
-          requestAnimationFrame(() => {
-            if (!this.videoAd || !this.videoOverride) return;
-            
-            const playPromise = this.videoAd.play();
-            if (playPromise !== undefined) {
-              playPromise
-                .then(() => {
-                  console.log(`Video resumed in override mode (muted: ${this.videoAd.muted})`);
-                })
-                .catch(error => {
-                  console.warn("Failed to resume video in override mode:", error);
-                  // Retry after a brief delay (helps with iPhone timing issues)
-                  setTimeout(() => {
-                    if (this.videoOverride && this.videoAd && this.videoAd.paused) {
-                      this.videoAd.play().catch(e => {
-                        console.warn("Video retry also failed:", e);
-                      });
-                    }
-                  }, 150);
-                });
-            }
-          });
+        if (isPlaying) {
+          // When music wants to play: IMMEDIATELY mute video first
+          this.videoAd.muted = true;
+          console.log(`Override mode - Video muted FIRST, then music will play`);
+          
+          // Ensure video keeps playing (muted)
+          if (this.videoAd.paused) {
+            this.videoAd.play().catch(error => {
+              console.warn("Failed to play muted video:", error);
+            });
+          }
+        } else {
+          // When music is paused: unmute video
+          this.videoAd.muted = false;
+          console.log(`Override mode - Music paused, video unmuted`);
+          
+          // Ensure video keeps playing (unmuted)
+          if (this.videoAd.paused) {
+            // Use requestAnimationFrame to ensure DOM is ready (helps with timing issues)
+            requestAnimationFrame(() => {
+              if (!this.videoAd || !this.videoOverride) return;
+              
+              const playPromise = this.videoAd.play();
+              if (playPromise !== undefined) {
+                playPromise
+                  .then(() => {
+                    console.log(`Video resumed in override mode (unmuted)`);
+                  })
+                  .catch(error => {
+                    console.warn("Failed to resume video in override mode:", error);
+                    // Retry after a brief delay (helps with iPhone timing issues)
+                    setTimeout(() => {
+                      if (this.videoOverride && this.videoAd && this.videoAd.paused) {
+                        this.videoAd.play().catch(e => {
+                          console.warn("Video retry also failed:", e);
+                        });
+                      }
+                    }, 150);
+                  });
+              }
+            });
+          }
         }
       }
     }
