@@ -551,27 +551,34 @@ class MediaManager {
         // Update mute state FIRST before any play attempts
         this.videoAd.muted = isPlaying; // Mute video when music is playing, unmute when paused
         
+        console.log(`Override mode - Music ${isPlaying ? 'playing' : 'paused'}, Video muted: ${this.videoAd.muted}`);
+        
         // For iPhone compatibility: always ensure video is playing in override mode
         // Use a promise chain to handle iPhone's autoplay restrictions
         if (this.videoAd.paused) {
-          const playPromise = this.videoAd.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                console.log(`Video resumed in override mode (muted: ${this.videoAd.muted})`);
-              })
-              .catch(error => {
-                console.warn("Failed to resume video in override mode:", error);
-                // Retry after a brief delay (helps with iPhone timing issues)
-                setTimeout(() => {
-                  if (this.videoOverride && this.videoAd && this.videoAd.paused) {
-                    this.videoAd.play().catch(e => {
-                      console.warn("Video retry also failed:", e);
-                    });
-                  }
-                }, 150);
-              });
-          }
+          // Use requestAnimationFrame to ensure DOM is ready (helps with timing issues)
+          requestAnimationFrame(() => {
+            if (!this.videoAd || !this.videoOverride) return;
+            
+            const playPromise = this.videoAd.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  console.log(`Video resumed in override mode (muted: ${this.videoAd.muted})`);
+                })
+                .catch(error => {
+                  console.warn("Failed to resume video in override mode:", error);
+                  // Retry after a brief delay (helps with iPhone timing issues)
+                  setTimeout(() => {
+                    if (this.videoOverride && this.videoAd && this.videoAd.paused) {
+                      this.videoAd.play().catch(e => {
+                        console.warn("Video retry also failed:", e);
+                      });
+                    }
+                  }, 150);
+                });
+            }
+          });
         }
       }
     }
