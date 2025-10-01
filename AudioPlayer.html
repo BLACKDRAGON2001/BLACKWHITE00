@@ -1333,7 +1333,7 @@
             return;
         }
 
-        // Check server connection
+        // Check server connection if not established
         if (!serverConnectionEstablished) {
             showMessage("ESTABLISHING CONNECTION... PLEASE WAIT A MOMENT");
             
@@ -1372,6 +1372,11 @@
             }
         } catch (error) {
             console.error('Login error:', error);
+            
+            // Reset connection flag if network error
+            if (error.message && (error.message.includes('CANNOT CONNECT') || error.message.includes('TIMED OUT'))) {
+                serverConnectionEstablished = false;
+            }
             
             // Record failed attempt
             const newAttemptStatus = loginManager.recordFailedAttempt(username);
@@ -2641,28 +2646,27 @@
         console.log('Connecting to backend at:', API_BASE_URL);
         console.log('Rolling session configuration:', SESSION_CONFIG);
         
-        // Don't show connection messages if we already have valid tokens
         const hasValidTokens = loadTokens();
         
-        if (!hasValidTokens) {
-            showMessage('CONNECTING TO SERVER...', true);
-        }
-        
+        // Test connection SILENTLY first
         const isConnected = await SecureAPI.testConnection();
+        serverConnectionEstablished = isConnected;
+        
         if (!isConnected) {
+            console.warn('Backend connection failed');
+            // Only show error if user doesn't have valid tokens (meaning they'll need to login)
             if (!hasValidTokens) {
-                showMessage('WARNING: BACKEND CONNECTION FAILED. PLEASE CHECK SERVER STATUS.');
+                showMessage('WARNING: BACKEND TEMPORARILY UNAVAILABLE. YOUR SESSION MAY BE LIMITED.', false);
+                // Give user time to see the message before checking auth
+                await new Promise(resolve => setTimeout(resolve, 2000));
             }
-            serverConnectionEstablished = false;
         } else {
             console.log('Backend connection successful');
-            serverConnectionEstablished = true;
-            if (!hasValidTokens) {
-                showMessage('SERVER CONNECTION ESTABLISHED', true);
-            }
+            // Don't show success message - it's unnecessary and causes flicker
         }
         
         // Always check auth status regardless of connection
+        // (tokens are stored locally, so auth check can work offline initially)
         await checkAuthStatus();
     }
 
