@@ -615,7 +615,9 @@ class MusicPlayer {
         await playPromise;
         
         // Only update UI state after successful play
-        this.mediaManager.videoAd.muted = true
+        if (this.mediaManager) {
+          this.mediaManager.videoAd.muted = true;
+        }
         this.wrapper.classList.add("paused");
         this.playPauseBtn.querySelector("i").textContent = "pause";
         this.isMusicPaused = false;
