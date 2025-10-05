@@ -198,9 +198,33 @@
       "coverType": "Images"
     },
     {
+      "name": "Oops I Did It Again",
+      "artist": "Britney Spears",
+      "src": "OopsIDidItAgain",
+      "coverType": "Images"
+    },
+    {
+      "name": "Karmas A Bitch X Gimme More",
+      "artist": "Britney Spears X Brit Smith",
+      "src": "KarmasABitchXGimmeMore",
+      "coverType": "Images"
+    },
+    {
+      "name": "Just Give Me A Reason",
+      "artist": "P!nk And Nate Ruess",
+      "src": "JustGiveMeAReason",
+      "coverType": "Images"
+    },
+    {
       "name": "Montagem Bandido",
       "artist": "Jmilton",
       "src": "MontagemBandido",
+      "coverType": "Images"
+    },
+    {
+      "name": "Calor Y Fuego",
+      "artist": "JXNDRO",
+      "src": "CalorYFuego",
       "coverType": "Images"
     },
     {
@@ -351,6 +375,12 @@
       "name": "Dale Dale",
       "artist": "SHIPU",
       "src": "DaleDale",
+      "coverType": "Images"
+    },
+    {
+      "name": "Montagem Piensas",
+      "artist": "MXSTHAVE",
+      "src": "MontagemPiensas",
       "coverType": "Images"
     },
     {
@@ -1124,6 +1154,12 @@
       "coverType": "Images"
     },
     {
+      "name": "Tit For Tat",
+      "artist": "Tate McRae",
+      "src": "TitForTat",
+      "coverType": "Images"
+    },
+    {
       "name": "All At Once",
       "artist": "Madison Beer",
       "src": "AllAtOnce",
@@ -1175,6 +1211,12 @@
       "name": "Yeah",
       "artist": "Usher",
       "src": "Yeah",
+      "coverType": "Images"
+    },
+    {
+      "name": "Let Me Know",
+      "artist": "Tamar Braxton And Future",
+      "src": "LetMeKnow",
       "coverType": "Images"
     },
     {
@@ -1257,7 +1299,7 @@
     },
     {
       "name": "Did It First",
-      "artist": "Central Cee",
+      "artist": "Central Cee And Ice Spice",
       "src": "DidItFirst",
       "coverType": "Images"
     },
@@ -1301,6 +1343,18 @@
       "name": "Turn Me On",
       "artist": "Kevin Lyttle",
       "src": "TurnMeOn",
+      "coverType": "Images"
+    },
+    {
+      "name": "Booty",
+      "artist": "Jennifer Lopez And Iggy Azalea",
+      "src": "Booty",
+      "coverType": "Images"
+    },
+    {
+      "name": "Bounce",
+      "artist": "Iggy Azalea",
+      "src": "Bounce",
       "coverType": "Images"
     },
     {
@@ -1361,6 +1415,12 @@
       "name": "Dum De Dum",
       "artist": "Zack Knight And Jasmin Walia",
       "src": "DumDeDum",
+      "coverType": "Images"
+    },
+    {
+      "name": "Dance For Me",
+      "artist": "Eugy X Mr Eazi",
+      "src": "DanceForMe",
       "coverType": "Images"
     },
     {
@@ -1910,6 +1970,55 @@
       "coverType": "Images"
     },
     {
+      "name": "Desolation",
+      "artist": "Toopoor",
+      "src": "Desolation",
+      "coverType": "Images"
+    },
+    {
+      "name": "Died For You",
+      "artist": "Toopoor",
+      "src": "DiedForYou",
+      "coverType": "Images"
+    },
+    {
+      "name": "Heaven Only",
+      "artist": "Toopoor",
+      "src": "HeavenOnly",
+      "coverType": "Images"
+    },
+    {
+      "name": "Like You Hate Me",
+      "artist": "Toopoor",
+      "src": "LikeYouHateMe",
+      "coverType": "Images"
+    },
+    {
+      "name": "1-800-Erotica",
+      "artist": "Toopoor",
+      "src": "OneEightHundredErotica",
+      "coverType": "Images"
+    },
+    {
+      "name": "Sweet Love Of Mine",
+      "artist": "Toopoor",
+      "src": "SweetLoveOfMine",
+      "coverType": "Images"
+    },
+    {
+      "name": "XO",
+      "artist": "Toopoor",
+      "src": "XO",
+      "coverType": "Images",
+      "type": "gif"
+    },
+    {
+      "name": "XO Remix",
+      "artist": "Toopoor",
+      "src": "XORemix",
+      "coverType": "Images"
+    },
+    {
       "name": "One Of The Girls",
       "artist": "The Weeknd JENNIE And Lily Depp Rose",
       "src": "OneOfTheGirls",
@@ -1925,6 +2034,12 @@
       "name": "Thats So True",
       "artist": "Gracie Abrams",
       "src": "ThatsSoTrue",
+      "coverType": "Images"
+    },
+    {
+      "name": "I Love You I'm Sorry",
+      "artist": "Gracie Abrams",
+      "src": "ILoveYouImSorry",
       "coverType": "Images"
     },
     {
@@ -2325,7 +2440,7 @@
     },
     {
       "name": "In N Out",
-      "artist": "Only Fire",
+      "artist": "Only Fire And Chase Icon",
       "src": "InNOut",
       "coverType": "Images"
     },
@@ -2369,6 +2484,18 @@
       "name": "Wir Suchen Dich",
       "artist": "Only Fire And HEISSS Berlin",
       "src": "WirSuchenDich",
+      "coverType": "Images"
+    },
+    {
+      "name": "Boy Crazy Remix",
+      "artist": "Kesha And Only Fire",
+      "src": "BoyCrazyRemix",
+      "coverType": "Images"
+    },
+    {
+      "name": "Yoga",
+      "artist": "Brooke Candy And Only Fire",
+      "src": "Yoga",
       "coverType": "Images"
     },
     {
@@ -2564,6 +2691,12 @@
       "coverType": "Images"
     },
     {
+      "name": "Beat My Pussy Up",
+      "artist": "ppcocaine",
+      "src": "BMPU",
+      "coverType": "Images"
+    },
+    {
       "name": "Request",
       "artist": "S3RL And Mixie Moon",
       "src": "Request",
@@ -2680,7 +2813,7 @@
     {
       "name": "Yummy",
       "artist": "Ayesha Erotica",
-      "src": "Yummy",
+      "src": "Yummy1",
       "coverType": "Images"
     },
     {
@@ -2777,6 +2910,12 @@
       "name": "Tina Hick",
       "artist": "Ayesha Erotica",
       "src": "TinaHick",
+      "coverType": "Images"
+    },
+    {
+      "name": "It Girl",
+      "artist": "Aliyah's Interlude",
+      "src": "ItGirl",
       "coverType": "Images"
     },
     {
@@ -3122,6 +3261,205 @@
       "coverType": "Images"
     },
     {
+      "name": "ABRACADABRA",
+      "artist": "Chase Icon Borgore And Cupcakke",
+      "src": "ABRACADABRA",
+      "coverType": "Images"
+    },
+    {
+      "name": "Bands On Me",
+      "artist": "Chase Icon",
+      "src": "BandsOnMe",
+      "coverType": "Images"
+    },
+    {
+      "name": "Bang My Body",
+      "artist": "Chase Icon",
+      "src": "BangMyBody",
+      "coverType": "Images"
+    },
+    {
+      "name": "Botched",
+      "artist": "Chase Icon And Kuntfetish",
+      "src": "Botched",
+      "coverType": "Images"
+    },
+    {
+      "name": "Call Your Mom",
+      "artist": "Chase Icon",
+      "src": "CallYourMom",
+      "coverType": "Images"
+    },
+    {
+      "name": "Cant Take",
+      "artist": "Chase Icon",
+      "src": "CantTake",
+      "coverType": "Images"
+    },
+    {
+      "name": "808",
+      "artist": "Chase Icon",
+      "src": "EightHundredAndEight",
+      "coverType": "Images"
+    },
+    {
+      "name": "Club Cooter Reloaded",
+      "artist": "Chase Icon",
+      "src": "ClubCooterReloaded",
+      "coverType": "Images"
+    },
+    {
+      "name": "Domination",
+      "artist": "Chase Icon",
+      "src": "Domination",
+      "coverType": "Images"
+    },
+    {
+      "name": "Girl Like Chase",
+      "artist": "Chase Icon",
+      "src": "GirlLikeChase",
+      "coverType": "Images"
+    },
+    {
+      "name": "High Speed Chase",
+      "artist": "Chase Icon",
+      "src": "HighSpeedChase",
+      "coverType": "Images"
+    },
+    {
+      "name": "I'm Perfect",
+      "artist": "Chase Icon",
+      "src": "ImPerfect",
+      "coverType": "Images"
+    },
+    {
+      "name": "Job Application",
+      "artist": "Chase Icon",
+      "src": "JobApplication",
+      "coverType": "Images"
+    },
+    {
+      "name": "Life Alert",
+      "artist": "Chase Icon",
+      "src": "LifeAlert",
+      "coverType": "Images"
+    },
+    {
+      "name": "Like Me",
+      "artist": "Chase Icon",
+      "src": "LikeMe",
+      "coverType": "Images"
+    },
+    {
+      "name": "Nancy",
+      "artist": "Chase Icon",
+      "src": "Nancy",
+      "coverType": "Images"
+    },
+    {
+      "name": "Pussy Killed The Trapstar",
+      "artist": "Chase Icon",
+      "src": "PussyKilledTheTrapstar",
+      "coverType": "Images"
+    },
+    {
+      "name": "Rip",
+      "artist": "Chase Icon",
+      "src": "Rip",
+      "coverType": "Images"
+    },
+    {
+      "name": "Save You From The Streets",
+      "artist": "Chase Icon",
+      "src": "SaveYouFromTheStreets",
+      "coverType": "Images"
+    },
+    {
+      "name": "Sex On Video",
+      "artist": "Lozeak And Chase Icon",
+      "src": "SexOnVideo",
+      "coverType": "Images"
+    },
+    {
+      "name": "Social Girl",
+      "artist": "Chase Icon",
+      "src": "SocialGirl",
+      "coverType": "Images"
+    },
+    {
+      "name": "SRS",
+      "artist": "Chase Icon",
+      "src": "SRS",
+      "coverType": "Images"
+    },
+    {
+      "name": "They Wanna",
+      "artist": "Chase Icon",
+      "src": "TheyWanna",
+      "coverType": "Images"
+    },
+    {
+      "name": "Becky's So Hot",
+      "artist": "FLETCHER",
+      "src": "BeckysSoHot",
+      "coverType": "Images"
+    },
+    {
+      "name": "Cherry",
+      "artist": "FLETCHER And Hayley Kiyoko",
+      "src": "Cherry",
+      "coverType": "Images"
+    },
+    {
+      "name": "Serotonin",
+      "artist": "Girl In Red",
+      "src": "Serotonin",
+      "coverType": "Images",
+      "type": "gif"
+    },
+    {
+      "name": "Girls",
+      "artist": "Girl In Red",
+      "src": "Girls2",
+      "coverType": "Images"
+    },
+    {
+      "name": "Girls Girls Girls",
+      "artist": "FLETCHER",
+      "src": "GirlsGirlsGirls",
+      "coverType": "Images"
+    },
+    {
+      "name": "I Wanna Be Your Girlfriend",
+      "artist": "Girl In Red",
+      "src": "IWannaBeYourGirlfriend",
+      "coverType": "Images"
+    },
+    {
+      "name": "October Passed Me By",
+      "artist": "Girl In Red",
+      "src": "OctoberPassedMeBy",
+      "coverType": "Images"
+    },
+    {
+      "name": "We Fell In Love In October",
+      "artist": "Girl In Red",
+      "src": "WeFellInLoveInOctober",
+      "coverType": "Images"
+    },
+    {
+      "name": "Summer Depression",
+      "artist": "Girl In Red",
+      "src": "SummerDepression",
+      "coverType": "Images"
+    },
+    {
+      "name": "Space Girl",
+      "artist": "Frances Forever",
+      "src": "SpaceGirl",
+      "coverType": "Images"
+    },
+    {
       "name": "Dont Speak",
       "artist": "No Doubt",
       "src": "DontSpeak",
@@ -3131,6 +3469,12 @@
       "name": "Until I Found You",
       "artist": "Stephen Sanchez",
       "src": "UntilIFoundYou",
+      "coverType": "Images"
+    },
+    {
+      "name": "I Wanna Be Your Slave",
+      "artist": "Maneskin Official",
+      "src": "IWannaBeYourSlave",
       "coverType": "Images"
     },
     {
@@ -3350,6 +3694,12 @@
       "coverType": "Images"
     },
     {
+      "name": "Blowjob",
+      "artist": "E^ST",
+      "src": "Blowjob",
+      "coverType": "Images"
+    },
+    {
       "name": "Favourite",
       "artist": "Isabel LaRosa",
       "src": "Favourite",
@@ -3377,6 +3727,12 @@
       "name": "Jenna Jameson",
       "artist": "Fleetwood X Ducati James",
       "src": "JennaJameson",
+      "coverType": "Images"
+    },
+    {
+      "name": "Riley Reid Freestyle",
+      "artist": "Riley Reid",
+      "src": "RileyReidRap",
       "coverType": "Images"
     },
     {
@@ -3509,6 +3865,24 @@
       "name": "Ta Ta Ta",
       "artist": "Byanni and Jason Derulo",
       "src": "TaTaTa",
+      "coverType": "Images"
+    },
+    {
+      "name": "Peace And Violence",
+      "artist": "Faouzia",
+      "src": "PeaceAndViolence",
+      "coverType": "Images"
+    },
+    {
+      "name": "Burnout Dynasty",
+      "artist": "Jasmine Sokko",
+      "src": "BurnoutDynasty",
+      "coverType": "Images"
+    },
+    {
+      "name": "Monster Under The Bed",
+      "artist": "Emily Mei",
+      "src": "MonsterUnderTheBed",
       "coverType": "Images"
     },
     {
@@ -3663,6 +4037,12 @@
       "coverType": "Images"
     },
     {
+      "name": "Na Na",
+      "artist": "Trey Songz",
+      "src": "NaNa",
+      "coverType": "Images"
+    },
+    {
       "name": "Give Me Everything",
       "artist": "Pitbull Ne-Yo And Afrojack",
       "src": "GiveMeEverything",
@@ -3732,6 +4112,26 @@
       "name": "Set Fire To The Rain",
       "artist": "Adele",
       "src": "SetFireToTheRain",
+      "coverType": "Images"
+    },
+    {
+      "name": "Golden",
+      "artist": "Huntrix",
+      "src": "Golden",
+      "coverType": "Images",
+      "type": "gif"
+    },
+    {
+      "name": "How It's Done",
+      "artist": "Huntrix",
+      "src": "HowItsDone",
+      "coverType": "Images",
+      "type": "gif"
+    },
+    {
+      "name": "Soda Pop",
+      "artist": "Saja Boys",
+      "src": "SodaPop",
       "coverType": "Images"
     },
     {
@@ -3927,6 +4327,12 @@
       "coverType": "Images"
     },
     {
+      "name": "Eyes Off You",
+      "artist": "PRETTYMUCH",
+      "src": "EyesOffYou",
+      "coverType": "Images"
+    },
+    {
       "name": "Someone You Loved",
       "artist": "Louis Capaldi",
       "src": "SomeoneYouLoved",
@@ -3954,6 +4360,12 @@
       "name": "A Thousand Years",
       "artist": "Christina Perri",
       "src": "AThousandYears",
+      "coverType": "Images"
+    },
+    {
+      "name": "Perfect",
+      "artist": "Ed Sheeran",
+      "src": "Perfect",
       "coverType": "Images"
     },
     {
