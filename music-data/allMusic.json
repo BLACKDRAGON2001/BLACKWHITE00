@@ -216,6 +216,12 @@
       "coverType": "Images"
     },
     {
+      "name": "Pony",
+      "artist": "Ginuwine",
+      "src": "Pony",
+      "coverType": "Images"
+    },
+    {
       "name": "ETA",
       "artist": "Nick Alexandr",
       "src": "ETA",
@@ -273,6 +279,12 @@
       "name": "Vampire Party",
       "artist": "Lost Reality",
       "src": "VampireParty",
+      "coverType": "Images"
+    },
+    {
+      "name": "Halcyon Ultra Slowed",
+      "artist": "Criticaleye",
+      "src": "HalcyonUltraSlowed",
       "coverType": "Images"
     },
     {
